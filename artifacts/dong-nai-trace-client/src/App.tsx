@@ -450,7 +450,7 @@ const navigationItems: {
   { label: "Tổng quan", icon: LayoutDashboard },
   { label: "Doanh nghiệp", icon: Building2 },
   { label: "Sản phẩm", icon: Package },
-  { label: "Mã QR", icon: QrCode },
+
   { label: "Báo cáo & phân tích", icon: BarChart3 },
   { label: "Tài khoản", icon: UsersRound },
 ];
@@ -490,7 +490,7 @@ const activityItems = [
     id: "qr-2047",
     icon: QrCode,
     color: "#E8650A",
-    title: "Đã cấp mã QR mới",
+  
     subject: "Sản phẩm OCOP - Bưởi Tân Triều",
     meta: "Trần Hoàng Nam · 09:18",
   },
@@ -559,9 +559,7 @@ function TraceSidebar({
           className="dashboard-scrollbar mt-7 flex-1 space-y-1 overflow-y-auto"
           aria-label="Các mục quản trị"
         >
-          <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[.17em] text-slate-400">
-            Không gian làm việc
-          </p>
+
           {navigationItems.map(({ label, icon: Icon, badge }) => {
             const active = selected === label;
             return (
@@ -1152,14 +1150,7 @@ function Dashboard() {
       icon: FileCheck2,
       note: "cần xử lý trong hôm nay",
     },
-    {
-      label: "Mã QR đã cấp",
-      value: "6.927",
-      change: "+15,6%",
-      positive: true,
-      icon: QrCode,
-      note: "tổng số mã đã phát hành",
-    },
+    
     {
       label: "Lượt truy xuất hôm nay",
       value: "2.486",
@@ -1265,9 +1256,7 @@ function Router() {
       <Route path="/dashboard/tin-tuc" component={CMS} />
       <Route path="/dashboard/ho-tro" component={Support} />
       <Route path="/dashboard/he-thong" component={System} />
-      <Route path="/dashboard/ma-qr">
-        {() => <PlaceholderPage title="Quản lý mã QR" />}
-      </Route>
+      
       <Route path="/dashboard/tai-khoan">
         {() => <PlaceholderPage title="Quản lý tài khoản" />}
       </Route>
