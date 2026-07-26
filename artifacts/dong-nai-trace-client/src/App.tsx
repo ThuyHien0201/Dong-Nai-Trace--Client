@@ -48,7 +48,7 @@ import CMS from "@/pages/cms";
 import Support from "@/pages/support";
 import System from "@/pages/system";
 import { DashboardShell } from "@/components/dashboard-shell";
-import { Route, Switch, Router as WouterRouter, useLocation } from "wouter";
+import { Route, Switch, Router as WouterRouter, useLocation, Link } from "wouter";
 import {
   CartesianGrid,
   Cell,
