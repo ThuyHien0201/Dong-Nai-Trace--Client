@@ -28,22 +28,22 @@
 }
 
 :root {
-  --background: 216 40% 97%;
-  --foreground: 222 41% 16%;
-  --border: 218 28% 87%;
-  --input: 218 28% 87%;
-  --ring: 229 65% 44%;
+  --background: 224 33% 97%;
+  --foreground: 222 34% 17%;
+  --border: 222 24% 89%;
+  --input: 222 24% 89%;
+  --ring: 232 65% 44%;
   --card: 0 0% 100%;
-  --card-foreground: 222 41% 16%;
+  --card-foreground: 222 34% 17%;
   --primary: 232 65% 44%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 215 36% 94%;
-  --secondary-foreground: 222 41% 20%;
-  --muted: 215 30% 94%;
-  --muted-foreground: 218 17% 43%;
+  --secondary: 226 43% 95%;
+  --secondary-foreground: 222 34% 21%;
+  --muted: 226 35% 95%;
+  --muted-foreground: 222 13% 48%;
   --accent: 23 91% 47%;
   --accent-foreground: 0 0% 100%;
-  --destructive: 0 71% 51%;
+  --destructive: 0 67% 51%;
   --destructive-foreground: 0 0% 100%;
   --app-font-sans: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
   --app-font-mono: 'DM Mono', monospace;
@@ -57,8 +57,8 @@
   --muted-border: hsl(var(--muted));
   --accent-border: hsl(var(--accent));
   --destructive-border: hsl(var(--destructive));
-  --elevate-1: rgba(39, 64, 186, 0.05);
-  --elevate-2: rgba(39, 64, 186, 0.09);
+  --elevate-1: rgba(39, 64, 186, 0.04);
+  --elevate-2: rgba(39, 64, 186, 0.08);
 }
 
 .dark {
@@ -120,6 +120,37 @@
 }
 
 .text-balance { text-wrap: balance; }
+
+.dashboard-shell {
+  background:
+    radial-gradient(circle at 78% -12%, rgba(39, 64, 186, 0.055), transparent 28rem),
+    #f5f6fa;
+}
+
+.dashboard-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.dashboard-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dashboard-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #cbd2e3;
+}
+
+.dashboard-chart-grid line {
+  stroke: #e7eaf2;
+}
+
+.dashboard-chart-tooltip {
+  border: 1px solid #e2e6f0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 14px 32px rgba(28, 44, 94, 0.12);
+}
 
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
