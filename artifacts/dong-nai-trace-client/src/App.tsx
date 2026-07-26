@@ -40,6 +40,14 @@ import {
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
+import Analytics from "@/pages/analytics";
+import Businesses from "@/pages/businesses";
+import Products from "@/pages/products";
+import Categories from "@/pages/categories";
+import CMS from "@/pages/cms";
+import Support from "@/pages/support";
+import System from "@/pages/system";
+import { DashboardShell } from "@/components/dashboard-shell";
 import { Route, Switch, Router as WouterRouter, useLocation } from "wouter";
 import {
   CartesianGrid,
@@ -1205,6 +1213,17 @@ function ActivityPanel() {
   );
 }
 
+function PlaceholderPage({ title }: { title: string }) {
+  return (
+    <DashboardShell title={title}>
+      <div className="flex h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-[#c4d0f5] bg-[#f7f8fd] text-slate-400">
+        <p className="text-[14px] font-semibold">{title}</p>
+        <p className="mt-1 text-[12px]">Đang phát triển</p>
+      </div>
+    </DashboardShell>
+  );
+}
+
 function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const kpis = [
@@ -1338,6 +1357,23 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/dashboard/bao-cao" component={Analytics} />
+      <Route path="/dashboard/doanh-nghiep" component={Businesses} />
+      <Route path="/dashboard/san-pham" component={Products} />
+      <Route path="/dashboard/ho-so" component={Businesses} />
+      <Route path="/dashboard/danh-muc" component={Categories} />
+      <Route path="/dashboard/tin-tuc" component={CMS} />
+      <Route path="/dashboard/ho-tro" component={Support} />
+      <Route path="/dashboard/he-thong" component={System} />
+      <Route path="/dashboard/ma-qr">
+        {() => <PlaceholderPage title="Quản lý mã QR" />}
+      </Route>
+      <Route path="/dashboard/tai-khoan">
+        {() => <PlaceholderPage title="Quản lý tài khoản" />}
+      </Route>
+      <Route path="/dashboard/cai-dat">
+        {() => <PlaceholderPage title="Cài đặt" />}
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );

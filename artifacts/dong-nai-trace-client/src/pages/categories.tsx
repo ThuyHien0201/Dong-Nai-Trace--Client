@@ -1,0 +1,282 @@
+import { useState } from "react";
+import { DashboardShell } from "@/components/dashboard-shell";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  ChevronRight,
+  ChevronDown,
+  X,
+  Check,
+  Tags,
+  Ruler,
+  Award,
+  MapPin,
+} from "lucide-react";
+
+const TABS = [
+  { id: "sector", label: "Ngành hàng", icon: Tags },
+  { id: "unit", label: "Đơn vị tính", icon: Ruler },
+  { id: "cert", label: "Chứng nhận", icon: Award },
+  { id: "region", label: "Địa bàn", icon: MapPin },
+] as const;
+type TabId = (typeof TABS)[number]["id"];
+
+const sectorData = [
+  { id: 1, name: "Nông sản", desc: "Rau củ quả, trái cây tươi", active: true },
+  { id: 2, name: "Thực phẩm chế biến", desc: "Sản phẩm qua chế biến công nghiệp", active: true },
+  { id: 3, name: "Thủy sản", desc: "Cá, tôm, hải sản", active: true },
+  { id: 4, name: "OCOP", desc: "Sản phẩm đặc sản địa phương", active: true },
+  { id: 5, name: "Dược liệu", desc: "Thảo dược, thuốc nam", active: false },
+  { id: 6, name: "Chăn nuôi", desc: "Gia súc, gia cầm", active: true },
+];
+
+const unitData = [
+  { id: 1, name: "Kilôgam (kg)", desc: "Đơn vị đo khối lượng chuẩn", active: true },
+  { id: 2, name: "Lọ", desc: "Đối với sản phẩm dạng lỏng đóng lọ", active: true },
+  { id: 3, name: "Hộp", desc: "Sản phẩm đóng hộp", active: true },
+  { id: 4, name: "Thùng", desc: "Đóng gói thùng carton", active: true },
+  { id: 5, name: "Con", desc: "Dùng cho gia súc, gia cầm", active: true },
+  { id: 6, name: "Tấn", desc: "Đơn vị lớn", active: false },
+];
+
+const certData = [
+  { id: 1, name: "VietGAP", desc: "Thực hành nông nghiệp tốt Việt Nam", active: true },
+  { id: 2, name: "GlobalGAP", desc: "Tiêu chuẩn nông nghiệp quốc tế", active: true },
+  { id: 3, name: "HACCP", desc: "Phân tích mối nguy và điểm kiểm soát tới hạn", active: true },
+  { id: 4, name: "OCOP 3★", desc: "Sản phẩm OCOP đạt 3 sao", active: true },
+  { id: 5, name: "OCOP 4★", desc: "Sản phẩm OCOP đạt 4 sao", active: true },
+  { id: 6, name: "Organic", desc: "Chứng nhận hữu cơ", active: false },
+];
+
+interface RegionNode {
+  id: string;
+  name: string;
+  children?: RegionNode[];
+}
+
+const regionTree: RegionNode[] = [
+  {
+    id: "r1", name: "Tỉnh Đồng Nai", children: [
+      { id: "r1-1", name: "TP. Biên Hòa", children: [
+        { id: "r1-1-1", name: "Phường Tân Phong" },
+        { id: "r1-1-2", name: "Phường Long Bình" },
+        { id: "r1-1-3", name: "Phường Trảng Dài" },
+      ]},
+      { id: "r1-2", name: "TP. Long Khánh", children: [
+        { id: "r1-2-1", name: "Phường Xuân An" },
+        { id: "r1-2-2", name: "Phường Bàu Sen" },
+      ]},
+      { id: "r1-3", name: "Huyện Xuân Lộc", children: [
+        { id: "r1-3-1", name: "Thị trấn Gia Ray" },
+        { id: "r1-3-2", name: "Xã Xuân Thành" },
+      ]},
+      { id: "r1-4", name: "Huyện Nhơn Trạch" },
+      { id: "r1-5", name: "Huyện Long Thành" },
+    ],
+  },
+];
+
+function TreeNode({ node, depth = 0 }: { node: RegionNode; depth?: number }) {
+  const [expanded, setExpanded] = useState(depth === 0);
+  const hasChildren = node.children && node.children.length > 0;
+
+  return (
+    <div>
+      <div
+        className={`flex items-center gap-2 rounded-lg py-2 px-2 hover:bg-[#f7f8fd] transition-colors cursor-pointer group ${depth === 0 ? "font-bold text-[#1d2944]" : depth === 1 ? "font-semibold text-[#25304b]" : "font-medium text-slate-500"}`}
+        style={{ paddingLeft: `${8 + depth * 20}px` }}
+        onClick={() => hasChildren && setExpanded((v) => !v)}
+      >
+        {hasChildren ? (
+          expanded ? (
+            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-[#2740BA]" />
+          ) : (
+            <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+          )
+        ) : (
+          <span className="ml-3.5 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-300" />
+        )}
+        <MapPin className={`h-3.5 w-3.5 shrink-0 ${depth === 0 ? "text-[#2740BA]" : depth === 1 ? "text-[#E8650A]" : "text-slate-400"}`} />
+        <span className="flex-1 text-[12px]">{node.name}</span>
+        <div className="hidden items-center gap-1 group-hover:flex">
+          <button className="rounded-md p-1 text-slate-400 hover:bg-[#edf0ff] hover:text-[#2740BA] transition-colors">
+            <Plus className="h-3 w-3" />
+          </button>
+          <button className="rounded-md p-1 text-slate-400 hover:bg-[#fff4ed] hover:text-[#E8650A] transition-colors">
+            <Pencil className="h-3 w-3" />
+          </button>
+          <button className="rounded-md p-1 text-slate-400 hover:bg-[#fef0f0] hover:text-[#c0392b] transition-colors">
+            <Trash2 className="h-3 w-3" />
+          </button>
+        </div>
+      </div>
+      {expanded && hasChildren && (
+        <div className="border-l border-[#e4e8f0] ml-[28px]">
+          {node.children!.map((child) => (
+            <TreeNode key={child.id} node={child} depth={depth + 1} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface ModalProps {
+  onClose: () => void;
+  type: string;
+}
+function Modal({ onClose, type }: ModalProps) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#16234f]/30 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+        <div className="mb-4 flex items-center justify-between">
+          <p className="text-[14px] font-bold text-[#1d2944]">Thêm mới — {type}</p>
+          <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-[#f1f3fa] hover:text-slate-600">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <label className="mb-1 block text-[11px] font-medium text-slate-600">Tên</label>
+            <input className="h-10 w-full rounded-xl border border-[#e4e8f0] bg-[#f9fafb] px-3 text-[12px] outline-none focus:border-[#2740BA] focus:bg-white focus:ring-2 focus:ring-[#2740BA]/15" placeholder={`Nhập tên ${type.toLowerCase()}...`} />
+          </div>
+          <div>
+            <label className="mb-1 block text-[11px] font-medium text-slate-600">Mô tả</label>
+            <textarea rows={3} className="w-full resize-none rounded-xl border border-[#e4e8f0] bg-[#f9fafb] p-3 text-[12px] outline-none focus:border-[#2740BA] focus:bg-white focus:ring-2 focus:ring-[#2740BA]/15" placeholder="Nhập mô tả..." />
+          </div>
+          <div className="flex items-center gap-2">
+            <input type="checkbox" defaultChecked id="active" className="rounded border-slate-300 text-[#2740BA]" />
+            <label htmlFor="active" className="text-[12px] font-medium text-slate-600">Kích hoạt</label>
+          </div>
+        </div>
+        <div className="mt-5 flex gap-3">
+          <button onClick={onClose} className="flex-1 rounded-xl border border-[#e4e8f0] py-2.5 text-[12px] font-semibold text-slate-500 hover:bg-[#f9fafb] transition-colors">
+            Hủy
+          </button>
+          <button onClick={onClose} className="flex-1 rounded-xl bg-[#E8650A] py-2.5 text-[12px] font-bold text-white hover:bg-[#d95c08] transition-colors">
+            Lưu lại
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DataTable({ data, typeName }: { data: typeof sectorData; typeName: string }) {
+  const [showModal, setShowModal] = useState(false);
+  return (
+    <>
+      {showModal && <Modal onClose={() => setShowModal(false)} type={typeName} />}
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={() => setShowModal(true)}
+          className="flex items-center gap-2 rounded-xl bg-[#E8650A] px-4 py-2.5 text-[12px] font-bold text-white hover:bg-[#d95c08] transition-colors shadow-[0_4px_14px_rgba(232,101,10,.2)]"
+        >
+          <Plus className="h-4 w-4" /> Thêm mới
+        </button>
+      </div>
+      <div className="overflow-hidden rounded-2xl border border-[#e4e8f0] bg-white shadow-sm">
+        <table className="min-w-full text-[12px]">
+          <thead>
+            <tr className="border-b border-[#e4e8f0] bg-[#f9fafb]">
+              {["Tên", "Mô tả", "Trạng thái", "Thao tác"].map((h) => (
+                <th key={h} className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((row) => (
+              <tr key={row.id} className="border-b border-[#f0f2f8] hover:bg-[#f9fafb] transition-colors">
+                <td className="px-5 py-3.5 font-semibold text-[#25304b]">{row.name}</td>
+                <td className="px-5 py-3.5 text-slate-500">{row.desc}</td>
+                <td className="px-5 py-3.5">
+                  <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ${row.active ? "bg-[#e8f5ed] text-[#1f7a45] border border-[#b8e2c8]" : "bg-[#f2f3f7] text-[#6b7694] border border-[#d9dce9]"}`}>
+                    {row.active ? <Check className="h-2.5 w-2.5" /> : <X className="h-2.5 w-2.5" />}
+                    {row.active ? "Hoạt động" : "Vô hiệu hóa"}
+                  </span>
+                </td>
+                <td className="px-5 py-3.5">
+                  <div className="flex items-center gap-1">
+                    <button className="rounded-lg p-1.5 text-slate-400 hover:bg-[#fff4ed] hover:text-[#E8650A] transition-colors"><Pencil className="h-3.5 w-3.5" /></button>
+                    <button className="rounded-lg p-1.5 text-slate-400 hover:bg-[#fef0f0] hover:text-[#c0392b] transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+export default function Categories() {
+  const [activeTab, setActiveTab] = useState<TabId>("sector");
+  const [showModal, setShowModal] = useState(false);
+
+  const tabData: Record<TabId, typeof sectorData> = {
+    sector: sectorData,
+    unit: unitData,
+    cert: certData,
+    region: [],
+  };
+
+  return (
+    <DashboardShell title="Danh mục & địa bàn" subtitle="Quản lý phân loại và đơn vị hành chính">
+      {showModal && <Modal onClose={() => setShowModal(false)} type="Địa bàn" />}
+
+      <div className="mb-5">
+        <p className="font-mono text-[10px] uppercase tracking-[.18em] text-[#E8650A]">Quản lý</p>
+        <h2 className="mt-1.5 text-[24px] font-bold tracking-[-.05em] text-[#1d2944]">Danh mục & địa bàn</h2>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-1 rounded-2xl border border-[#e4e8f0] bg-white p-1.5 shadow-sm w-fit mb-6">
+        {TABS.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            onClick={() => setActiveTab(id)}
+            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-[12px] font-semibold transition-colors ${
+              activeTab === id
+                ? "bg-[#2740BA] text-white shadow-sm"
+                : "text-slate-500 hover:text-[#2740BA]"
+            }`}
+          >
+            <Icon className="h-3.5 w-3.5" />
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Content */}
+      {activeTab !== "region" && (
+        <DataTable
+          data={tabData[activeTab]}
+          typeName={TABS.find((t) => t.id === activeTab)?.label ?? ""}
+        />
+      )}
+
+      {activeTab === "region" && (
+        <div>
+          <div className="mb-4 flex justify-end">
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex items-center gap-2 rounded-xl bg-[#E8650A] px-4 py-2.5 text-[12px] font-bold text-white hover:bg-[#d95c08] transition-colors shadow-[0_4px_14px_rgba(232,101,10,.2)]"
+            >
+              <Plus className="h-4 w-4" /> Thêm mới
+            </button>
+          </div>
+          <div className="rounded-2xl border border-[#e4e8f0] bg-white p-4 shadow-sm">
+            <p className="mb-3 px-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">
+              Cây đơn vị hành chính
+            </p>
+            {regionTree.map((node) => (
+              <TreeNode key={node.id} node={node} depth={0} />
+            ))}
+          </div>
+        </div>
+      )}
+    </DashboardShell>
+  );
+}
