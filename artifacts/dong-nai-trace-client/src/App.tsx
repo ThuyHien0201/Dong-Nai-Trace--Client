@@ -446,13 +446,13 @@ const navigationItems: {
   label: string;
   icon: DashboardIcon;
   badge?: string;
+  href: string;
 }[] = [
-  { label: "Tổng quan", icon: LayoutDashboard },
-  { label: "Doanh nghiệp", icon: Building2 },
-  { label: "Sản phẩm", icon: Package },
-
-  { label: "Báo cáo & phân tích", icon: BarChart3 },
-  { label: "Tài khoản", icon: UsersRound },
+  { label: "Tổng quan", icon: LayoutDashboard, href: "/dashboard" },
+  { label: "Doanh nghiệp", icon: Building2, href: "/dashboard/doanh-nghiep" },
+  { label: "Sản phẩm", icon: Package, href: "/dashboard/san-pham" },
+  { label: "Báo cáo & phân tích", icon: BarChart3, href: "/dashboard/bao-cao" },
+  { label: "Tài khoản", icon: UsersRound, href: "/dashboard/tai-khoan" },
 ];
 
 const trendData = [
@@ -519,7 +519,12 @@ function TraceSidebar({
   open: boolean;
   onClose: () => void;
 }) {
-  const [selected, setSelected] = useState("Tổng quan");
+  const [location] = useLocation();
+
+  const isActive = (href: string) => {
+    if (href === "/dashboard") return location === "/dashboard";
+    return location.startsWith(href);
+  };
 
   return (
     <>
@@ -553,25 +558,21 @@ function TraceSidebar({
             <span className="h-1.5 w-1.5 rounded-full bg-[#4f9a77]" /> Cổng quản
             trị
           </div>
-         
         </div>
         <nav
           className="dashboard-scrollbar mt-7 flex-1 space-y-1 overflow-y-auto"
           aria-label="Các mục quản trị"
         >
-
-          {navigationItems.map(({ label, icon: Icon, badge }) => {
-            const active = selected === label;
+          {navigationItems.map(({ label, icon: Icon, badge, href }) => {
+            const active = isActive(href);
             return (
-              <button
-                type="button"
+              <Link
+                key={href}
+                href={href}
+                onClick={onClose}
                 data-testid={`button-nav-${label}`}
-                key={label}
-                onClick={() => setSelected(label)}
                 className={`group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-[12px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2740BA] ${active ? "bg-[#edf0ff] text-[#2740BA]" : "text-slate-500 hover:bg-[#f7f8fc] hover:text-[#2740BA]"}`}
-                aria-current={
-                  active && label === "Tổng quan" ? "page" : undefined
-                }
+                aria-current={active ? "page" : undefined}
               >
                 <Icon
                   className={`h-[18px] w-[18px] shrink-0 ${active ? "text-[#2740BA]" : "text-slate-400 group-hover:text-[#2740BA]"}`}
@@ -585,24 +586,24 @@ function TraceSidebar({
                     {badge}
                   </span>
                 )}
-              </button>
+              </Link>
             );
           })}
           <p className="mb-3 mt-8 px-3 text-[10px] font-bold uppercase tracking-[.17em] text-slate-400">
             Hệ thống
           </p>
-          <button
-            type="button"
+          <Link
+            href="/dashboard/cai-dat"
+            onClick={onClose}
             data-testid="button-nav-settings"
-            onClick={() => setSelected("Cài đặt")}
-            className={`group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-[12px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2740BA] ${selected === "Cài đặt" ? "bg-[#edf0ff] text-[#2740BA]" : "text-slate-500 hover:bg-[#f7f8fc] hover:text-[#2740BA]"}`}
+            className={`group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-[12px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2740BA] ${isActive("/dashboard/cai-dat") ? "bg-[#edf0ff] text-[#2740BA]" : "text-slate-500 hover:bg-[#f7f8fc] hover:text-[#2740BA]"}`}
           >
             <Settings
-              className="h-[18px] w-[18px] text-slate-400 group-hover:text-[#2740BA]"
-              strokeWidth={1.7}
+              className={`h-[18px] w-[18px] ${isActive("/dashboard/cai-dat") ? "text-[#2740BA]" : "text-slate-400 group-hover:text-[#2740BA]"}`}
+              strokeWidth={isActive("/dashboard/cai-dat") ? 2 : 1.7}
             />
             <span>Cài đặt</span>
-          </button>
+          </Link>
         </nav>
         <div className="mt-5 rounded-2xl bg-[#152978] p-4 text-white">
           <div className="flex items-center justify-between">
