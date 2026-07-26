@@ -663,7 +663,16 @@ export default function Businesses() {
                     </td>
                     <td className="whitespace-nowrap px-4 py-3.5 text-slate-500">{b.registeredAt}</td>
                     <td className="px-4 py-3.5">
-                      <div className="flex items-center gap-0.5">
+                      <div className="flex items-center gap-1">
+                        {b.status === "Chờ duyệt" && (
+                          <button
+                            onClick={() => setApproving(b)}
+                            className="flex items-center gap-1 rounded-lg border border-[#2740BA] px-2.5 py-1 text-[10px] font-semibold text-[#2740BA] transition-colors hover:bg-[#edf0ff]"
+                            title="Duyệt hồ sơ doanh nghiệp"
+                          >
+                            <CheckCircle className="h-3 w-3" /> Duyệt hồ sơ
+                          </button>
+                        )}
                         <button
                           onClick={() => setApproving(b)}
                           className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#edf0ff] hover:text-[#2740BA]"
