@@ -1,15 +1,17 @@
-# [Project name]
+# Đồng Nai Trace
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Đồng Nai Trace is a Vietnamese product traceability portal with a login screen and dashboard experience for managing supply-chain verification data.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `PORT=21771 BASE_PATH=/ pnpm --filter @workspace/dong-nai-trace-client run dev` — run the Vite frontend locally
+- `pnpm --filter @workspace/api-server run dev` — run the API server separately (requires `DATABASE_URL`)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Frontend env: `PORT=21771` and `BASE_PATH=/`
+- API env: `PORT` and `DATABASE_URL` (Postgres connection string)
 
 ## Stack
 
@@ -22,23 +24,32 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/dong-nai-trace-client` — React/Vite frontend and the root preview
+- `artifacts/api-server` — Express API service with the `/api/healthz` endpoint
+- `lib/api-spec/openapi.yaml` — API contract source of truth
+- `lib/db/src/schema` — database schema source of truth
+- `artifacts/dong-nai-trace-client/src/index.css` — theme tokens and global styles
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The existing pnpm workspace and artifact layout are preserved.
+- The frontend is the primary Replit workflow; the API is a separate service because the current frontend flow does not require it to render.
+- The frontend uses port `21771` and root `BASE_PATH=/`, matching its existing artifact metadata.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Vietnamese-language traceability portal
+- Login validation and password recovery guidance
+- Dashboard-style traceability views and supply-chain verification UI
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+No additional user preferences recorded.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- The Vite config requires both `PORT` and `BASE_PATH`; the Replit workflow supplies them explicitly.
+- The API server imports the database package at startup and therefore needs `DATABASE_URL`.
 
 ## Pointers
 

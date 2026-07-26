@@ -11,6 +11,27 @@ env = { "CI" = "true" }
 [workflows]
 runButton = "Project"
 
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Dong Nai Trace"
+
+[[workflows.workflow]]
+name = "Dong Nai Trace"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "PORT=21771 BASE_PATH=/ pnpm --filter @workspace/dong-nai-trace-client run dev"
+waitForPort = 21771
+
 [agent]
 stack = "PNPM_WORKSPACE"
 expertMode = true
