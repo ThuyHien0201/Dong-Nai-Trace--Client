@@ -1248,7 +1248,6 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/bao-cao" component={Analytics} />
       <Route path="/dashboard/doanh-nghiep" component={Businesses} />
       <Route path="/dashboard/san-pham" component={Products} />
@@ -1256,13 +1255,13 @@ function Router() {
       <Route path="/dashboard/tin-tuc" component={CMS} />
       <Route path="/dashboard/ho-tro" component={Support} />
       <Route path="/dashboard/he-thong" component={System} />
-      
       <Route path="/dashboard/tai-khoan">
         {() => <PlaceholderPage title="Quản lý tài khoản" />}
       </Route>
       <Route path="/dashboard/cai-dat">
         {() => <PlaceholderPage title="Cài đặt" />}
       </Route>
+      <Route path="/dashboard" component={Dashboard} />
       <Route component={NotFound} />
     </Switch>
   );
