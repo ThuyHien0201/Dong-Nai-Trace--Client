@@ -1,0 +1,130 @@
+PHẦN 3 — Dashboard thống kê tổng hợp
+
+Thiết kế màn hình Thống kê tổng hợp (báo cáo – thống kê) cho Đồng Nai Trace Client.
+
+Màu chủ đạo: #2740BA và #E8650A, kết hợp thêm 2-3 màu phụ hài hòa (xanh lá, xanh nhạt, xám) cho biểu đồ nhiều chuỗi dữ liệu.
+
+Yêu cầu:
+
+
+
+
+
+Thanh bộ lọc trên cùng: chọn khoảng thời gian (ngày/tuần/tháng/quý/năm), chọn địa bàn (tỉnh/huyện/xã dạng dropdown phân cấp), chọn ngành hàng.
+
+
+
+Bố cục dạng lưới (grid) gồm nhiều biểu đồ nhỏ:
+
+
+
+
+
+Biểu đồ cột: số lượng doanh nghiệp theo địa bàn.
+
+
+
+Biểu đồ cột: số lượng sản phẩm theo ngành hàng.
+
+
+
+Biểu đồ đường: lượt truy xuất/quét QR theo thời gian.
+
+
+
+Biểu đồ tròn: tỉ lệ chứng nhận (VietGAP, OCOP, HACCP, GlobalGAP...).
+
+
+
+Biểu đồ cột chồng (stacked bar): hồ sơ đăng ký theo trạng thái (chờ duyệt/đã duyệt/từ chối) theo tháng.
+
+
+
+Mỗi biểu đồ đặt trong card trắng bo góc, có tiêu đề, nút "Xuất báo cáo" (icon Excel/PDF) ở góc phải mỗi card.
+
+
+
+Nút "Xuất báo cáo tổng hợp" nổi bật màu cam #E8650A ở góc trên cùng bên phải trang.
+
+
+
+Dùng React + Tailwind + Recharts, responsive tốt.
+
+PHẦN 4 — Quản lý doanh nghiệp (Danh sách + Phê duyệt hồ sơ + cấp mã định danh doanh nghiệp)
+
+Thiết kế 2 màn hình liên quan đến Quản lý doanh nghiệp cho Đồng Nai Trace Client.
+
+Màu chủ đạo: #2740BA (chính), #E8650A (nhấn).
+
+Màn 1 – Danh sách doanh nghiệp:
+
+
+
+
+
+Bảng dữ liệu (data table) với cột: Tên doanh nghiệp, Mã số thuế, Địa bàn, Ngành hàng, Trạng thái, Ngày đăng ký, Thao tác.
+
+
+
+Badge trạng thái: Đã duyệt (xanh dương/xanh lá), Chờ duyệt (cam #E8650A), Từ chối (đỏ), Đã khóa (xám).
+
+
+
+Thanh công cụ trên bảng: ô tìm kiếm, bộ lọc theo trạng thái/địa bàn/ngành hàng, nút "Thêm doanh nghiệp", nút xuất Excel.
+
+
+
+Hỗ trợ sắp xếp cột, phân trang, chọn nhiều dòng để thao tác hàng loạt (khóa/mở khóa).
+
+Màn 2 – Phê duyệt hồ sơ doanh nghiệp:
+
+
+
+
+
+Layout 2 cột: bên trái hiển thị thông tin hồ sơ (thông tin doanh nghiệp, tài liệu đính kèm dạng preview PDF/ảnh), bên phải là khu vực thao tác duyệt.
+
+
+
+Khu vực thao tác gồm: ô nhập lý do/nhận xét, 2 nút lớn "Duyệt" (nền xanh dương/xanh lá) và "Từ chối" (nền đỏ, viền), lịch sử xử lý hồ sơ dạng timeline nhỏ bên dưới.
+
+
+
+Dùng React + Tailwind CSS.
+
+PHẦN 5 — Quản lý sản phẩm (Danh sách + Phê duyệt + cấp mã định danh sản phẩm)
+
+Thiết kế 2 màn hình Quản lý sản phẩm cho Đồng Nai Trace Client., phong cách đồng bộ với màu #2740BA và #E8650A.
+
+Màn 1 – Danh sách sản phẩm:
+
+
+
+
+
+Dạng lưới card sản phẩm (grid card) HOẶC bảng dữ liệu (cho phép chuyển đổi 2 chế độ xem): mỗi item gồm ảnh sản phẩm, tên, doanh nghiệp sở hữu, ngành hàng, trạng thái (badge), giá/đơn vị tính.
+
+
+
+Bộ lọc: theo ngành hàng, địa phương, trạng thái duyệt, khoảng giá.
+
+
+
+Nút "Thêm sản phẩm", nút xuất dữ liệu.
+
+Màn 2 – Phê duyệt sản phẩm:
+
+
+
+
+
+Trang chi tiết sản phẩm: ảnh lớn (carousel nếu nhiều ảnh), thông tin mô tả, chứng nhận đính kèm, mã QR xem trước (nếu có).
+
+
+
+Khu vực duyệt bên phải hoặc bên dưới: nút "Phê duyệt" (xanh dương/xanh lá) và "Từ chối" (đỏ) kèm ô ghi chú lý do.
+
+
+
+Dùng React + Tailwind CSS, bo góc mềm, đổ bóng nhẹ toàn bộ card.
+

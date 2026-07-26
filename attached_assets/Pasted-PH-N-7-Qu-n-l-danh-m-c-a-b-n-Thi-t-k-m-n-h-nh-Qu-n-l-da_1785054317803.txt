@@ -1,0 +1,68 @@
+PHẦN 7 — Quản lý danh mục & địa bàn
+
+Thiết kế màn hình Quản lý danh mục (ngành hàng, đơn vị tính, chứng nhận) và Quản lý địa bàn (tỉnh/huyện/xã) cho Đồng Nai Trace Client.
+
+Màu chủ đạo: 
+#2740BA, 
+#E8650A.
+
+Yêu cầu:
+
+Giao diện dạng tab hoặc menu con để chuyển giữa các loại danh mục: Ngành hàng / Đơn vị tính / Chứng nhận / Địa bàn.
+Mỗi tab là 1 bảng dữ liệu đơn giản: Tên, Mô tả, Trạng thái, Thao tác (Sửa/Xóa dạng icon).
+Với Địa bàn: hiển thị dạng cây phân cấp (tree view) Tỉnh > Huyện > Xã, có thể mở rộng/thu gọn, kèm nút thêm cấp con.
+Nút "Thêm mới" màu cam 
+#E8650A ở góc trên mỗi bảng/tab.
+Form thêm/sửa hiển thị dạng Modal hoặc Drawer trượt từ phải.
+Dùng React + Tailwind CSS.
+PHẦN 8 — Quản lý tin tức & banner (CMS)
+
+Thiết kế màn hình Quản lý tin tức và Quản lý banner/giao diện Portal cho Đồng Nai Trace Client.
+
+Màu chủ đạo: 
+#2740BA, 
+#E8650A.
+
+Màn 1 – Quản lý tin tức:
+
+Bảng danh sách bài viết: ảnh đại diện thu nhỏ, tiêu đề, chuyên mục, ngày đăng, trạng thái (Đã đăng/Nháp), thao tác (Sửa/Xóa/Xem).
+Trang soạn thảo bài viết: form gồm tiêu đề, chọn chuyên mục, upload ảnh đại diện, trình soạn thảo văn bản (rich text editor) có định dạng chữ/ảnh/link, nút "Lưu nháp" (viền xám) và "Đăng bài" (nền cam).
+
+Màn 2 – Quản lý banner:
+
+Lưới hiển thị các banner hiện có dạng card ảnh lớn, có nút kéo-thả sắp xếp thứ tự, toggle bật/tắt hiển thị từng banner.
+Nút "Thêm banner mới" mở modal upload ảnh + nhập link liên kết + thời gian hiển thị.
+Dùng React + Tailwind CSS.
+PHẦN 9 — Quản lý hỗ trợ & thông báo
+
+Thiết kế màn hình Quản lý yêu cầu hỗ trợ (ticket) và Quản lý thông báo cho Đồng Nai Trace Client.
+
+Màu chủ đạo: 
+#2740BA, 
+#E8650A.
+
+Màn 1 – Yêu cầu hỗ trợ:
+
+Bố cục dạng hộp thư/ticket: danh sách ticket bên trái (kèm badge trạng thái: Mới – cam, Đang xử lý – xanh dương, Đã đóng – xám), chi tiết hội thoại bên phải dạng khung chat.
+Ô nhập phản hồi + nút "Gửi phản hồi" (cam), nút "Đóng ticket".
+
+Màn 2 – Quản lý thông báo:
+
+Bảng danh sách thông báo đã gửi: tiêu đề, đối tượng nhận, thời gian gửi, trạng thái.
+Form tạo thông báo mới: tiêu đề, nội dung, chọn đối tượng nhận (tất cả/theo địa bàn/theo doanh nghiệp cụ thể), nút "Gửi thông báo" nền cam nổi bật.
+Dùng React + Tailwind CSS.
+PHẦN 10 — Nhật ký hệ thống, phân quyền, cấu hình & sao lưu
+
+Thiết kế các màn hình quản trị hệ thống cho Đồng Nai Trace Client: Nhật ký hệ thống (Audit Log), Quản lý phân quyền, Cấu hình hệ thống, Sao lưu & phục hồi dữ liệu.
+
+Màu chủ đạo: 
+#2740BA, 
+#E8650A.
+
+Yêu cầu:
+
+Audit Log: bảng/timeline ghi lại thao tác người dùng (Người thực hiện, Hành động, Đối tượng tác động, Thời gian, IP), có bộ lọc theo người dùng/loại hành động/khoảng thời gian, các hành động quan trọng (xóa, khóa tài khoản) hiển thị badge đỏ/cam.
+Phân quyền: giao diện dạng ma trận (matrix) Vai trò x Chức năng, dùng checkbox/toggle để bật/tắt quyền, có card riêng cho từng vai trò (Super Admin, Admin, Nhân viên duyệt hồ sơ...).
+Cấu hình hệ thống: dạng form nhiều tab (Chung, Email, QR Code, API/Tích hợp), mỗi tab là các trường input rõ ràng, nút "Lưu cấu hình" cố định ở cuối trang màu cam.
+Sao lưu & phục hồi: bảng lịch sử các bản sao lưu (ngày tạo, dung lượng, trạng thái), nút "Tạo bản sao lưu mới" (xanh dương) và "Khôi phục" (cam, có xác nhận cảnh báo trước khi thực hiện).
+Dùng React + Tailwind CSS, ưu tiên rõ ràng, ít màu sắc rực rỡ vì đây là khu vực kỹ thuật/nhạy cảm.
