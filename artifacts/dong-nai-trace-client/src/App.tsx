@@ -450,7 +450,6 @@ const navigationItems: {
   { label: "Tổng quan", icon: LayoutDashboard },
   { label: "Doanh nghiệp", icon: Building2 },
   { label: "Sản phẩm", icon: Package },
-  { label: "Hồ sơ chờ duyệt", icon: FileCheck2, badge: "18" },
   { label: "Mã QR", icon: QrCode },
   { label: "Báo cáo & phân tích", icon: BarChart3 },
   { label: "Tài khoản", icon: UsersRound },
@@ -1262,7 +1261,6 @@ function Router() {
       <Route path="/dashboard/bao-cao" component={Analytics} />
       <Route path="/dashboard/doanh-nghiep" component={Businesses} />
       <Route path="/dashboard/san-pham" component={Products} />
-      <Route path="/dashboard/ho-so" component={Businesses} />
       <Route path="/dashboard/danh-muc" component={Categories} />
       <Route path="/dashboard/tin-tuc" component={CMS} />
       <Route path="/dashboard/ho-tro" component={Support} />

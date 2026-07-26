@@ -1,0 +1,40 @@
+PHẦN 5 — Quản lý sản phẩm (Danh sách + Phê duyệt + Truy xuất nguồn gốc)
+
+Thiết kế các màn hình Quản lý sản phẩm cho Đồng Nai Trace Client, phong cách đồng bộ với màu 
+#2740BA và 
+#E8650A.
+
+Bối cảnh nghiệp vụ: Sản phẩm sau khi doanh nghiệp đăng ký (form cơ bản: tên sản phẩm, danh mục, đơn vị tính, chứng nhận, mô tả, hình ảnh — xem mẫu form đính kèm) sẽ được Admin phê duyệt thông tin cơ bản. Sau khi duyệt, các đơn vị giải pháp truy xuất nguồn gốc (bên thứ 3) có thể đẩy dữ liệu truy xuất (quy trình canh tác, nhật ký sản xuất, kiểm định, lô hàng...) lên gắn với sản phẩm đó. Vì vậy sản phẩm có 4 trạng thái:
+
+Chờ duyệt (badge cam 
+#E8650A) — doanh nghiệp mới đăng ký, chưa được Admin duyệt thông tin cơ bản.
+Đã duyệt (badge xanh dương 
+#2740BA hoặc xanh lá) — đã duyệt thông tin cơ bản, chưa có dữ liệu truy xuất.
+Đã có truy xuất nguồn gốc (badge màu riêng, ví dụ xanh ngọc/teal, có icon QR hoặc icon "chuỗi liên kết" đi kèm) — đã được đơn vị giải pháp đẩy dữ liệu truy xuất nguồn gốc lên.
+Từ chối (badge đỏ) — hồ sơ sản phẩm bị từ chối.
+
+Màn 1 – Danh sách sản phẩm:
+
+Dạng lưới card sản phẩm (grid card) HOẶC bảng dữ liệu (cho phép chuyển đổi 2 chế độ xem): mỗi item gồm ảnh sản phẩm, tên, doanh nghiệp sở hữu, ngành hàng, trạng thái (1 trong 4 badge ở trên), giá/đơn vị tính.
+Bộ lọc: theo ngành hàng, địa phương, trạng thái (bao gồm cả lọc riêng "Đã có truy xuất nguồn gốc"), khoảng giá.
+Nút "Thêm sản phẩm", nút xuất dữ liệu.
+Mỗi item có nút "Xem chi tiết"; nội dung trang chi tiết mở ra sẽ khác nhau tùy trạng thái (xem Màn 2 và Màn 3 bên dưới).
+
+Màn 2 – Xem/Phê duyệt thông tin cơ bản (áp dụng cho sản phẩm ở trạng thái Chờ duyệt / Đã duyệt / Từ chối):
+
+Trang chi tiết hiển thị đúng các trường như form đăng ký sản phẩm (tham khảo mẫu đính kèm): Tên sản phẩm, Danh mục, Đơn vị tính, Chứng nhận (dạng các tag/checkbox đã chọn), Mô tả sản phẩm, Hình ảnh sản phẩm (carousel nếu nhiều ảnh).
+Nếu sản phẩm đang Chờ duyệt: hiển thị thêm khu vực phê duyệt bên dưới/bên phải gồm ô ghi chú lý do và 2 nút "Phê duyệt" (xanh dương/xanh lá) và "Từ chối" (đỏ).
+Nếu sản phẩm đã Đã duyệt hoặc Từ chối: hiển thị dạng chỉ xem (read-only), có thêm lịch sử xử lý (ai duyệt, khi nào, ghi chú) dạng timeline nhỏ; nếu đã duyệt thì có thêm nút/tab dẫn sang "Xem truy xuất nguồn gốc" (nếu đã có dữ liệu) hoặc dòng chữ "Chưa có dữ liệu truy xuất nguồn gốc" (nếu chưa có).
+
+Màn 3 – Xem chi tiết truy xuất nguồn gốc (áp dụng cho sản phẩm ở trạng thái "Đã có truy xuất nguồn gốc"):
+
+Truy cập bằng cách bấm "Xem chi tiết" trên sản phẩm có badge này, hoặc bấm tab/nút "Truy xuất nguồn gốc" từ Màn 2.
+Bố cục dạng 2 tab trên cùng 1 trang chi tiết: Tab "Thông tin cơ bản" (giống Màn 2, chỉ xem) và Tab "Truy xuất nguồn gốc" (mặc định mở khi vào từ danh sách).
+Nội dung tab Truy xuất nguồn gốc gồm:
+Thông tin đơn vị giải pháp đã đẩy dữ liệu (tên đơn vị, thời gian cập nhật gần nhất).
+Mã QR / mã định danh gắn với sản phẩm (hiển thị ảnh QR, nút tải về).
+Timeline/quy trình truy xuất: các mốc như Gieo trồng/Nuôi trồng → Chăm sóc → Thu hoạch → Sơ chế/Đóng gói → Vận chuyển → Phân phối, mỗi mốc có ngày tháng, mô tả ngắn, hình ảnh/tài liệu đính kèm (nếu có) — hiển thị dạng stepper/timeline dọc.
+Kết quả kiểm định/chứng nhận liên quan đến lô hàng (nếu có), dạng danh sách file có thể xem/tải.
+Đây là màn hình chỉ xem (read-only) đối với Admin (vì dữ liệu do đơn vị giải pháp đẩy lên), có thể có nút "Yêu cầu cập nhật lại" nếu phát hiện dữ liệu chưa hợp lệ.
+
+Yêu cầu chung: Dùng React + Tailwind CSS, bo góc mềm, đổ bóng nhẹ toàn bộ card, đồng bộ font/màu với các phần khác của hệ thống.
