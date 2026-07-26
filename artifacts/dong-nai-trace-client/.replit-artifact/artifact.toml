@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Đồng Nai Trace Client"
+version = "1.0.0"
+id = "artifacts/dong-nai-trace-client"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21771
+
+[services.development]
+run = "pnpm --filter @workspace/dong-nai-trace-client run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/dong-nai-trace-client", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/dong-nai-trace-client/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21771"
+BASE_PATH = "/"
