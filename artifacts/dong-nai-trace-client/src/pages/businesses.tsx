@@ -485,23 +485,7 @@ export default function Businesses() {
   // Sync approving business from list when businesses state changes
   const approvingBusiness = approving ? (businesses.find((b) => b.id === approving.id) ?? approving) : null;
 
-  function handleApproved(id: string, code: string) {
-    setBusinesses((prev) =>
-      prev.map((b) => b.id === id ? { ...b, status: "Đã duyệt", businessCode: code } : b)
-    );
-  }
-
-  if (approvingBusiness) {
-    return (
-      <ApprovalDetail
-        business={approvingBusiness}
-        onBack={() => setApproving(null)}
-        onApproved={handleApproved}
-      />
-    );
-  }
-
-  // ── Filtering ─────────────────────────────────────────────────────────────────
+  // ── All hooks must be declared before any early return ─────────────────────
   const filtered = useMemo(() => {
     let list = businesses.filter((b) => {
       const q = search.toLowerCase();
@@ -526,8 +510,23 @@ export default function Businesses() {
     return list;
   }, [businesses, search, statusFilter, regionFilter, sectorFilter, sortKey, sortDir]);
 
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = { "Tất cả": businesses.length };
+    statuses.forEach((s) => { counts[s] = businesses.filter((b) => b.status === s).length; });
+    return counts;
+  }, [businesses]);
+
+  // ── Derived values (non-hook) ───────────────────────────────────────────────
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const pageIds = paginated.map((b) => b.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selected.includes(id));
+
+  function handleApproved(id: string, code: string) {
+    setBusinesses((prev) =>
+      prev.map((b) => b.id === id ? { ...b, status: "Đã duyệt", businessCode: code } : b)
+    );
+  }
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
@@ -553,9 +552,6 @@ export default function Businesses() {
     );
   }
 
-  const pageIds = paginated.map((b) => b.id);
-  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selected.includes(id));
-
   function SortIcon({ col }: { col: SortKey }) {
     if (sortKey !== col) return <ArrowUpDown className="ml-1 inline h-3 w-3 text-slate-300" />;
     if (sortDir === "asc") return <ChevronUp className="ml-1 inline h-3 w-3 text-[#2740BA]" />;
@@ -563,11 +559,16 @@ export default function Businesses() {
     return <ArrowUpDown className="ml-1 inline h-3 w-3 text-slate-300" />;
   }
 
-  const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = { "Tất cả": businesses.length };
-    statuses.forEach((s) => { counts[s] = businesses.filter((b) => b.status === s).length; });
-    return counts;
-  }, [businesses]);
+  // ── Early return after all hooks ────────────────────────────────────────────
+  if (approvingBusiness) {
+    return (
+      <ApprovalDetail
+        business={approvingBusiness}
+        onBack={() => setApproving(null)}
+        onApproved={handleApproved}
+      />
+    );
+  }
 
   return (
     <DashboardShell title="Quản lý doanh nghiệp" subtitle="Danh sách và phê duyệt hồ sơ">

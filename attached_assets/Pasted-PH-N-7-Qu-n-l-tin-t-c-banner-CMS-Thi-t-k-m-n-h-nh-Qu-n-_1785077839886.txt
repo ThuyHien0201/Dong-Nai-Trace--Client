@@ -1,0 +1,84 @@
+PHẦN 7 — Quản lý tin tức & banner (CMS)
+
+Thiết kế màn hình Quản lý tin tức và Quản lý banner/giao diện Portal cho Đồng Nai Trace Client.
+
+Màu chủ đạo: 
+#2740BA, 
+#E8650A.
+
+Màn 1 – Quản lý tin tức:
+
+Bảng danh sách bài viết: ảnh đại diện thu nhỏ, tiêu đề, chuyên mục, ngày đăng, trạng thái (Đã đăng/Nháp), thao tác (Sửa/Xóa/Xem).
+Trang soạn thảo bài viết: form gồm tiêu đề, chọn chuyên mục, upload ảnh đại diện, trình soạn thảo văn bản (rich text editor) có định dạng chữ/ảnh/link, nút "Lưu nháp" (viền xám) và "Đăng bài" (nền cam).
+
+Màn 2 – Quản lý banner:
+
+Lưới hiển thị các banner hiện có dạng card ảnh lớn, có nút kéo-thả sắp xếp thứ tự, toggle bật/tắt hiển thị từng banner.
+Nút "Thêm banner mới" mở modal upload ảnh + nhập link liên kết + thời gian hiển thị.
+Dùng React + Tailwind CSS.
+PHẦN 8 — Quản lý hỗ trợ & thông báo
+
+Thiết kế màn hình Quản lý yêu cầu hỗ trợ (ticket) và Quản lý thông báo cho Đồng Nai Trace Client.
+
+Màu chủ đạo: 
+#2740BA, 
+#E8650A.
+
+Màn 1 – Yêu cầu hỗ trợ:
+
+Bố cục dạng hộp thư/ticket: danh sách ticket bên trái (kèm badge trạng thái: Mới – cam, Đang xử lý – xanh dương, Đã đóng – xám), chi tiết hội thoại bên phải dạng khung chat.
+Ô nhập phản hồi + nút "Gửi phản hồi" (cam), nút "Đóng ticket".
+
+Màn 2 – Quản lý thông báo:
+
+Bảng danh sách thông báo đã gửi: tiêu đề, đối tượng nhận, thời gian gửi, trạng thái.
+Form tạo thông báo mới: tiêu đề, nội dung, chọn đối tượng nhận (tất cả/theo địa bàn/theo doanh nghiệp cụ thể), nút "Gửi thông báo" nền cam nổi bật.
+Dùng React + Tailwind CSS.
+PHẦN 9 — Quản lý tài khoản, cấp tài khoản & phân quyền
+
+Thiết kế các màn hình Quản lý tài khoản cho Đồng Nai Trace Client: danh sách tài khoản quản trị, cấp tài khoản mới, và phân quyền theo vai trò.
+
+Màu chủ đạo: 
+#2740BA, 
+#E8650A.
+
+Màn 1 – Danh sách tài khoản:
+
+Bảng dữ liệu với cột: Họ tên, Email/Tên đăng nhập, Vai trò (badge màu theo vai trò, ví dụ Super Admin – tím/xanh đậm, Admin – xanh dương 
+#2740BA, Nhân viên duyệt hồ sơ – xanh nhạt), Đơn vị/Phòng ban, Trạng thái (Đang hoạt động – xanh lá, Tạm khóa – xám, Chưa kích hoạt – cam 
+#E8650A), Lần đăng nhập gần nhất, Thao tác (Sửa/Khóa-Mở khóa/Xóa dạng icon).
+Thanh công cụ trên bảng: ô tìm kiếm theo tên/email, bộ lọc theo vai trò/trạng thái, nút "Cấp tài khoản mới" nổi bật màu cam ở góc phải.
+Có thể chọn nhiều dòng để khóa/mở khóa hàng loạt.
+
+Màn 2 – Cấp tài khoản mới (Modal hoặc trang riêng):
+
+Form gồm: Họ tên, Email (dùng làm tên đăng nhập), Số điện thoại, chọn Vai trò (dropdown: Super Admin/Admin/Nhân viên duyệt hồ sơ/tùy chỉnh...), chọn Đơn vị/Phòng ban phụ trách (nếu có phân theo địa bàn thì thêm mục chọn địa bàn quản lý).
+Tùy chọn: "Gửi mật khẩu tự động qua email" (toggle bật/tắt) hoặc nhập mật khẩu thủ công có ô xác nhận.
+Nút "Hủy" (viền xám) và "Cấp tài khoản" (nền cam 
+#E8650A, chữ trắng) ở cuối form.
+Sau khi tạo thành công, hiển thị thông báo (toast) xác nhận đã gửi thông tin đăng nhập qua email.
+
+Màn 3 – Phân quyền theo vai trò:
+
+Giao diện dạng ma trận (matrix): cột là các Vai trò (Super Admin, Admin, Nhân viên duyệt hồ sơ, Nhân viên thống kê...), hàng là các nhóm chức năng/module (Quản lý doanh nghiệp, Quản lý sản phẩm, Quản lý QR, Báo cáo thống kê, Quản lý tài khoản, Cấu hình hệ thống...).
+Mỗi ô giao giữa Vai trò x Chức năng là checkbox/toggle bật-tắt quyền (Xem/Thêm/Sửa/Xóa/Duyệt có thể tách thành các cột phụ nếu cần chi tiết hơn).
+Có thể xem dạng "card riêng cho từng vai trò" (chọn 1 vai trò ở tab/dropdown, hiển thị toàn bộ quyền của vai trò đó dạng danh sách rõ ràng) làm chế độ xem thay thế cho ma trận khi màn hình nhỏ.
+Nút "Lưu thay đổi phân quyền" cố định ở cuối trang, màu cam, có hộp thoại xác nhận trước khi áp dụng (vì ảnh hưởng quyền truy cập của nhiều người).
+Super Admin luôn có đầy đủ quyền và không thể bị chỉnh sửa/giới hạn từ giao diện này.
+
+Yêu cầu chung: Dùng React + Tailwind CSS, bo góc mềm, rõ ràng, dễ đọc — vì đây là khu vực quản trị quyền hạn, ưu tiên sự chính xác và tránh gây nhầm lẫn hơn là hiệu ứng trang trí.
+
+PHẦN 10 — Nhật ký hệ thống, cấu hình & sao lưu
+
+Thiết kế các màn hình quản trị hệ thống cho Đồng Nai Trace Client: Nhật ký hệ thống (Audit Log), Cấu hình hệ thống, Sao lưu & phục hồi dữ liệu.
+
+Màu chủ đạo: 
+#2740BA, 
+#E8650A.
+
+Yêu cầu:
+
+Audit Log: bảng/timeline ghi lại thao tác người dùng (Người thực hiện, Hành động, Đối tượng tác động, Thời gian, IP), có bộ lọc theo người dùng/loại hành động/khoảng thời gian, các hành động quan trọng (xóa, khóa tài khoản) hiển thị badge đỏ/cam.
+Cấu hình hệ thống: dạng form nhiều tab (Chung, Email, QR Code, API/Tích hợp), mỗi tab là các trường input rõ ràng, nút "Lưu cấu hình" cố định ở cuối trang màu cam.
+Sao lưu & phục hồi: bảng lịch sử các bản sao lưu (ngày tạo, dung lượng, trạng thái), nút "Tạo bản sao lưu mới" (xanh dương) và "Khôi phục" (cam, có xác nhận cảnh báo trước khi thực hiện).
+Dùng React + Tailwind CSS, ưu tiên rõ ràng, ít màu sắc rực rỡ vì đây là khu vực kỹ thuật/nhạy cảm.

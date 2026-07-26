@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   Building2,
   Package,
-  QrCode,
   BarChart3,
   UsersRound,
   Settings,
@@ -55,7 +54,6 @@ const workspaceNav = [
   { label: "Tổng quan", icon: LayoutDashboard, href: "/dashboard" },
   { label: "Doanh nghiệp", icon: Building2, href: "/dashboard/doanh-nghiep" },
   { label: "Sản phẩm", icon: Package, href: "/dashboard/san-pham" },
-  { label: "Mã QR", icon: QrCode, href: "/dashboard/ma-qr" },
   { label: "Báo cáo & phân tích", icon: BarChart3, href: "/dashboard/bao-cao" },
   { label: "Tài khoản", icon: UsersRound, href: "/dashboard/tai-khoan" },
 ];
