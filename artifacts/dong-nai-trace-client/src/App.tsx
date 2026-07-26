@@ -98,93 +98,7 @@ function TraceMark({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function TraceIllustration() {
-  return (
-    <div
-      className="pointer-events-none absolute inset-0 overflow-hidden"
-      aria-hidden="true"
-    >
-      <div className="absolute -left-20 -top-24 h-[520px] w-[520px] rounded-full bg-[#314ac6]/30 blur-3xl" />
-      <div className="absolute -bottom-32 -right-20 h-[470px] w-[470px] rounded-full bg-[#E8650A]/20 blur-3xl" />
-      <div className="trace-grid absolute inset-0 opacity-40" />
-      <svg
-        className="absolute inset-0 h-full w-full"
-        viewBox="0 0 760 900"
-        preserveAspectRatio="none"
-      >
-        <defs>
-          <linearGradient id="route" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#E8650A" />
-            <stop offset="1" stopColor="#ffb35c" />
-          </linearGradient>
-          <linearGradient id="hill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#8ba3ef" stopOpacity=".32" />
-            <stop offset="1" stopColor="#8ba3ef" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M-40 720C95 610 83 490 180 424S302 350 340 275s117-107 182-120 123-45 278-125v930H-40Z"
-          fill="url(#hill)"
-        />
-        <path
-          d="M-30 683C90 592 92 500 180 433s126-70 164-151 118-113 186-127 121-38 238-104"
-          fill="none"
-          stroke="rgba(188,204,255,.48)"
-          strokeWidth="2"
-          strokeDasharray="6 11"
-        />
-        <path
-          d="M-35 700C82 617 94 512 187 443s132-66 169-147 120-119 185-130 115-40 226-111"
-          fill="none"
-          stroke="url(#route)"
-          strokeWidth="3.5"
-          strokeDasharray="1 13"
-          strokeLinecap="round"
-          className="animate-pulse-route"
-        />
-        <path
-          d="M50 790C145 645 210 654 261 570s28-154 113-205 138-26 189-99"
-          fill="none"
-          stroke="rgba(255,255,255,.2)"
-          strokeWidth="1"
-        />
-        <g fill="rgba(255,255,255,.86)">
-          <circle cx="185" cy="443" r="5" />
-          <circle cx="356" cy="296" r="5" />
-          <circle cx="540" cy="153" r="5" />
-        </g>
-        <g fill="#E8650A">
-          <circle cx="185" cy="443" r="2.5" />
-          <circle cx="356" cy="296" r="2.5" />
-          <circle cx="540" cy="153" r="2.5" />
-        </g>
-        <g fill="none" stroke="rgba(255,255,255,.15)" strokeWidth="1">
-          <path d="M135 470l24 12-8 25 24 18-13 29 20 18" />
-          <path d="M310 336l22 14-6 24 26 16-11 23 20 24" />
-          <path d="M490 193l28 10-7 24 23 15-8 25" />
-        </g>
-      </svg>
-      <div className="absolute left-[11%] top-[43%] hidden animate-drift rounded-2xl border border-white/20 bg-white/10 px-3 py-2 text-white backdrop-blur-md sm:block">
-        <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#ffad5e]" />
-          <span className="font-mono text-[9px] uppercase tracking-[.18em] text-white/75">
-            Vùng nguyên liệu
-          </span>
-        </div>
-        <div className="mt-1 text-[11px] font-semibold">Long Khánh</div>
-      </div>
-      <div className="absolute right-[12%] top-[17%] hidden rounded-2xl border border-white/20 bg-white/10 px-3 py-2 text-white backdrop-blur-md md:block">
-        <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#ffad5e]" />
-          <span className="font-mono text-[9px] uppercase tracking-[.18em] text-white/75">
-            Điểm xác thực
-          </span>
-        </div>
-        <div className="mt-1 text-[11px] font-semibold">Biên Hòa</div>
-      </div>
-    </div>
-  );
-}
+
 
 function PortalOverview() {
   return (
@@ -192,40 +106,30 @@ function PortalOverview() {
       className="relative hidden min-h-[100dvh] flex-col overflow-hidden bg-[#152978] px-10 py-10 text-white lg:flex xl:px-16"
       aria-label="Giới thiệu Đồng Nai Trace"
     >
-      <TraceIllustration />
+     
       <div className="relative z-10 flex items-start justify-between">
         <TraceMark />
-        <span className="rounded-full border border-white/20 bg-white/10 px-3 py-2 font-mono text-[9px] uppercase tracking-[.18em] text-white/75">
-          Cổng thông tin tỉnh
-        </span>
+        
       </div>
       <div className="relative z-10 mt-auto max-w-[560px] pb-9 pt-20">
         <div className="mb-7 flex items-center gap-3 text-[#ffb265]">
           <span className="h-px w-9 bg-[#ffb265]" />
-          <span className="font-mono text-[10px] uppercase tracking-[.25em]">
-            Nguồn gốc rõ ràng · Giá trị bền vững
-          </span>
+          
         </div>
         <h1 className="max-w-[520px] text-balance text-[clamp(2.6rem,4.2vw,4.65rem)] font-bold leading-[1.06] tracking-[-.055em]">
           Mỗi sản phẩm,
           <br />
-          <span className="text-[#ffb265]">một câu chuyện</span>
-          <br />
-          đáng tin.
+          <span className="text-[#ffb265]">một câu chuyện.</span>
+         
         </h1>
-        <p className="mt-7 max-w-[420px] text-[15px] leading-7 text-blue-100/75">
-          Nền tảng truy xuất nguồn gốc và xác thực sản phẩm của tỉnh Đồng Nai —
-          kết nối minh bạch từ vùng nguyên liệu đến tay người tiêu dùng.
-        </p>
+        
       </div>
       <div className="relative z-10 flex items-end justify-between border-t border-white/15 pt-5">
         <div className="flex items-center gap-2 text-blue-100/70">
           <MapPin className="h-4 w-4 text-[#ffad5e]" strokeWidth={1.5} />
           <span className="text-xs">Đồng Nai, Việt Nam</span>
         </div>
-        <span className="font-mono text-[10px] tracking-[.18em] text-white/40">
-          DN.TRACE / 01
-        </span>
+       
       </div>
     </section>
   );
