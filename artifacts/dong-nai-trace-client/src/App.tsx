@@ -554,9 +554,7 @@ function TraceSidebar({
             <span className="h-1.5 w-1.5 rounded-full bg-[#4f9a77]" /> Cổng quản
             trị
           </div>
-          <p className="mt-1.5 text-[11px] leading-4 text-slate-500">
-            Ủy ban nhân dân tỉnh Đồng Nai
-          </p>
+         
         </div>
         <nav
           className="dashboard-scrollbar mt-7 flex-1 space-y-1 overflow-y-auto"
