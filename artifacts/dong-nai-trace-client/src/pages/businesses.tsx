@@ -19,12 +19,10 @@ import {
   ArrowLeft,
   CheckCircle,
   XCircle,
-  ChevronsUpDown,
   ChevronUp,
   ArrowUpDown,
   QrCode,
   Copy,
-  RefreshCw,
   BadgeCheck,
   MoreHorizontal,
   SlidersHorizontal,
@@ -49,7 +47,7 @@ interface Business {
 }
 
 // ─── Mock data ─────────────────────────────────────────────────────────────────
-const mockBusinesses: Business[] = [
+const initialBusinesses: Business[] = [
   { id: "DN-001", name: "Công ty TNHH Nông sản An Phú", taxCode: "3601234567", region: "Biên Hòa", sector: "Nông sản", status: "Đã duyệt", registeredAt: "12/10/2024", representative: "Nguyễn Văn An", phone: "0901 234 567", businessCode: "DNT-2024-0001" },
   { id: "DN-002", name: "HTX Nông nghiệp Xuân Lộc", taxCode: "3607654321", region: "Xuân Lộc", sector: "OCOP", status: "Chờ duyệt", registeredAt: "18/12/2024", representative: "Trần Thị Bình", phone: "0912 345 678", businessCode: null },
   { id: "DN-003", name: "Công ty CP Thực phẩm Đồng Nai", taxCode: "3601112233", region: "Long Khánh", sector: "Thực phẩm CB", status: "Đã duyệt", registeredAt: "05/09/2024", representative: "Lê Hoàng Nam", phone: "0923 456 789", businessCode: "DNT-2024-0002" },
@@ -81,14 +79,11 @@ const statusConfig: Record<Status, { cls: string; icon: typeof Check }> = {
   "Đã khóa": { cls: "bg-[#f2f3f7] text-[#6b7694] border border-[#d9dce9]", icon: Lock },
 };
 
-const timelineItems = [
-  { action: "Hồ sơ được tiếp nhận", actor: "Hệ thống tự động", time: "18/12/2024 08:30", color: "#2740BA", done: true },
-  { action: "Chuyển xét duyệt vòng 1", actor: "Admin · Nguyễn Hoàng", time: "18/12/2024 09:05", color: "#4f9a77", done: true },
-  { action: "Xác minh tài liệu pháp lý", actor: "Chuyên viên · Minh Anh", time: "18/12/2024 10:30", color: "#2e9fbf", done: true },
-  { action: "Đang chờ quyết định duyệt", actor: "Quản trị viên", time: "18/12/2024 11:00", color: "#E8650A", done: false },
-];
+function generateCode(seq: number) {
+  return `DNT-${new Date().getFullYear()}-${String(seq).padStart(4, "0")}`;
+}
 
-// ─── Shared components ──────────────────────────────────────────────────────────
+// ─── Shared ─────────────────────────────────────────────────────────────────────
 function StatusBadge({ status }: { status: Status }) {
   const cfg = statusConfig[status];
   const Icon = cfg.icon;
@@ -100,15 +95,7 @@ function StatusBadge({ status }: { status: Status }) {
   );
 }
 
-function SelectFilter({
-  value,
-  onChange,
-  options,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  options: string[];
-}) {
+function SelectFilter({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: string[] }) {
   return (
     <div className="relative">
       <select
@@ -123,309 +110,368 @@ function SelectFilter({
   );
 }
 
-// ─── Approval + ID issuance screen ─────────────────────────────────────────────
-function ApprovalDetail({ business, onBack }: { business: Business; onBack: () => void }) {
-  const [comment, setComment] = useState("");
-  const [decision, setDecision] = useState<"approved" | "rejected" | null>(null);
-  const [idIssued, setIdIssued] = useState(!!business.businessCode);
-  const [generatedCode, setGeneratedCode] = useState(
-    business.businessCode ?? `DNT-${new Date().getFullYear()}-${String(mockBusinesses.length + 1).padStart(4, "0")}`
-  );
+// ─── Approval modal ─────────────────────────────────────────────────────────────
+function ApprovalSuccessModal({
+  businessName,
+  code,
+  onClose,
+  onViewDetail,
+}: {
+  businessName: string;
+  code: string;
+  onClose: () => void;
+  onViewDetail: () => void;
+}) {
   const [copied, setCopied] = useState(false);
 
-  function handleIssueId() {
-    setIdIssued(true);
-  }
-
   function handleCopy() {
-    navigator.clipboard.writeText(generatedCode).catch(() => {});
+    navigator.clipboard.writeText(code).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
   }
 
-  const approved = decision === "approved" || business.status === "Đã duyệt";
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-200 rounded-3xl border border-[#b8e2c8] bg-white p-8 shadow-[0_32px_64px_rgba(0,0,0,.18)]">
+        {/* Icon */}
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#e8f5ed]">
+          <BadgeCheck className="h-8 w-8 text-[#1f7a45]" strokeWidth={1.8} />
+        </div>
+
+        {/* Heading */}
+        <h3 className="text-center text-[18px] font-bold tracking-[-0.04em] text-[#1d2944]">
+          Đã duyệt hồ sơ thành công
+        </h3>
+        <p className="mt-1.5 text-center text-[12px] text-slate-400">
+          {businessName} đã được phê duyệt và cấp mã định danh.
+        </p>
+
+        {/* Code block */}
+        <div className="mt-6 rounded-2xl border border-[#e4e8f0] bg-[#f7f8fd] p-4">
+          <p className="mb-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+            Mã định danh tổ chức
+          </p>
+          <div className="flex items-center gap-3">
+            <div className="flex flex-1 items-center gap-2.5 rounded-xl border border-[#dce3ff] bg-white px-4 py-3">
+              <QrCode className="h-4 w-4 shrink-0 text-[#2740BA]" />
+              <span className="flex-1 font-mono text-[15px] font-bold tracking-wider text-[#2740BA]">
+                {code}
+              </span>
+            </div>
+            <button
+              onClick={handleCopy}
+              title="Sao chép mã"
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border transition-colors ${copied ? "border-[#b8e2c8] bg-[#e8f5ed] text-[#1f7a45]" : "border-[#e4e8f0] bg-white text-slate-400 hover:border-[#2740BA] hover:text-[#2740BA]"}`}
+            >
+              {copied ? <Check className="h-4 w-4" strokeWidth={2.5} /> : <Copy className="h-4 w-4" />}
+            </button>
+          </div>
+          {copied && (
+            <p className="mt-1.5 text-center text-[10px] font-medium text-[#1f7a45]">Đã sao chép!</p>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="mt-5 flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 rounded-xl border border-[#e4e8f0] py-3 text-[13px] font-semibold text-slate-600 transition-colors hover:border-[#2740BA] hover:text-[#2740BA]"
+          >
+            Đóng
+          </button>
+          <button
+            onClick={onViewDetail}
+            className="flex-1 rounded-xl bg-[#2740BA] py-3 text-[13px] font-bold text-white shadow-[0_4px_14px_rgba(39,64,186,.25)] transition-colors hover:bg-[#1e33a0]"
+          >
+            Xem chi tiết
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Approval detail screen ─────────────────────────────────────────────────────
+function ApprovalDetail({
+  business,
+  onBack,
+  onApproved,
+}: {
+  business: Business;
+  onBack: () => void;
+  onApproved: (id: string, code: string) => void;
+}) {
+  const [comment, setComment] = useState("");
+  const [decision, setDecision] = useState<"approved" | "rejected" | null>(
+    business.status === "Đã duyệt" ? "approved" : business.status === "Từ chối" ? "rejected" : null
+  );
+  const [showModal, setShowModal] = useState(false);
+  const [issuedCode] = useState(
+    business.businessCode ?? generateCode(initialBusinesses.filter((b) => b.businessCode).length + 1)
+  );
+
+  const isAlreadyDecided = business.status === "Đã duyệt" || business.status === "Từ chối" || business.status === "Đã khóa";
+
+  const effectiveStatus: Status =
+    decision === "approved" ? "Đã duyệt" :
+    decision === "rejected" ? "Từ chối" :
+    business.status;
+
+  const timelineItems = [
+    { action: "Hồ sơ được tiếp nhận", actor: "Hệ thống tự động", time: "18/12/2024 08:30", color: "#2740BA", done: true },
+    { action: "Chuyển xét duyệt vòng 1", actor: "Admin · Nguyễn Hoàng", time: "18/12/2024 09:05", color: "#4f9a77", done: true },
+    { action: "Xác minh tài liệu pháp lý", actor: "Chuyên viên · Minh Anh", time: "18/12/2024 10:30", color: "#2e9fbf", done: true },
+    ...(decision === "approved" || business.status === "Đã duyệt"
+      ? [{ action: "Phê duyệt & cấp mã định danh", actor: "Admin · Nguyễn Hoàng", time: "18/12/2024 11:15", color: "#1f7a45", done: true }]
+      : decision === "rejected" || business.status === "Từ chối"
+      ? [{ action: "Hồ sơ bị từ chối", actor: "Admin · Nguyễn Hoàng", time: "18/12/2024 11:15", color: "#c0392b", done: true }]
+      : [{ action: "Đang chờ quyết định duyệt", actor: "Quản trị viên", time: "18/12/2024 11:00", color: "#E8650A", done: false }]
+    ),
+  ];
+
+  function handleApprove() {
+    setDecision("approved");
+    setShowModal(true);
+    onApproved(business.id, issuedCode);
+  }
+
+  function handleReject() {
+    setDecision("rejected");
+  }
 
   return (
-    <DashboardShell title="Phê duyệt hồ sơ" subtitle={business.name}>
-      {/* Back */}
-      <button
-        onClick={onBack}
-        className="mb-5 flex items-center gap-1.5 text-[12px] font-medium text-slate-500 transition-colors hover:text-[#2740BA]"
-      >
-        <ArrowLeft className="h-4 w-4" /> Quay lại danh sách doanh nghiệp
-      </button>
-
-      {/* Decision banner */}
-      {decision && (
-        <div
-          className={`mb-5 flex items-center gap-3 rounded-2xl border p-4 ${
-            decision === "approved"
-              ? "border-[#b8e2c8] bg-[#e8f5ed] text-[#1f7a45]"
-              : "border-[#f5bcbc] bg-[#fef0f0] text-[#c0392b]"
-          }`}
-        >
-          {decision === "approved" ? (
-            <CheckCircle className="h-5 w-5 shrink-0" />
-          ) : (
-            <XCircle className="h-5 w-5 shrink-0" />
-          )}
-          <p className="text-[13px] font-semibold">
-            {decision === "approved"
-              ? "Hồ sơ đã được phê duyệt thành công. Bạn có thể cấp mã định danh doanh nghiệp."
-              : "Hồ sơ đã bị từ chối. Doanh nghiệp sẽ nhận được thông báo qua email."}
-          </p>
-        </div>
+    <>
+      {showModal && (
+        <ApprovalSuccessModal
+          businessName={business.name}
+          code={issuedCode}
+          onClose={() => setShowModal(false)}
+          onViewDetail={() => { setShowModal(false); }}
+        />
       )}
 
-      {/* Page header */}
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[.18em] text-[#E8650A]">
-            Hồ sơ doanh nghiệp
-          </p>
-          <h2 className="mt-1 text-[20px] font-bold tracking-[-0.04em] text-[#1d2944]">
-            {business.name}
-          </h2>
-        </div>
-        <StatusBadge status={decision === "approved" ? "Đã duyệt" : decision === "rejected" ? "Từ chối" : business.status} />
-      </div>
+      <DashboardShell title="Phê duyệt hồ sơ doanh nghiệp" subtitle={business.name}>
+        {/* Back */}
+        <button
+          onClick={onBack}
+          className="mb-5 flex items-center gap-1.5 text-[12px] font-medium text-slate-500 transition-colors hover:text-[#2740BA]"
+        >
+          <ArrowLeft className="h-4 w-4" /> Quay lại danh sách doanh nghiệp
+        </button>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_400px]">
-        {/* ── LEFT COLUMN ──────────────────────────────────────────────────────── */}
-        <div className="space-y-5">
-          {/* Business info */}
-          <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-[0_2px_12px_rgba(38,55,105,.04)]">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#edf0ff]">
-                <Building2 className="h-5 w-5 text-[#2740BA]" strokeWidth={1.8} />
-              </div>
-              <div>
-                <p className="text-[14px] font-bold text-[#1d2944]">{business.name}</p>
-                <p className="text-[11px] text-slate-400">MST: {business.taxCode}</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-[12px] sm:grid-cols-3">
-              {[
-                ["Địa bàn", business.region],
-                ["Ngành hàng", business.sector],
-                ["Ngày đăng ký", business.registeredAt],
-                ["Loại hình", "TNHH / HTX"],
-                ["Quy mô", "Vừa và nhỏ"],
-                ["Vốn điều lệ", "5,000,000,000 đ"],
-                ["Người đại diện", business.representative],
-                ["SĐT liên hệ", business.phone],
-                ["Email", "lienhe@dntrace.vn"],
-              ].map(([k, v]) => (
-                <div key={k}>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{k}</p>
-                  <p className="mt-1 font-medium text-[#25304b]">{v}</p>
-                </div>
-              ))}
-            </div>
+        {/* Page header */}
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[.18em] text-[#E8650A]">Hồ sơ doanh nghiệp</p>
+            <h2 className="mt-1 text-[20px] font-bold tracking-[-0.04em] text-[#1d2944]">{business.name}</h2>
           </div>
-
-          {/* Documents */}
-          <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-[0_2px_12px_rgba(38,55,105,.04)]">
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-[13px] font-bold text-[#1d2944]">Tài liệu đính kèm</p>
-              <span className="rounded-full bg-[#edf0ff] px-2 py-0.5 text-[10px] font-bold text-[#2740BA]">4 file</span>
-            </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {[
-                { name: "Giấy đăng ký kinh doanh", size: "1.2 MB", type: "PDF", color: "#E8650A" },
-                { name: "CMND/CCCD người đại diện", size: "0.8 MB", type: "JPG", color: "#2740BA" },
-                { name: "Giấy chứng nhận ATTP", size: "2.1 MB", type: "PDF", color: "#E8650A" },
-                { name: "Hồ sơ năng lực sản xuất", size: "3.4 MB", type: "PDF", color: "#E8650A" },
-              ].map((doc) => (
-                <div
-                  key={doc.name}
-                  className="group flex cursor-pointer items-center gap-3 rounded-xl border border-[#e4e8f0] bg-[#f9fafb] p-3.5 transition-all hover:border-[#2740BA] hover:bg-[#f0f3ff] hover:shadow-sm"
-                >
-                  <div
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white text-[9px] font-bold"
-                    style={{ background: doc.color }}
-                  >
-                    {doc.type}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[11px] font-semibold text-[#25304b]">{doc.name}</p>
-                    <p className="mt-0.5 text-[10px] text-slate-400">{doc.type} · {doc.size}</p>
-                  </div>
-                  <Eye className="h-3.5 w-3.5 shrink-0 text-slate-300 transition-colors group-hover:text-[#2740BA]" />
-                </div>
-              ))}
-            </div>
-            {/* Preview placeholder */}
-            <div className="mt-4 flex h-36 items-center justify-center rounded-xl border-2 border-dashed border-[#e4e8f0] bg-[#f9fafb] text-slate-400">
-              <div className="text-center">
-                <FileText className="mx-auto h-7 w-7 opacity-40" />
-                <p className="mt-2 text-[11px]">Nhấp vào tài liệu để xem trước</p>
-              </div>
-            </div>
-          </div>
+          <StatusBadge status={effectiveStatus} />
         </div>
 
-        {/* ── RIGHT COLUMN ─────────────────────────────────────────────────────── */}
-        <div className="space-y-5">
-          {/* Decision card */}
-          <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-[0_2px_12px_rgba(38,55,105,.04)]">
-            <p className="mb-4 text-[13px] font-bold text-[#1d2944]">Quyết định xét duyệt</p>
-            <label className="mb-1.5 block text-[11px] font-semibold text-slate-500">
-              Nhận xét / Lý do
-            </label>
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              rows={4}
-              placeholder="Nhập nhận xét hoặc lý do từ chối hồ sơ này..."
-              className="w-full resize-none rounded-xl border border-[#e4e8f0] bg-[#f9fafb] p-3 text-[12px] text-[#25304b] placeholder:text-slate-400 outline-none transition focus:border-[#2740BA] focus:bg-white focus:ring-2 focus:ring-[#2740BA]/15"
-            />
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <button
-                onClick={() => setDecision("approved")}
-                className={`flex items-center justify-center gap-2 rounded-xl py-3.5 text-[13px] font-bold transition-all ${
-                  decision === "approved"
-                    ? "bg-[#1f7a45] text-white shadow-lg"
-                    : "bg-[#2740BA] text-white hover:bg-[#1e33a0] shadow-[0_4px_14px_rgba(39,64,186,.25)] hover:shadow-[0_6px_18px_rgba(39,64,186,.32)]"
-                }`}
-              >
-                <CheckCircle className="h-4 w-4" /> Phê duyệt
-              </button>
-              <button
-                onClick={() => setDecision("rejected")}
-                className={`flex items-center justify-center gap-2 rounded-xl border-2 py-3.5 text-[13px] font-bold transition-all ${
-                  decision === "rejected"
-                    ? "border-[#c0392b] bg-[#c0392b] text-white"
-                    : "border-[#e04040] bg-white text-[#c0392b] hover:bg-[#fef0f0]"
-                }`}
-              >
-                <XCircle className="h-4 w-4" /> Từ chối
-              </button>
-            </div>
-          </div>
-
-          {/* ID issuance card */}
-          <div className={`rounded-2xl border p-6 shadow-[0_2px_12px_rgba(38,55,105,.04)] transition-all ${approved ? "border-[#b8e2c8] bg-white" : "border-[#e4e8f0] bg-[#f9fafb] opacity-60"}`}>
-            <div className="mb-4 flex items-center gap-2">
-              <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${approved ? "bg-[#e8f5ed]" : "bg-[#f0f2f8]"}`}>
-                <BadgeCheck className={`h-4 w-4 ${approved ? "text-[#1f7a45]" : "text-slate-400"}`} strokeWidth={1.8} />
-              </div>
-              <p className="text-[13px] font-bold text-[#1d2944]">Cấp mã định danh doanh nghiệp</p>
-            </div>
-
-            {!approved && (
-              <p className="mb-3 rounded-xl border border-[#e4e8f0] bg-white p-3 text-[11px] text-slate-400">
-                Chức năng cấp mã chỉ khả dụng sau khi hồ sơ được phê duyệt.
-              </p>
-            )}
-
-            <div className="mb-3">
-              <label className="mb-1.5 block text-[11px] font-semibold text-slate-500">
-                Mã định danh doanh nghiệp
-              </label>
-              <div className="flex gap-2">
-                <div className="flex flex-1 items-center gap-2 rounded-xl border border-[#e4e8f0] bg-[#f9fafb] px-3 py-2.5">
-                  <QrCode className="h-3.5 w-3.5 shrink-0 text-[#2740BA]" />
-                  <span className="flex-1 font-mono text-[12px] font-bold text-[#25304b] tracking-wide">
-                    {generatedCode}
-                  </span>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_380px]">
+          {/* ── LEFT: hồ sơ ────────────────────────────────────────────────────── */}
+          <div className="space-y-5">
+            {/* Business info */}
+            <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-[0_2px_12px_rgba(38,55,105,.04)]">
+              <div className="mb-5 flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#edf0ff]">
+                  <Building2 className="h-5 w-5 text-[#2740BA]" strokeWidth={1.8} />
                 </div>
-                <button
-                  onClick={() => {
-                    const year = new Date().getFullYear();
-                    const rand = String(Math.floor(Math.random() * 9000) + 1000);
-                    setGeneratedCode(`DNT-${year}-${rand}`);
-                  }}
-                  disabled={!approved}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#e4e8f0] bg-white text-slate-400 transition-colors hover:border-[#2740BA] hover:text-[#2740BA] disabled:pointer-events-none"
-                  title="Tạo lại mã"
-                >
-                  <RefreshCw className="h-3.5 w-3.5" />
-                </button>
+                <div>
+                  <p className="text-[14px] font-bold text-[#1d2944]">{business.name}</p>
+                  <p className="text-[11px] text-slate-400">MST: {business.taxCode}</p>
+                </div>
               </div>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-[12px] sm:grid-cols-3">
+                {[
+                  ["Địa bàn", business.region],
+                  ["Ngành hàng", business.sector],
+                  ["Ngày đăng ký", business.registeredAt],
+                  ["Loại hình", "TNHH / HTX"],
+                  ["Quy mô", "Vừa và nhỏ"],
+                  ["Vốn điều lệ", "5,000,000,000 đ"],
+                  ["Người đại diện", business.representative],
+                  ["SĐT liên hệ", business.phone],
+                  ["Email", "lienhe@dntrace.vn"],
+                ].map(([k, v]) => (
+                  <div key={k}>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{k}</p>
+                    <p className="mt-1 font-medium text-[#25304b]">{v}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Issued code (if approved) */}
+              {(decision === "approved" || business.status === "Đã duyệt") && (
+                <div className="mt-5 rounded-xl border border-[#b8e2c8] bg-[#e8f5ed] p-3.5">
+                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#1f7a45]">Mã định danh tổ chức</p>
+                  <div className="flex items-center gap-2">
+                    <QrCode className="h-3.5 w-3.5 text-[#1f7a45]" />
+                    <span className="font-mono text-[13px] font-bold tracking-wider text-[#1f7a45]">
+                      {business.businessCode ?? issuedCode}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* QR preview */}
-            <div className="mb-4 flex items-center gap-3 rounded-xl border border-[#e4e8f0] bg-[#f9fafb] p-3">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-[#dce3ff] bg-white">
-                <QrCode className="h-10 w-10 text-[#2740BA] opacity-60" />
+            {/* Documents */}
+            <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-[0_2px_12px_rgba(38,55,105,.04)]">
+              <div className="mb-4 flex items-center justify-between">
+                <p className="text-[13px] font-bold text-[#1d2944]">Tài liệu đính kèm</p>
+                <span className="rounded-full bg-[#edf0ff] px-2 py-0.5 text-[10px] font-bold text-[#2740BA]">4 file</span>
               </div>
-              <div>
-                <p className="text-[11px] font-semibold text-[#25304b]">QR Code xem trước</p>
-                <p className="mt-0.5 text-[10px] text-slate-400">QR sẽ được tạo sau khi cấp mã chính thức</p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {[
+                  { name: "Giấy đăng ký kinh doanh", size: "1.2 MB", type: "PDF", color: "#E8650A" },
+                  { name: "CMND/CCCD người đại diện", size: "0.8 MB", type: "JPG", color: "#2740BA" },
+                  { name: "Giấy chứng nhận ATTP", size: "2.1 MB", type: "PDF", color: "#E8650A" },
+                  { name: "Hồ sơ năng lực sản xuất", size: "3.4 MB", type: "PDF", color: "#E8650A" },
+                ].map((doc) => (
+                  <div
+                    key={doc.name}
+                    className="group flex cursor-pointer items-center gap-3 rounded-xl border border-[#e4e8f0] bg-[#f9fafb] p-3.5 transition-all hover:border-[#2740BA] hover:bg-[#f0f3ff] hover:shadow-sm"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white text-[9px] font-bold" style={{ background: doc.color }}>
+                      {doc.type}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[11px] font-semibold text-[#25304b]">{doc.name}</p>
+                      <p className="mt-0.5 text-[10px] text-slate-400">{doc.type} · {doc.size}</p>
+                    </div>
+                    <Eye className="h-3.5 w-3.5 shrink-0 text-slate-300 transition-colors group-hover:text-[#2740BA]" />
+                  </div>
+                ))}
               </div>
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                onClick={handleIssueId}
-                disabled={!approved || idIssued}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-[12px] font-bold transition-all ${
-                  idIssued
-                    ? "bg-[#e8f5ed] text-[#1f7a45] cursor-default"
-                    : approved
-                    ? "bg-[#2740BA] text-white hover:bg-[#1e33a0] shadow-[0_4px_14px_rgba(39,64,186,.2)]"
-                    : "bg-[#e4e8f0] text-slate-400 cursor-not-allowed"
-                }`}
-              >
-                {idIssued ? (
-                  <><Check className="h-4 w-4" /> Đã cấp mã</>
-                ) : (
-                  <><BadgeCheck className="h-4 w-4" /> Cấp mã định danh</>
-                )}
-              </button>
-              <button
-                onClick={handleCopy}
-                disabled={!approved}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#e4e8f0] bg-white text-slate-400 transition-colors hover:border-[#2740BA] hover:text-[#2740BA] disabled:pointer-events-none"
-                title="Sao chép mã"
-              >
-                {copied ? <Check className="h-3.5 w-3.5 text-[#1f7a45]" /> : <Copy className="h-3.5 w-3.5" />}
-              </button>
+              {/* Preview placeholder */}
+              <div className="mt-4 flex h-36 items-center justify-center rounded-xl border-2 border-dashed border-[#e4e8f0] bg-[#f9fafb] text-slate-400">
+                <div className="text-center">
+                  <FileText className="mx-auto h-7 w-7 opacity-40" />
+                  <p className="mt-2 text-[11px]">Nhấp vào tài liệu để xem trước</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Timeline */}
-          <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-[0_2px_12px_rgba(38,55,105,.04)]">
-            <p className="mb-5 text-[13px] font-bold text-[#1d2944]">Lịch sử xử lý hồ sơ</p>
-            <div className="space-y-0">
-              {timelineItems.map((item, i) => (
-                <div key={i} className="relative flex gap-4 pb-5 last:pb-0">
-                  {/* Connector line */}
-                  {i < timelineItems.length - 1 && (
-                    <span className="absolute left-[11px] top-6 h-full w-px bg-[#e4e8f0]" />
-                  )}
-                  {/* Dot */}
-                  <div
-                    className="relative z-10 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-white ring-2"
-                    style={{
-                      background: item.done ? item.color : "#fff",
-                      ringColor: item.color,
-                      boxShadow: `0 0 0 2px ${item.color}`,
-                    }}
+          {/* ── RIGHT: decision + timeline ──────────────────────────────────────── */}
+          <div className="space-y-5">
+            {/* Decision card */}
+            <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-[0_2px_12px_rgba(38,55,105,.04)]">
+              <p className="mb-4 text-[13px] font-bold text-[#1d2944]">Quyết định xét duyệt</p>
+
+              {/* Already decided state */}
+              {isAlreadyDecided && (
+                <div className={`mb-4 flex items-center gap-3 rounded-xl border p-3.5 ${business.status === "Đã duyệt" ? "border-[#b8e2c8] bg-[#e8f5ed]" : business.status === "Từ chối" ? "border-[#f5bcbc] bg-[#fef0f0]" : "border-[#d9dce9] bg-[#f2f3f7]"}`}>
+                  {business.status === "Đã duyệt" ? <CheckCircle className="h-4 w-4 text-[#1f7a45] shrink-0" /> : <XCircle className="h-4 w-4 text-[#c0392b] shrink-0" />}
+                  <p className={`text-[12px] font-semibold ${business.status === "Đã duyệt" ? "text-[#1f7a45]" : "text-[#c0392b]"}`}>
+                    {business.status === "Đã duyệt" ? "Hồ sơ đã được phê duyệt" : business.status === "Từ chối" ? "Hồ sơ đã bị từ chối" : "Tài khoản đã bị khóa"}
+                  </p>
+                </div>
+              )}
+
+              <label className="mb-1.5 block text-[11px] font-semibold text-slate-500">Nhận xét / Lý do</label>
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                rows={4}
+                disabled={isAlreadyDecided}
+                placeholder={isAlreadyDecided ? "Hồ sơ đã được xử lý." : "Nhập nhận xét hoặc lý do từ chối hồ sơ này..."}
+                className="w-full resize-none rounded-xl border border-[#e4e8f0] bg-[#f9fafb] p-3 text-[12px] text-[#25304b] placeholder:text-slate-400 outline-none transition focus:border-[#2740BA] focus:bg-white focus:ring-2 focus:ring-[#2740BA]/15 disabled:cursor-not-allowed disabled:opacity-60"
+              />
+
+              {/* Buttons — show only if pending */}
+              {!isAlreadyDecided && decision === null && (
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <button
+                    onClick={handleApprove}
+                    className="flex items-center justify-center gap-2 rounded-xl bg-[#2740BA] py-3.5 text-[13px] font-bold text-white shadow-[0_4px_14px_rgba(39,64,186,.25)] transition-all hover:bg-[#1e33a0] hover:shadow-[0_6px_18px_rgba(39,64,186,.32)] active:scale-[.98]"
                   >
-                    {item.done ? (
-                      <Check className="h-3 w-3 text-white" strokeWidth={3} />
-                    ) : (
-                      <Clock className="h-3 w-3" style={{ color: item.color }} strokeWidth={2.5} />
+                    <CheckCircle className="h-4 w-4" /> Duyệt
+                  </button>
+                  <button
+                    onClick={handleReject}
+                    className="flex items-center justify-center gap-2 rounded-xl border-2 border-[#e04040] bg-white py-3.5 text-[13px] font-bold text-[#c0392b] transition-all hover:bg-[#fef0f0] active:scale-[.98]"
+                  >
+                    <XCircle className="h-4 w-4" /> Từ chối
+                  </button>
+                </div>
+              )}
+
+              {/* Rejected in-session: confirm */}
+              {!isAlreadyDecided && decision === "rejected" && (
+                <div className="mt-4 rounded-xl border border-[#f5bcbc] bg-[#fef0f0] p-4">
+                  <div className="mb-2 flex items-center gap-2 text-[#c0392b]">
+                    <XCircle className="h-4 w-4 shrink-0" />
+                    <p className="text-[12px] font-bold">Hồ sơ đã bị từ chối</p>
+                  </div>
+                  <p className="text-[11px] text-[#c0392b]/70">Doanh nghiệp sẽ nhận được thông báo qua email.</p>
+                  <button
+                    onClick={() => setDecision(null)}
+                    className="mt-3 text-[11px] font-semibold text-slate-500 underline hover:text-[#2740BA]"
+                  >
+                    Hoàn tác
+                  </button>
+                </div>
+              )}
+
+              {/* Approved in-session */}
+              {!isAlreadyDecided && decision === "approved" && (
+                <div className="mt-4 rounded-xl border border-[#b8e2c8] bg-[#e8f5ed] p-4">
+                  <div className="mb-2 flex items-center gap-2 text-[#1f7a45]">
+                    <CheckCircle className="h-4 w-4 shrink-0" />
+                    <p className="text-[12px] font-bold">Đã phê duyệt thành công</p>
+                  </div>
+                  <p className="text-[11px] text-[#1f7a45]/70">Mã định danh đã được cấp tự động cho doanh nghiệp.</p>
+                  <button
+                    onClick={() => setShowModal(true)}
+                    className="mt-3 flex items-center gap-1.5 text-[11px] font-semibold text-[#2740BA] hover:underline"
+                  >
+                    <QrCode className="h-3 w-3" /> Xem lại mã định danh
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Processing timeline */}
+            <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-[0_2px_12px_rgba(38,55,105,.04)]">
+              <p className="mb-5 text-[13px] font-bold text-[#1d2944]">Lịch sử xử lý hồ sơ</p>
+              <div className="space-y-0">
+                {timelineItems.map((item, i) => (
+                  <div key={i} className="relative flex gap-4 pb-5 last:pb-0">
+                    {i < timelineItems.length - 1 && (
+                      <span className="absolute left-[11px] top-6 h-full w-px bg-[#e4e8f0]" />
                     )}
+                    <div
+                      className="relative z-10 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
+                      style={{
+                        background: item.done ? item.color : "#fff",
+                        boxShadow: `0 0 0 2px ${item.color}`,
+                      }}
+                    >
+                      {item.done ? (
+                        <Check className="h-3 w-3 text-white" strokeWidth={3} />
+                      ) : (
+                        <Clock className="h-3 w-3" style={{ color: item.color }} strokeWidth={2.5} />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[12px] font-semibold text-[#25304b]">{item.action}</p>
+                      <p className="mt-0.5 text-[10px] text-slate-400">{item.actor} · {item.time}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[12px] font-semibold text-[#25304b]">{item.action}</p>
-                    <p className="mt-0.5 text-[10px] text-slate-400">{item.actor} · {item.time}</p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </DashboardShell>
+      </DashboardShell>
+    </>
   );
 }
 
 // ─── Business list ──────────────────────────────────────────────────────────────
 export default function Businesses() {
+  const [businesses, setBusinesses] = useState<Business[]>(initialBusinesses);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState(STATUS_ALL);
   const [regionFilter, setRegionFilter] = useState("Tất cả địa bàn");
@@ -436,13 +482,28 @@ export default function Businesses() {
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [approving, setApproving] = useState<Business | null>(null);
 
-  if (approving) {
-    return <ApprovalDetail business={approving} onBack={() => setApproving(null)} />;
+  // Sync approving business from list when businesses state changes
+  const approvingBusiness = approving ? (businesses.find((b) => b.id === approving.id) ?? approving) : null;
+
+  function handleApproved(id: string, code: string) {
+    setBusinesses((prev) =>
+      prev.map((b) => b.id === id ? { ...b, status: "Đã duyệt", businessCode: code } : b)
+    );
   }
 
-  // ── Filtering ────────────────────────────────────────────────────────────────
+  if (approvingBusiness) {
+    return (
+      <ApprovalDetail
+        business={approvingBusiness}
+        onBack={() => setApproving(null)}
+        onApproved={handleApproved}
+      />
+    );
+  }
+
+  // ── Filtering ─────────────────────────────────────────────────────────────────
   const filtered = useMemo(() => {
-    let list = mockBusinesses.filter((b) => {
+    let list = businesses.filter((b) => {
       const q = search.toLowerCase();
       return (
         (b.name.toLowerCase().includes(q) || b.taxCode.includes(q) || b.id.toLowerCase().includes(q)) &&
@@ -463,24 +524,20 @@ export default function Businesses() {
     }
 
     return list;
-  }, [search, statusFilter, regionFilter, sectorFilter, sortKey, sortDir]);
+  }, [businesses, search, statusFilter, regionFilter, sectorFilter, sortKey, sortDir]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  // ── Helpers ──────────────────────────────────────────────────────────────────
   function handleSort(key: SortKey) {
     if (sortKey === key) {
-      setSortDir((d) => (d === "asc" ? "desc" : d === "desc" ? null : "asc"));
-      if (sortDir === null) setSortKey(null);
+      const next = sortDir === "asc" ? "desc" : sortDir === "desc" ? null : "asc";
+      setSortDir(next);
+      if (next === null) setSortKey(null);
     } else {
       setSortKey(key);
       setSortDir("asc");
     }
-    setPage(1);
-  }
-
-  function handleFilter() {
     setPage(1);
   }
 
@@ -507,12 +564,10 @@ export default function Businesses() {
   }
 
   const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = { "Tất cả": mockBusinesses.length };
-    statuses.forEach((s) => {
-      counts[s] = mockBusinesses.filter((b) => b.status === s).length;
-    });
+    const counts: Record<string, number> = { "Tất cả": businesses.length };
+    statuses.forEach((s) => { counts[s] = businesses.filter((b) => b.status === s).length; });
     return counts;
-  }, []);
+  }, [businesses]);
 
   return (
     <DashboardShell title="Quản lý doanh nghiệp" subtitle="Danh sách và phê duyệt hồ sơ">
@@ -520,9 +575,7 @@ export default function Businesses() {
       <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-[.18em] text-[#E8650A]">Quản lý</p>
-          <h2 className="mt-1.5 text-[24px] font-bold tracking-[-0.05em] text-[#1d2944]">
-            Doanh nghiệp
-          </h2>
+          <h2 className="mt-1.5 text-[24px] font-bold tracking-[-0.05em] text-[#1d2944]">Doanh nghiệp</h2>
         </div>
         <div className="flex gap-2">
           <button className="flex items-center gap-1.5 rounded-xl border border-[#e4e8f0] bg-white px-3.5 py-2.5 text-[12px] font-semibold text-slate-600 transition-colors hover:border-[#2740BA] hover:text-[#2740BA]">
@@ -538,20 +591,15 @@ export default function Businesses() {
       <div className="mb-4 flex flex-wrap gap-2">
         {[STATUS_ALL, ...statuses].map((s) => {
           const active = statusFilter === s;
-          const badge = statusCounts[s];
           return (
             <button
               key={s}
-              onClick={() => { setStatusFilter(s); handleFilter(); }}
-              className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-[12px] font-semibold transition-colors ${
-                active
-                  ? "bg-[#2740BA] text-white shadow-[0_3px_10px_rgba(39,64,186,.2)]"
-                  : "border border-[#e4e8f0] bg-white text-slate-500 hover:border-[#2740BA] hover:text-[#2740BA]"
-              }`}
+              onClick={() => { setStatusFilter(s); setPage(1); }}
+              className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-[12px] font-semibold transition-colors ${active ? "bg-[#2740BA] text-white shadow-[0_3px_10px_rgba(39,64,186,.2)]" : "border border-[#e4e8f0] bg-white text-slate-500 hover:border-[#2740BA] hover:text-[#2740BA]"}`}
             >
               {s}
               <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${active ? "bg-white/20 text-white" : "bg-[#f0f2f8] text-slate-500"}`}>
-                {badge}
+                {statusCounts[s] ?? 0}
               </span>
             </button>
           );
@@ -582,15 +630,15 @@ export default function Businesses() {
           <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
           <input
             value={search}
-            onChange={(e) => { setSearch(e.target.value); handleFilter(); }}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             placeholder="Tìm tên, mã số thuế, mã DN..."
             className="h-9 w-full rounded-xl border border-[#e4e8f0] bg-[#f9fafb] pl-9 pr-4 text-[12px] text-[#25304b] outline-none transition focus:border-[#2740BA] focus:bg-white focus:ring-2 focus:ring-[#2740BA]/15"
           />
         </div>
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="h-3.5 w-3.5 text-slate-400" />
-          <SelectFilter value={regionFilter} onChange={(v) => { setRegionFilter(v); handleFilter(); }} options={regions} />
-          <SelectFilter value={sectorFilter} onChange={(v) => { setSectorFilter(v); handleFilter(); }} options={sectors} />
+          <SelectFilter value={regionFilter} onChange={(v) => { setRegionFilter(v); setPage(1); }} options={regions} />
+          <SelectFilter value={sectorFilter} onChange={(v) => { setSectorFilter(v); setPage(1); }} options={sectors} />
         </div>
       </div>
 
@@ -608,17 +656,16 @@ export default function Businesses() {
                     className="rounded border-slate-300 accent-[#2740BA]"
                   />
                 </th>
-                {(
-                  [
-                    { label: "Tên doanh nghiệp", key: "name" as SortKey },
-                    { label: "Mã số thuế", key: "taxCode" as SortKey },
-                    { label: "Địa bàn", key: "region" as SortKey },
-                    { label: "Ngành hàng", key: "sector" as SortKey },
-                    { label: "Trạng thái", key: "status" as SortKey },
-                    { label: "Ngày đăng ký", key: "registeredAt" as SortKey },
-                    { label: "Thao tác", key: null },
-                  ] as { label: string; key: SortKey }[]
-                ).map(({ label, key }) => (
+                {([
+                  { label: "Tên doanh nghiệp", key: "name" as SortKey },
+                  { label: "Mã số thuế", key: "taxCode" as SortKey },
+                  { label: "Địa bàn", key: "region" as SortKey },
+                  { label: "Ngành hàng", key: "sector" as SortKey },
+                  { label: "Mã định danh", key: null },
+                  { label: "Trạng thái", key: "status" as SortKey },
+                  { label: "Ngày đăng ký", key: "registeredAt" as SortKey },
+                  { label: "Thao tác", key: null },
+                ] as { label: string; key: SortKey }[]).map(({ label, key }) => (
                   <th
                     key={label}
                     onClick={key ? () => handleSort(key) : undefined}
@@ -633,80 +680,84 @@ export default function Businesses() {
             <tbody className="divide-y divide-[#f0f2f8]">
               {paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-16 text-center text-[12px] text-slate-400">
+                  <td colSpan={9} className="py-16 text-center text-[12px] text-slate-400">
                     Không tìm thấy doanh nghiệp nào phù hợp bộ lọc.
                   </td>
                 </tr>
-              ) : (
-                paginated.map((b) => (
-                  <tr
-                    key={b.id}
-                    className={`transition-colors hover:bg-[#f7f8fd] ${selected.includes(b.id) ? "bg-[#f0f3ff]" : ""}`}
-                  >
-                    <td className="px-4 py-3.5">
-                      <input
-                        type="checkbox"
-                        checked={selected.includes(b.id)}
-                        onChange={() => toggleSelect(b.id)}
-                        className="rounded border-slate-300 accent-[#2740BA]"
-                      />
-                    </td>
-                    <td className="px-4 py-3.5">
-                      <p className="font-semibold text-[#25304b]">{b.name}</p>
-                      <p className="mt-0.5 font-mono text-[10px] text-slate-400">{b.id}</p>
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-3.5 font-mono text-slate-500">{b.taxCode}</td>
-                    <td className="px-4 py-3.5 text-slate-500">{b.region}</td>
-                    <td className="px-4 py-3.5 text-slate-500">{b.sector}</td>
-                    <td className="px-4 py-3.5">
-                      <StatusBadge status={b.status} />
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-3.5 text-slate-500">{b.registeredAt}</td>
-                    <td className="px-4 py-3.5">
-                      <div className="flex items-center gap-1">
-                        {b.status === "Chờ duyệt" && (
-                          <button
-                            onClick={() => setApproving(b)}
-                            className="flex items-center gap-1 rounded-lg border border-[#2740BA] px-2.5 py-1 text-[10px] font-semibold text-[#2740BA] transition-colors hover:bg-[#edf0ff]"
-                            title="Duyệt hồ sơ doanh nghiệp"
-                          >
-                            <CheckCircle className="h-3 w-3" /> Duyệt hồ sơ
-                          </button>
-                        )}
+              ) : paginated.map((b) => (
+                <tr
+                  key={b.id}
+                  className={`transition-colors hover:bg-[#f7f8fd] ${selected.includes(b.id) ? "bg-[#f0f3ff]" : ""}`}
+                >
+                  <td className="px-4 py-3.5">
+                    <input
+                      type="checkbox"
+                      checked={selected.includes(b.id)}
+                      onChange={() => toggleSelect(b.id)}
+                      className="rounded border-slate-300 accent-[#2740BA]"
+                    />
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <p className="font-semibold text-[#25304b]">{b.name}</p>
+                    <p className="mt-0.5 font-mono text-[10px] text-slate-400">{b.id}</p>
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3.5 font-mono text-slate-500">{b.taxCode}</td>
+                  <td className="px-4 py-3.5 text-slate-500">{b.region}</td>
+                  <td className="px-4 py-3.5 text-slate-500">{b.sector}</td>
+                  {/* Mã định danh column */}
+                  <td className="whitespace-nowrap px-4 py-3.5">
+                    {b.businessCode ? (
+                      <span className="flex items-center gap-1.5 font-mono text-[11px] font-semibold text-[#2740BA]">
+                        <QrCode className="h-3 w-3 shrink-0" />
+                        {b.businessCode}
+                      </span>
+                    ) : (
+                      <span className="text-slate-300 select-none">—</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <StatusBadge status={b.status} />
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3.5 text-slate-500">{b.registeredAt}</td>
+                  <td className="px-4 py-3.5">
+                    <div className="flex items-center gap-1">
+                      {b.status === "Chờ duyệt" && (
                         <button
                           onClick={() => setApproving(b)}
-                          className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#edf0ff] hover:text-[#2740BA]"
-                          title="Xem / Phê duyệt"
+                          className="flex items-center gap-1 rounded-lg border border-[#2740BA] px-2.5 py-1 text-[10px] font-semibold text-[#2740BA] transition-colors hover:bg-[#edf0ff]"
                         >
-                          <Eye className="h-3.5 w-3.5" />
+                          <CheckCircle className="h-3 w-3" /> Duyệt hồ sơ
                         </button>
-                        <button
-                          className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#fff4ed] hover:text-[#E8650A]"
-                          title="Chỉnh sửa"
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#f0f2f8] hover:text-slate-600"
-                          title={b.status === "Đã khóa" ? "Mở khóa" : "Khóa"}
-                        >
-                          {b.status === "Đã khóa" ? (
-                            <Unlock className="h-3.5 w-3.5" />
-                          ) : (
-                            <Lock className="h-3.5 w-3.5" />
-                          )}
-                        </button>
-                        <button
-                          className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#f0f2f8] hover:text-slate-600"
-                          title="Thêm"
-                        >
-                          <MoreHorizontal className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
+                      )}
+                      <button
+                        onClick={() => setApproving(b)}
+                        className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#edf0ff] hover:text-[#2740BA]"
+                        title="Xem / Phê duyệt"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#fff4ed] hover:text-[#E8650A]"
+                        title="Chỉnh sửa"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#f0f2f8] hover:text-slate-600"
+                        title={b.status === "Đã khóa" ? "Mở khóa" : "Khóa"}
+                      >
+                        {b.status === "Đã khóa" ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                      </button>
+                      <button
+                        className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#f0f2f8] hover:text-slate-600"
+                        title="Thêm"
+                      >
+                        <MoreHorizontal className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -730,11 +781,7 @@ export default function Businesses() {
               <button
                 key={p}
                 onClick={() => setPage(p)}
-                className={`flex h-8 w-8 items-center justify-center rounded-lg text-[12px] font-semibold transition-colors ${
-                  page === p
-                    ? "bg-[#2740BA] text-white shadow-[0_2px_8px_rgba(39,64,186,.22)]"
-                    : "border border-[#e4e8f0] text-slate-500 hover:border-[#2740BA] hover:text-[#2740BA]"
-                }`}
+                className={`flex h-8 w-8 items-center justify-center rounded-lg text-[12px] font-semibold transition-colors ${page === p ? "bg-[#2740BA] text-white shadow-[0_2px_8px_rgba(39,64,186,.22)]" : "border border-[#e4e8f0] text-slate-500 hover:border-[#2740BA] hover:text-[#2740BA]"}`}
               >
                 {p}
               </button>
