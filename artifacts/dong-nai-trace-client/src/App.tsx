@@ -624,21 +624,6 @@ function TraceSidebar({
             <span>Cài đặt</span>
           </Link>
         </nav>
-        <div className="mt-5 rounded-2xl bg-[#152978] p-4 text-white">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-[9px] uppercase tracking-[.16em] text-blue-100/65">
-              Trạng thái hệ thống
-            </span>
-            <span className="h-2 w-2 rounded-full bg-[#7bd19f]" />
-          </div>
-          <p className="mt-2 text-[12px] font-semibold">Hoạt động ổn định</p>
-          <div className="mt-3 h-1 rounded-full bg-white/15">
-            <div className="h-full w-[94%] rounded-full bg-[#ffad5e]" />
-          </div>
-          <p className="mt-2 text-[10px] text-blue-100/65">
-            Cập nhật lần cuối 2 phút trước
-          </p>
-        </div>
         <div className="mt-4 flex items-center gap-3 border-t border-[#edf0f5] px-2 pt-4">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#dce3ff] text-[11px] font-bold text-[#2740BA]">
             NMA
