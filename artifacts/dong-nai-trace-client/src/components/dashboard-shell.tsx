@@ -17,6 +17,8 @@ import {
   Newspaper,
   LifeBuoy,
   Server,
+  Network,
+  RefreshCw,
 } from "lucide-react";
 import skhcnLogo from "@assets/Logo-SKHCN-2026_1785046021867.png";
 

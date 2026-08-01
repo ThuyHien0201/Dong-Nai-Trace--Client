@@ -1,0 +1,35 @@
+USE CASE — ĐỒNG NAI TRACE CLIENT (nền tảng quản trị Master)						
+STT	Nhóm chức năng (theo Phụ lục)	Mã UC	Tên Use Case	Actor chính	Mô tả ngắn	Ghi chú
+1. Quản trị hệ thống, tài khoản và phân quyền						
+1	Quản trị hệ thống, tài khoản và phân quyền	UC-01	Đăng nhập hệ thống	Tất cả tài khoản	Đăng nhập bằng tài khoản được cấp theo vai trò	Chung 3 nền tảng
+2	Quản trị hệ thống, tài khoản và phân quyền	UC-02	Đăng xuất	Tất cả tài khoản	Kết thúc phiên làm việc	
+3	Quản trị hệ thống, tài khoản và phân quyền	UC-06	Đổi mật khẩu / khôi phục mật khẩu	Tất cả tài khoản	Tự đổi hoặc yêu cầu reset mật khẩu	
+4	Quản trị hệ thống, tài khoản và phân quyền	UC-75	Giám sát hạ tầng & tài nguyên hệ thống	Quản trị Master (Checkee vận hành)	Theo dõi uptime, CPU/RAM, log máy chủ 3 nền tảng	
+5	Quản trị hệ thống, tài khoản và phân quyền	UC-77	Khởi tạo & quản lý tài khoản quản trị cấp cao (Portal-admin, Sở KH&CN, Lãnh đạo tỉnh, Sở ban ngành)	Quản trị Master (Checkee)	Client là quyền cấp cao nhất; tạo/thu hồi tài khoản Quản trị Portal cho Phòng TDC/Sở KH&CN, và tài khoản xem báo cáo cho lãnh đạo tỉnh và các sở ban ngành khác	
+6	Quản trị hệ thống, tài khoản và phân quyền	UC-78	Cấp tài khoản xem báo cáo giới hạn cho Sở KH&CN, lãnh đạo tỉnh và sở ban ngành trên Client	Quản trị Master (Checkee)	Cán bộ Sở, lãnh đạo tỉnh và các sở ban ngành được cấp quyền xem (view-only) trực tiếp trên Client để theo dõi báo cáo thống kê	
+4. Quản lý hồ sơ tổ chức/cơ sở						
+7	Quản lý hồ sơ tổ chức/cơ sở	UC-83	Quản lý hồ sơ doanh nghiệp (tổng hợp) trên Client	Checkee (Vận hành)	Xem/quản lý hồ sơ DN tổng hợp gồm: (1) Thông tin doanh nghiệp & hồ sơ sản phẩm đã đăng ký trên Portal (đồng bộ qua UC-80); (2) Dữ liệu TXNG còn lại (lô hàng, mã truy xuất, nhật ký sản xuất) do đơn vị cung cấp giải pháp đẩy về (đồng bộ qua UC-36..39). Client hợp nhất 2 nguồn thành 1 hồ sơ DN duy nhất để Checkee theo dõi/vận hành	
+7. Quản lý đơn vị cung cấp giải pháp và cấu hình kết nối						
+8	Quản lý đơn vị cung cấp giải pháp và cấu hình kết nối	UC-79	Giám sát & cấu hình kỹ thuật kết nối API tổng thể (đối tác giải pháp, Cổng Quốc gia)	Checkee (Kỹ thuật)	Lớp kỹ thuật hạ tầng phía sau UC-33/UC-67 (Portal chỉ hiển thị, Client vận hành thực tế)	
+8. Tiếp nhận, chuẩn hóa và đồng bộ dữ liệu từ nền tảng giải pháp						
+9	Tiếp nhận, chuẩn hóa và đồng bộ dữ liệu từ nền tảng giải pháp	UC-36	Tiếp nhận dữ liệu qua API	Hệ thống (nền)	Nhận dữ liệu từ Checkee/đơn vị GP khác	
+10	Tiếp nhận, chuẩn hóa và đồng bộ dữ liệu từ nền tảng giải pháp	UC-37	Kiểm tra cấu trúc & ánh xạ trường dữ liệu	Hệ thống (nền)	Validate & mapping theo chuẩn dùng chung	
+11	Tiếp nhận, chuẩn hóa và đồng bộ dữ liệu từ nền tảng giải pháp	UC-38	Chuẩn hóa dữ liệu theo danh mục dùng chung	Hệ thống (nền)	Áp danh mục chuẩn vào dữ liệu nhận	
+12	Tiếp nhận, chuẩn hóa và đồng bộ dữ liệu từ nền tảng giải pháp	UC-39	Ghi nhận trạng thái đồng bộ	Hệ thống (nền)	Thành công/thất bại + lý do lỗi	
+13	Tiếp nhận, chuẩn hóa và đồng bộ dữ liệu từ nền tảng giải pháp	UC-80	Tiếp nhận hồ sơ đăng ký/khai báo đồng bộ từ Portal về Client	Hệ thống (nền)	Ngay khi DN đăng ký hồ sơ tổ chức (UC-13) hoặc khai báo sản phẩm (UC-22) trên Portal, dữ liệu tự động đẩy về Client	
+9. Quản lý dữ liệu đồng bộ sản phẩm, lô hàng, mã truy xuất						
+14	Quản lý dữ liệu đồng bộ sản phẩm, lô hàng, mã truy xuất	UC-41	Xem danh sách sản phẩm/lô hàng đã đồng bộ	Cán bộ Portal, Checkee	Danh sách dữ liệu nhận từ giải pháp	
+15	Quản lý dữ liệu đồng bộ sản phẩm, lô hàng, mã truy xuất	UC-43	Đối chiếu dữ liệu đồng bộ với nguồn	Cán bộ Portal, Checkee	Kiểm tra tính nhất quán dữ liệu	
+16	Quản lý dữ liệu đồng bộ sản phẩm, lô hàng, mã truy xuất	UC-44	Giám sát trạng thái dữ liệu đồng bộ	Cán bộ Portal, Checkee	Không tạo/kích hoạt QR, chỉ giám sát	
+16. Kết nối, chia sẻ dữ liệu với Cổng TXNG Quốc gia và các Bộ ban ngành						
+17	Kết nối, chia sẻ dữ liệu với Cổng TXNG Quốc gia và các Bộ ban ngành	UC-85	Đầu mối kết nối liên thông Hệ thống Truy xuất nguồn gốc Quốc gia, các Bộ ban ngành và giải pháp bên thứ ba	Quản trị Master (Checkee - Kỹ thuật)	Client là đầu mối kỹ thuật thực tế thực hiện kết nối/liên thông dữ liệu với Cổng TXNG Quốc gia (UC-67..69), các Bộ ban ngành (UC-45..47) và các giải pháp bên thứ ba; Portal chỉ hiển thị cấu hình/trạng thái	
+14. Báo cáo, thống kê và dashboard quản lý nhà nước						
+18	Báo cáo, thống kê và dashboard quản lý nhà nước	UC-81	Xem dashboard tổng quan hồ sơ đăng ký trên Client	Checkee (Vận hành)	Tổng số DN/HTX, tổng số sản phẩm đã đăng ký/khai báo, cập nhật theo thời gian thực từ dữ liệu đồng bộ (UC-80)	
+19	Báo cáo, thống kê và dashboard quản lý nhà nước	UC-86	Xem báo cáo thống kê doanh nghiệp, ngành hàng và chỉ số truy xuất trên Client	Lãnh đạo tỉnh, Sở KH&CN, Sở ban ngành	Với tài khoản được cấp theo UC-77/78, lãnh đạo tỉnh, Sở KH&CN và các sở ban ngành xem báo cáo thống kê tổng hợp: số lượng DN/HTX theo ngành hàng/địa bàn, chỉ số truy xuất nguồn gốc, tiến độ hoàn thiện dữ liệu	
+17. Nhật ký hệ thống, an toàn thông tin và kiểm soát truy cập						
+20	Nhật ký hệ thống, an toàn thông tin và kiểm soát truy cập	UC-71	Quản lý bảo mật tài khoản	Tất cả tài khoản	Xác thực 2 lớp, khóa sau nhiều lần sai...	
+21	Nhật ký hệ thống, an toàn thông tin và kiểm soát truy cập	UC-76	Sao lưu & phục hồi dữ liệu hệ thống	Checkee (Vận hành)	Backup/restore toàn hệ thống (thay UC-70)	
+18. Quản trị vận hành, bảo trì và hỗ trợ kỹ thuật						
+22	Quản trị vận hành, bảo trì và hỗ trợ kỹ thuật	UC-74	Xem hướng dẫn sử dụng/tài liệu hệ thống	Tất cả tài khoản	FAQ, tài liệu hướng dẫn	
+19. Đẩy dữ liệu và tính năng ra Portal & App (đề xuất bổ sung)						
+23	Đẩy dữ liệu và tính năng ra Portal & App	UC-84	Đẩy (boost) dữ liệu và tính năng đã xử lý ra Portal và App	Hệ thống (nền) / Quản trị Master (Checkee)	Sau khi nghiệp vụ được xử lý/chuẩn hóa tại Client, dữ liệu và tính năng liên quan được đẩy (boost) ra Portal và App để người dùng cuối sử dụng
