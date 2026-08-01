@@ -118,7 +118,7 @@ function TraceMark({
 function PortalOverview() {
   return (
     <section
-      className="relative hidden min-h-[100dvh] flex-col overflow-hidden px-10 py-10 text-white lg:flex xl:px-14"
+      className="relative hidden min-h-[100dvh] flex-col overflow-hidden px-10 py-10 text-white lg:flex xl:px-16"
       aria-label="Giới thiệu Đồng Nai Trace"
     >
       {/* Background photo */}
@@ -129,43 +129,25 @@ function PortalOverview() {
         className="absolute inset-0 h-full w-full object-cover object-center"
       />
       {/* Dark blue overlay */}
-      <div className="absolute inset-0 bg-[#152978]/78" />
+      <div className="absolute inset-0 bg-[#152978]/80" />
 
       <div className="relative z-10 flex items-start justify-between">
-        <TraceMark onDark subtitle="SỞ KH&CN ĐỒNG NAI" />
+        <TraceMark onDark />
       </div>
-
-      <div className="relative z-10 mt-auto max-w-[520px] pb-10 pt-20">
-        <h1 className="text-balance text-[clamp(2.2rem,3.6vw,3.6rem)] font-bold leading-[1.1] tracking-[-.04em]">
-          Truy xuất nguồn gốc hàng hóa
+      <div className="relative z-10 mt-auto max-w-[560px] pb-9 pt-20">
+        <div className="mb-7 flex items-center gap-3 text-[#ffb265]">
+          <span className="h-px w-9 bg-[#ffb265]" />
+        </div>
+        <h1 className="max-w-[520px] text-balance text-[clamp(2.6rem,4.2vw,4.65rem)] font-bold leading-[1.06] tracking-[-.055em]">
+          Mỗi sản phẩm,
+          <br />
+          <span className="text-[#ffb265]">một câu chuyện.</span>
         </h1>
-        <p className="mt-4 text-[14px] leading-relaxed text-blue-100/75">
-          Hệ thống truy xuất nguồn gốc tỉnh Đồng Nai –{" "}
-          <br className="hidden xl:block" />
-          minh bạch, tin cậy, chuẩn quốc tế.
-        </p>
-
-        <div className="mt-10 flex items-center gap-7">
-          <div>
-            <div className="text-[26px] font-bold leading-none">1.200+</div>
-            <div className="mt-1.5 text-[12px] text-blue-100/65">
-              Doanh nghiệp
-            </div>
-          </div>
-          <div className="h-9 w-px bg-white/20" />
-          <div>
-            <div className="text-[26px] font-bold leading-none">8.500+</div>
-            <div className="mt-1.5 text-[12px] text-blue-100/65">
-              Sản phẩm
-            </div>
-          </div>
-          <div className="h-9 w-px bg-white/20" />
-          <div>
-            <div className="text-[26px] font-bold leading-none">95/95</div>
-            <div className="mt-1.5 text-[12px] text-blue-100/65">
-              Phường / Xã
-            </div>
-          </div>
+      </div>
+      <div className="relative z-10 flex items-end justify-between border-t border-white/15 pt-5">
+        <div className="flex items-center gap-2 text-blue-100/70">
+          <MapPin className="h-4 w-4 text-[#ffad5e]" strokeWidth={1.5} />
+          <span className="text-xs">Đồng Nai, Việt Nam</span>
         </div>
       </div>
     </section>
@@ -244,52 +226,49 @@ function LoginForm() {
 
   return (
     <section
-      className="flex min-h-[100dvh] flex-1 flex-col bg-white px-8 py-8 sm:px-12 lg:px-14 xl:px-20"
+      className="flex min-h-[calc(100dvh-0px)] flex-1 items-center justify-center bg-[#f5f7fb] px-5 py-10 sm:px-10 lg:px-14 xl:px-24"
       aria-label="Đăng nhập"
     >
-      {/* Back to home — desktop */}
-      <div className="hidden lg:block">
-        <a
-          href="#"
-          className="inline-flex items-center gap-1.5 text-[13px] text-slate-500 transition-colors hover:text-[#2740BA]"
-        >
-          <ArrowLeft className="h-4 w-4" strokeWidth={1.7} />
-          Về trang chủ
-        </a>
-      </div>
-
-      {/* Mobile brand header */}
-      <div className="mb-8 lg:hidden">
-        <MobileBrand />
-      </div>
-
-      <div className="flex flex-1 items-center justify-center">
-        <div className="w-full max-w-[420px] animate-rise-in">
-          {/* Heading */}
-          <div className="mb-7">
-            <h2 className="text-[32px] font-bold tracking-[-.045em] text-[#17213a]">
+      <div className="w-full max-w-[475px] animate-rise-in">
+        <div className="mb-9 lg:hidden">
+          <MobileBrand />
+        </div>
+        <div className="mb-8 hidden items-start justify-between lg:flex">
+          <div>
+            <h2 className="mt-3 text-3xl font-bold tracking-[-.045em] text-[#17213a]">
               Đăng nhập
             </h2>
-            <p className="mt-1.5 text-[14px] text-slate-500">
-              Nhập thông tin tài khoản của bạn
+          </div>
+          <div className="mt-1 rounded-full bg-[#e9edff] p-2.5 text-[#2740BA]">
+            <ShieldCheck className="h-5 w-5" strokeWidth={1.7} />
+          </div>
+        </div>
+        <div className="rounded-[24px] border border-[#e0e5ef] bg-white p-6 shadow-[0_18px_60px_rgba(30,50,100,.08)] sm:p-9">
+          <div className="mb-7 lg:hidden">
+            <p className="font-mono text-[10px] uppercase tracking-[.2em] text-[#E8650A]">
+              Khu vực truy cập
+            </p>
+            <h2 className="mt-2 text-[26px] font-bold tracking-[-.045em] text-[#17213a]">
+              Chào mừng trở lại.
+            </h2>
+            <p className="mt-1.5 text-[13px] leading-5 text-slate-500">
+              Đăng nhập để tiếp tục quản lý dữ liệu truy xuất.
             </p>
           </div>
-
           <form onSubmit={handleSubmit} noValidate>
             <div className="space-y-5">
-              {/* Username */}
               <div>
                 <label
                   htmlFor="identifier"
-                  className="mb-1.5 block text-[11px] font-bold uppercase tracking-[.1em] text-slate-500"
+                  className="mb-2 block text-[12px] font-semibold text-[#34405a]"
                 >
-                  Tên đăng nhập
+                  Tên đăng nhập hoặc email
                 </label>
                 <div
-                  className={`group flex items-center rounded-lg border bg-white transition-colors focus-within:border-[#2740BA] focus-within:ring-2 focus-within:ring-[#2740BA]/10 ${error && !identifier ? "border-[#d85b5b]" : "border-[#dde2ee]"}`}
+                  className={`group relative flex items-center rounded-xl border bg-[#f9faff] transition-colors focus-within:border-[#2740BA] focus-within:ring-4 focus-within:ring-[#2740BA]/10 ${error && !identifier ? "border-[#d85b5b]" : "border-[#dfe4ee]"}`}
                 >
                   <Mail
-                    className="pointer-events-none ml-3.5 h-[16px] w-[16px] shrink-0 text-slate-400 transition-colors group-focus-within:text-[#2740BA]"
+                    className="pointer-events-none ml-3.5 h-[17px] w-[17px] text-slate-400 transition-colors group-focus-within:text-[#2740BA]"
                     strokeWidth={1.7}
                   />
                   <input
@@ -302,36 +281,24 @@ function LoginForm() {
                       if (error) setError("");
                     }}
                     autoComplete="username"
-                    placeholder="Mã số doanh nghiệp / CCCD / tài khoản"
-                    className="h-[46px] w-full bg-transparent px-3 text-[13px] text-[#1e2b45] outline-none placeholder:text-slate-400"
+                    placeholder="Ví dụ: nguyenvana hoặc email@donai.gov.vn"
+                    className="h-[50px] w-full bg-transparent px-3 text-[13px] text-[#1e2b45] outline-none placeholder:text-slate-400"
                     aria-describedby={error ? "login-error" : undefined}
                   />
                 </div>
               </div>
-
-              {/* Password */}
               <div>
-                <div className="mb-1.5 flex items-center justify-between">
-                  <label
-                    htmlFor="password"
-                    className="text-[11px] font-bold uppercase tracking-[.1em] text-slate-500"
-                  >
-                    Mật khẩu
-                  </label>
-                  <button
-                    type="button"
-                    data-testid="button-forgot-password"
-                    onClick={handleForgotPassword}
-                    className="text-[12px] font-medium text-[#2740BA] underline-offset-4 transition-colors hover:underline focus-visible:outline-none"
-                  >
-                    Quên mật khẩu?
-                  </button>
-                </div>
+                <label
+                  htmlFor="password"
+                  className="mb-2 block text-[12px] font-semibold text-[#34405a]"
+                >
+                  Mật khẩu
+                </label>
                 <div
-                  className={`group flex items-center rounded-lg border bg-white transition-colors focus-within:border-[#2740BA] focus-within:ring-2 focus-within:ring-[#2740BA]/10 ${error && !password ? "border-[#d85b5b]" : "border-[#dde2ee]"}`}
+                  className={`group relative flex items-center rounded-xl border bg-[#f9faff] transition-colors focus-within:border-[#2740BA] focus-within:ring-4 focus-within:ring-[#2740BA]/10 ${error && !password ? "border-[#d85b5b]" : "border-[#dfe4ee]"}`}
                 >
                   <LockKeyhole
-                    className="pointer-events-none ml-3.5 h-[16px] w-[16px] shrink-0 text-slate-400 transition-colors group-focus-within:text-[#2740BA]"
+                    className="pointer-events-none ml-3.5 h-[17px] w-[17px] text-slate-400 transition-colors group-focus-within:text-[#2740BA]"
                     strokeWidth={1.7}
                   />
                   <input
@@ -345,56 +312,68 @@ function LoginForm() {
                     }}
                     autoComplete="current-password"
                     placeholder="Nhập mật khẩu"
-                    className="h-[46px] w-full bg-transparent px-3 text-[13px] text-[#1e2b45] outline-none placeholder:text-slate-400"
+                    className="h-[50px] w-full bg-transparent px-3 text-[13px] text-[#1e2b45] outline-none placeholder:text-slate-400"
                     aria-describedby={error ? "login-error" : undefined}
                   />
                   <button
                     type="button"
                     data-testid="button-toggle-password"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="mr-2 rounded-md p-2 text-slate-400 transition-colors hover:text-[#2740BA] focus-visible:outline-none"
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    className="mr-2 rounded-lg p-2 text-slate-400 transition-colors hover:bg-[#e9edff] hover:text-[#2740BA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2740BA]"
                     aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                     aria-pressed={showPassword}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-[16px] w-[16px]" strokeWidth={1.7} />
+                      <EyeOff className="h-[17px] w-[17px]" strokeWidth={1.7} />
                     ) : (
-                      <Eye className="h-[16px] w-[16px]" strokeWidth={1.7} />
+                      <Eye className="h-[17px] w-[17px]" strokeWidth={1.7} />
                     )}
                   </button>
                 </div>
               </div>
             </div>
-
-            {/* Remember me */}
-            <label className="mt-4 flex cursor-pointer items-center gap-2 text-[13px] text-slate-600">
-              <input
-                type="checkbox"
-                data-testid="checkbox-remember-login"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-                className="peer sr-only"
-              />
-              <span
-                className={`flex h-[16px] w-[16px] shrink-0 items-center justify-center rounded-[4px] border transition-colors ${remember ? "border-[#2740BA] bg-[#2740BA]" : "border-[#c8cfdd] bg-white"}`}
+            <div className="mt-5 flex items-center justify-between gap-3">
+              <label className="flex cursor-pointer items-center gap-2 text-[12px] text-slate-600">
+                <input
+                  type="checkbox"
+                  data-testid="checkbox-remember-login"
+                  checked={remember}
+                  onChange={(event) => setRemember(event.target.checked)}
+                  className="peer sr-only"
+                />
+                <span
+                  className={`flex h-[17px] w-[17px] items-center justify-center rounded-[4px] border transition-colors ${remember ? "border-[#2740BA] bg-[#2740BA]" : "border-[#c8cfdd] bg-white"}`}
+                >
+                  {remember && (
+                    <CircleCheck
+                      className="h-3.5 w-3.5 text-white"
+                      strokeWidth={2.5}
+                    />
+                  )}
+                </span>
+                <span>Ghi nhớ đăng nhập</span>
+              </label>
+              <button
+                type="button"
+                data-testid="button-forgot-password"
+                onClick={handleForgotPassword}
+                className="rounded-md text-[12px] font-semibold text-[#2740BA] underline-offset-4 transition-colors hover:text-[#E8650A] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2740BA]"
               >
-                {remember && (
-                  <CircleCheck className="h-3 w-3 text-white" strokeWidth={2.5} />
-                )}
-              </span>
-              <span>Ghi nhớ mật khẩu</span>
-            </label>
-
-            {/* Status messages */}
-            <div className="mt-5 min-h-[44px]" aria-live="polite">
+                Quên mật khẩu?
+              </button>
+            </div>
+            <div className="mt-6 min-h-[45px]" aria-live="polite">
               {error && (
                 <div
                   id="login-error"
                   data-testid="status-login-error"
                   role="alert"
-                  className="flex items-start gap-2.5 rounded-lg border border-[#f2caca] bg-[#fff6f6] px-3.5 py-3 text-[12px] leading-5 text-[#b53d3d]"
+                  className="flex items-start gap-2.5 rounded-xl border border-[#f2caca] bg-[#fff6f6] px-3.5 py-3 text-[12px] leading-5 text-[#b53d3d]"
                 >
-                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.8} />
+                  <AlertCircle
+                    className="mt-0.5 h-4 w-4 shrink-0"
+                    strokeWidth={1.8}
+                  />
                   <span>{error}</span>
                 </div>
               )}
@@ -402,30 +381,38 @@ function LoginForm() {
                 <div
                   data-testid="status-forgot-confirmation"
                   role="status"
-                  className="flex items-start gap-2.5 rounded-lg border border-[#c9ddf4] bg-[#f3f8ff] px-3.5 py-3 text-[12px] leading-5 text-[#2740BA]"
+                  className="flex items-start gap-2.5 rounded-xl border border-[#c9ddf4] bg-[#f3f8ff] px-3.5 py-3 text-[12px] leading-5 text-[#2740BA]"
                 >
-                  <HelpCircle className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.8} />
-                  <span>Vui lòng liên hệ quản trị viên đơn vị để cấp lại mật khẩu.</span>
+                  <HelpCircle
+                    className="mt-0.5 h-4 w-4 shrink-0"
+                    strokeWidth={1.8}
+                  />
+                  <span>
+                    Vui lòng liên hệ quản trị viên đơn vị để cấp lại mật khẩu.
+                  </span>
                 </div>
               )}
               {status === "success" && (
                 <div
                   data-testid="status-login-success"
                   role="status"
-                  className="flex items-start gap-2.5 rounded-lg border border-[#c7e6d5] bg-[#f2fbf6] px-3.5 py-3 text-[12px] leading-5 text-[#207a47]"
+                  className="flex items-start gap-2.5 rounded-xl border border-[#c7e6d5] bg-[#f2fbf6] px-3.5 py-3 text-[12px] leading-5 text-[#207a47]"
                 >
-                  <CircleCheck className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.8} />
-                  <span>Thông tin hợp lệ. Đang mở không gian làm việc của bạn.</span>
+                  <CircleCheck
+                    className="mt-0.5 h-4 w-4 shrink-0"
+                    strokeWidth={1.8}
+                  />
+                  <span>
+                    Thông tin hợp lệ. Đang mở không gian làm việc của bạn.
+                  </span>
                 </div>
               )}
             </div>
-
-            {/* Submit */}
             <button
               type="submit"
               data-testid="button-submit-login"
               disabled={status === "loading"}
-              className="group mt-1 flex h-[48px] w-full items-center justify-center gap-2 rounded-lg bg-[#2740BA] text-[14px] font-semibold text-white transition-[transform,background-color,box-shadow] hover:bg-[#1f35a0] active:translate-y-px disabled:cursor-wait disabled:opacity-75 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2740BA]/25"
+              className="group mt-1 flex h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-[#E8650A] text-[13px] font-bold text-white shadow-[0_9px_20px_rgba(232,101,10,.2)] transition-[transform,background-color,box-shadow] hover:bg-[#d95c08] hover:shadow-[0_12px_24px_rgba(232,101,10,.28)] active:translate-y-px disabled:cursor-wait disabled:opacity-80 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#E8650A]/25"
             >
               {status === "loading" ? (
                 <>
@@ -438,38 +425,25 @@ function LoginForm() {
                 </>
               ) : (
                 <>
-                  Đăng nhập
-                  <ChevronRight className="h-4 w-4" strokeWidth={2} />
+                  Đăng nhập{" "}
+                  <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                 </>
               )}
             </button>
-
-            {/* Register link */}
-            <p className="mt-5 text-center text-[13px] text-slate-500">
-              Chưa có tài khoản?{" "}
-              <a
-                href="#"
-                className="font-semibold text-[#2740BA] transition-colors hover:underline"
-              >
-                Đăng ký cho doanh nghiệp{" "}
-                <ChevronRight className="inline h-3.5 w-3.5" strokeWidth={2.5} />
-              </a>
-            </p>
           </form>
-
-          {/* Footer info */}
-          <div className="mt-8 border-t border-[#edf0f6] pt-6 text-center">
-            <p className="text-[12px] text-slate-400">
-              Hướng dẫn đăng ký, cập nhật thông tin tài khoản.{" "}
-              <a href="#" className="font-medium text-[#2740BA] hover:underline">
-                Tại đây
-              </a>
-            </p>
-            <p className="mt-3 flex items-center justify-center gap-1.5 text-[13px] font-medium text-slate-600">
-              <Phone className="h-4 w-4 text-[#2740BA]" strokeWidth={1.7} />
-              Hotline: 0251.3822297
-            </p>
+          <div className="mt-7 flex items-center justify-center gap-2 text-center text-[11px] text-slate-400">
+            <ShieldCheck
+              className="h-3.5 w-3.5 text-[#2740BA]"
+              strokeWidth={1.8}
+            />
+            <span>
+              Dữ liệu của bạn được bảo vệ theo quy định an toàn thông tin.
+            </span>
           </div>
+        </div>
+        <div className="mt-7 flex items-center justify-between gap-4 px-1 text-[10px] text-slate-400">
+          <span>© 2024 Đồng Nai Trace</span>
+          <span className="font-mono tracking-[.12em]">PHIÊN BẢN 1.0.0</span>
         </div>
       </div>
     </section>
