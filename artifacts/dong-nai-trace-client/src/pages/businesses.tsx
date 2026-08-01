@@ -26,6 +26,8 @@ import {
   BadgeCheck,
   MoreHorizontal,
   SlidersHorizontal,
+  LayoutGrid,
+  List,
 } from "lucide-react";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -481,6 +483,7 @@ export default function Businesses() {
   const [sortKey, setSortKey] = useState<SortKey>("registeredAt");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [approving, setApproving] = useState<Business | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
   // Sync approving business from list when businesses state changes
   const approvingBusiness = approving ? (businesses.find((b) => b.id === approving.id) ?? approving) : null;
@@ -641,10 +644,97 @@ export default function Businesses() {
           <SelectFilter value={regionFilter} onChange={(v) => { setRegionFilter(v); setPage(1); }} options={regions} />
           <SelectFilter value={sectorFilter} onChange={(v) => { setSectorFilter(v); setPage(1); }} options={sectors} />
         </div>
+        <div className="ml-auto flex overflow-hidden rounded-lg border border-[#e4e8f0]">
+          {(["list", "grid"] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setViewMode(m)}
+              className={`flex h-8 w-8 items-center justify-center transition-colors ${viewMode === m ? "bg-[#2740BA] text-white" : "bg-white text-slate-400 hover:text-[#2740BA]"}`}
+            >
+              {m === "list" ? <List className="h-3.5 w-3.5" /> : <LayoutGrid className="h-3.5 w-3.5" />}
+            </button>
+          ))}
+        </div>
       </div>
 
+      {/* Results count */}
+      <p className="mt-3 text-[11px] text-slate-400">
+        Hiển thị {filtered.length} doanh nghiệp
+      </p>
+
+      {/* Grid view */}
+      {viewMode === "grid" && (
+        <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          {paginated.length === 0 ? (
+            <div className="col-span-full py-16 text-center text-[12px] text-slate-400">
+              Không tìm thấy doanh nghiệp nào phù hợp bộ lọc.
+            </div>
+          ) : paginated.map((b) => (
+            <div
+              key={b.id}
+              className="group relative flex flex-col gap-3 rounded-2xl border border-[#e4e8f0] bg-white p-5 shadow-[0_2px_12px_rgba(38,55,105,.04)] transition-shadow hover:shadow-[0_6px_20px_rgba(38,55,105,.1)]"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#edf0ff]">
+                  <Building2 className="h-5 w-5 text-[#2740BA]" strokeWidth={1.8} />
+                </div>
+                <StatusBadge status={b.status} />
+              </div>
+              <div>
+                <p className="font-semibold leading-snug text-[#1d2944]">{b.name}</p>
+                <p className="mt-0.5 font-mono text-[10px] text-slate-400">{b.id} · MST: {b.taxCode}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[11px]">
+                <div>
+                  <span className="text-slate-400">Địa bàn: </span>
+                  <span className="font-medium text-[#25304b]">{b.region}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400">Ngành: </span>
+                  <span className="font-medium text-[#25304b]">{b.sector}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400">Đăng ký: </span>
+                  <span className="font-medium text-[#25304b]">{b.registeredAt}</span>
+                </div>
+                {b.businessCode && (
+                  <div className="flex items-center gap-1">
+                    <QrCode className="h-3 w-3 text-[#2740BA]" />
+                    <span className="font-mono text-[10px] font-semibold text-[#2740BA]">{b.businessCode}</span>
+                  </div>
+                )}
+              </div>
+              <div className="mt-auto flex items-center gap-1 border-t border-[#f0f2f8] pt-3">
+                {b.status === "Chờ duyệt" && (
+                  <button
+                    onClick={() => setApproving(b)}
+                    className="flex items-center gap-1 rounded-lg border border-[#2740BA] px-2.5 py-1 text-[10px] font-semibold text-[#2740BA] transition-colors hover:bg-[#edf0ff]"
+                  >
+                    <CheckCircle className="h-3 w-3" /> Duyệt hồ sơ
+                  </button>
+                )}
+                <button
+                  onClick={() => setApproving(b)}
+                  className="ml-auto rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#edf0ff] hover:text-[#2740BA]"
+                  title="Xem chi tiết"
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                </button>
+                <button className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#fff4ed] hover:text-[#E8650A]" title="Chỉnh sửa">
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+                <button className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#f0f2f8] hover:text-slate-600" title={b.status === "Đã khóa" ? "Mở khóa" : "Khóa"}>
+                  {b.status === "Đã khóa" ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Table */}
-      <div className="mt-4 overflow-hidden rounded-2xl border border-[#e4e8f0] bg-white shadow-[0_2px_12px_rgba(38,55,105,.04)]">
+      {viewMode === "list" && (
+      <div className="mt-2 overflow-hidden rounded-2xl border border-[#e4e8f0] bg-white shadow-[0_2px_12px_rgba(38,55,105,.04)]">
         <div className="overflow-x-auto">
           <table className="min-w-full text-[12px]">
             <thead>
@@ -797,6 +887,7 @@ export default function Businesses() {
           </div>
         </div>
       </div>
+      )}
     </DashboardShell>
   );
 }

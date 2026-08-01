@@ -139,15 +139,6 @@ function TraceSidebar({ open, onClose }: { open: boolean; onClose: () => void })
           </button>
         </div>
 
-        <div className="mx-3 mt-8 rounded-xl border border-[#e4e8f4] bg-[#f7f8fd] px-3.5 py-3">
-          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.16em] text-[#2740BA]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#4f9a77]" /> Cổng quản trị
-          </div>
-          <p className="mt-1.5 text-[11px] leading-4 text-slate-500">
-            Ủy ban nhân dân tỉnh Đồng Nai
-          </p>
-        </div>
-
         <nav className="dashboard-scrollbar mt-7 flex-1 space-y-1 overflow-y-auto" aria-label="Các mục quản trị">
           <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[.17em] text-slate-400">
             Không gian làm việc
