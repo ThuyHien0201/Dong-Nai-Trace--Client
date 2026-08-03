@@ -51,6 +51,8 @@ import Categories from "@/pages/categories";
 import CMS from "@/pages/cms";
 import Support from "@/pages/support";
 import System from "@/pages/system";
+import Sync from "@/pages/sync";
+import Connections from "@/pages/connections";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Route, Switch, Router as WouterRouter, useLocation, Link } from "wouter";
 import {
@@ -1260,6 +1262,8 @@ function Router() {
       <Route path="/dashboard/tin-tuc" component={CMS} />
       <Route path="/dashboard/ho-tro" component={Support} />
       <Route path="/dashboard/he-thong" component={System} />
+      <Route path="/dashboard/dong-bo" component={Sync} />
+      <Route path="/dashboard/ket-noi" component={Connections} />
       <Route path="/dashboard/tai-khoan">
         {() => <PlaceholderPage title="Quản lý tài khoản" />}
       </Route>
