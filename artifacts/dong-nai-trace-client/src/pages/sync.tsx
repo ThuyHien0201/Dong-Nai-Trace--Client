@@ -520,11 +520,11 @@ function SolutionProviderTab() {
                     <td className="px-4 py-3.5">
                       {isSent ? (
                         <span className="inline-flex items-center gap-1 rounded-full border border-[#b8e2c8] bg-[#e8f5ed] px-2.5 py-0.5 text-[10px] font-bold text-[#1f7a45]">
-                          <CheckCircle2 className="h-3 w-3" /> Đã gửi sang giải pháp
+                          <CheckCircle2 className="h-3 w-3" /> Đã gửi
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 rounded-full border border-[#d9dce9] bg-[#f2f3f7] px-2.5 py-0.5 text-[10px] font-bold text-slate-500">
-                          <Clock className="h-3 w-3" /> Chờ đồng bộ
+                          <Clock className="h-3 w-3" /> Chưa gửi
                         </span>
                       )}
                     </td>
