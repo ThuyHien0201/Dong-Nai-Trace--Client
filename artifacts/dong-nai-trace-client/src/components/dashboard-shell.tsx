@@ -25,7 +25,7 @@ import skhcnLogo from "@assets/Logo-SKHCN-2026_1785046021867.png";
 function TraceMark({ compact: _compact }: { compact?: boolean }) {
   return (
     <div className="flex items-center gap-2.5">
-      <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#2740BA]">
+      <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl">
         <img src={skhcnLogo} alt="SKHCN Logo" className="h-full w-full object-contain" />
       </div>
       <div>

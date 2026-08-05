@@ -806,31 +806,24 @@ function TxngPortalTab() {
                   </td>
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-1.5">
-                      {/* QR modal button */}
-                      <button
-                        onClick={() => setQrLot(lot)}
-                        className="rounded-lg p-1.5 text-slate-400 hover:bg-[#e6f7f7] hover:text-[#2a9d6e]"
-                        title="Xem mã QR"
-                      >
-                        <QrCode className="h-3.5 w-3.5" />
-                      </button>
-                      {/* Sync/push icon */}
                       {lot.syncStatus === "synced" ? (
+                        /* Đã đồng bộ: chỉ hiện nút Mã QR */
                         <button
-                          onClick={() => setSelectedLotId(lot.id)}
-                          className="rounded-lg p-1.5 text-[#1f7a45] hover:bg-[#e8f5ed]"
-                          title="Xem trên cổng"
+                          onClick={() => setQrLot(lot)}
+                          className="flex items-center gap-1 rounded-lg border border-[#2a9d6e] px-2.5 py-1.5 text-[11px] font-semibold text-[#2a9d6e] hover:bg-[#e6f7f7] transition-colors"
+                          title="Xem mã QR và link cổng TXNG"
                         >
-                          <ExternalLink className="h-3.5 w-3.5" />
+                          <QrCode className="h-3.5 w-3.5" /> Mã QR
                         </button>
                       ) : (
+                        /* Chưa đồng bộ: nút đồng bộ lên Cổng thông tin */
                         <button
                           onClick={() => setSelectedLotId(lot.id)}
                           disabled={!lot.isComplete}
-                          title={lot.isComplete ? "Đẩy lên cổng" : "Hồ sơ chưa hoàn thiện"}
-                          className="rounded-lg p-1.5 text-[#2740BA] hover:bg-[#edf0ff] disabled:cursor-not-allowed disabled:text-slate-300"
+                          title={lot.isComplete ? "Đồng bộ lên Cổng thông tin" : "Hồ sơ chưa hoàn thiện — cần đủ công đoạn TXNG"}
+                          className="flex items-center gap-1 rounded-lg border border-[#2740BA] px-2.5 py-1.5 text-[11px] font-semibold text-[#2740BA] hover:bg-[#edf0ff] disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-300 transition-colors"
                         >
-                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          <RefreshCw className="h-3.5 w-3.5" /> Đồng bộ
                         </button>
                       )}
                     </div>
