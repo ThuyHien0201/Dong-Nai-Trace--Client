@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import {
   Search,
@@ -17,8 +17,6 @@ import {
 } from "lucide-react";
 import {
   useListPortalLots,
-  useGetPortalLotDetail,
-  usePushToPortal,
 } from "@workspace/api-client-react";
 import type { ListPortalLotsSyncStatus } from "@workspace/api-client-react";
 
@@ -46,355 +44,386 @@ function isImageUrl(url: string | null | undefined) {
   return !!url && /\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i.test(url);
 }
 
+// ─── Mock detail data for SyncModal ─────────────────────────────────────────
+
+interface TxngStep {
+  stepType: string;
+  stepName: string;
+  startTime: string;
+  endTime: string;
+  executor: string;
+  locationCode: string;
+  description: string;
+  evidenceUrl: string;
+}
+
+interface LotDetail {
+  id: number;
+  productName: string;
+  gtin: string;
+  lotCode: string;
+  businessName: string;
+  businessAddress: string;
+  businessPhone: string;
+  industry: string;
+  category: string;
+  region: string;
+  certifications: string[];
+  description: string;
+  imageUrl: string;
+  province: string;
+  productionZone: string;
+  txngSteps: TxngStep[];
+}
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const MOCK_LOT_DETAILS: Record<number, LotDetail> = {
+  104: {
+    id: 104, productName: "Xoài cát Hòa Lộc", gtin: "8936001234562", lotCode: "LOT-2025-002",
+    businessName: "HTX Xoài Hòa Lộc", businessAddress: "Ấp Hòa Lộc, xã Hòa Hưng, Cái Bè, Tiền Giang",
+    businessPhone: "0274 382 1111", industry: "Nông sản", category: "Trái cây", region: "Cái Bè",
+    certifications: ["VietGAP", "OCOP 4★"],
+    description: "Xoài cát Hòa Lộc – giống xoài đặc sản, trái to, thịt vàng, ngọt thanh, ít xơ. Canh tác theo quy trình VietGAP, sử dụng phân hữu cơ vi sinh.",
+    imageUrl: "https://images.unsplash.com/photo-1553279768-865429fa0078?w=400&h=300&fit=crop",
+    province: "Đồng Nai", productionZone: "Vùng trồng Hòa Lộc – Cái Bè",
+    txngSteps: [
+      { stepType: "planting", stepName: "Gieo trồng / Nuôi trồng", startTime: "2025-01-10T07:00", endTime: "2025-01-10T17:00", executor: "Tổ trưởng Nguyễn Văn Minh", locationCode: "LOC-VT-001", description: "Giống xoài cát Hòa Lộc ghép mắt, trồng theo hàng cách nhau 6m, bón lót phân hữu cơ trước khi trồng.", evidenceUrl: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&h=400&fit=crop" },
+      { stepType: "care", stepName: "Chăm sóc", startTime: "2025-01-15T07:00", endTime: "2025-03-20T17:00", executor: "Kỹ sư Trần Thị Hoa", locationCode: "LOC-VT-001", description: "Bón phân NPK theo giai đoạn, tưới nước nhỏ giọt, phun thuốc BVTV sinh học định kỳ 15 ngày/lần.", evidenceUrl: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=600&h=400&fit=crop" },
+      { stepType: "harvest", stepName: "Thu hoạch", startTime: "2025-04-18T06:00", endTime: "2025-04-18T14:00", executor: "Đội thu hoạch HTX", locationCode: "LOC-VT-001", description: "Thu hái thủ công khi trái đạt độ chín 80–85%, dùng kéo chuyên dụng để tránh dập. Tỉ lệ loại A: 78%.", evidenceUrl: "https://images.unsplash.com/photo-1553279768-865429fa0078?w=600&h=400&fit=crop" },
+      { stepType: "processing", stepName: "Sơ chế / Đóng gói", startTime: "2025-04-18T15:00", endTime: "2025-04-18T20:00", executor: "Xưởng sơ chế HTX", locationCode: "LOC-SC-002", description: "Rửa sạch bằng nước ozone, phân loại theo kích cỡ, đóng gói trong hộp carton 5kg có lót xốp, dán nhãn TXNG.", evidenceUrl: "" },
+      { stepType: "transport", stepName: "Vận chuyển", startTime: "2025-04-19T05:00", endTime: "2025-04-19T10:00", executor: "Cty vận tải Hoàng Long", locationCode: "LOC-VT-003", description: "Vận chuyển bằng xe tải lạnh nhiệt độ 10–12°C, hành trình: Cái Bè → TP.HCM → Biên Hòa. Hàng nguyên vẹn, không dập vỡ.", evidenceUrl: "" },
+      { stepType: "distribution", stepName: "Phân phối", startTime: "2025-04-19T11:00", endTime: "2025-04-19T16:00", executor: "Đại lý phân phối Đồng Nai", locationCode: "LOC-PP-004", description: "Phân phối đến các siêu thị CoopMart, Lotte Mart và 12 đại lý bán lẻ trên địa bàn tỉnh Đồng Nai.", evidenceUrl: "" },
+    ],
+  },
+  105: {
+    id: 105, productName: "Tiêu đen Xuân Lộc", gtin: "8936001234564", lotCode: "LOT-2025-004",
+    businessName: "HTX Tiêu Xuân Lộc", businessAddress: "Xã Xuân Thành, huyện Xuân Lộc, Đồng Nai",
+    businessPhone: "0251 388 5566", industry: "Gia vị", category: "Nông sản chế biến", region: "Xuân Lộc",
+    certifications: ["4C", "Organic VN"],
+    description: "Tiêu đen hữu cơ Xuân Lộc trồng trên đất đỏ bazan, không phân bón hóa học, thu hái thủ công khi chín 70–80%.",
+    imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
+    province: "Đồng Nai", productionZone: "Vùng trồng tiêu hữu cơ Xuân Thành",
+    txngSteps: [
+      { stepType: "planting", stepName: "Gieo trồng / Nuôi trồng", startTime: "2024-11-01T07:00", endTime: "2024-11-01T17:00", executor: "Nông dân Lê Văn Hùng", locationCode: "LOC-XL-001", description: "Trồng tiêu dây leo trên cọc gỗ, mật độ 1.000 cây/ha, bón lót phân hữu cơ trùn quế.", evidenceUrl: "https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?w=600&h=400&fit=crop" },
+      { stepType: "care", stepName: "Chăm sóc", startTime: "2024-11-05T07:00", endTime: "2025-03-31T17:00", executor: "Kỹ thuật viên HTX", locationCode: "LOC-XL-001", description: "Tưới nước bằng hệ thống nhỏ giọt, bổ sung phân vi sinh định kỳ, kiểm soát sâu bệnh bằng thuốc sinh học.", evidenceUrl: "" },
+      { stepType: "harvest", stepName: "Thu hoạch", startTime: "2025-04-12T06:00", endTime: "2025-04-12T15:00", executor: "Tổ thu hoạch HTX", locationCode: "LOC-XL-001", description: "Hái thủ công từng chùm khi 70% hạt chuyển vàng, năng suất đạt 2,8 tấn/ha tươi.", evidenceUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop" },
+      { stepType: "processing", stepName: "Sơ chế / Đóng gói", startTime: "2025-04-13T07:00", endTime: "2025-04-13T18:00", executor: "Xưởng chế biến HTX", locationCode: "LOC-SC-002", description: "Phơi khô tự nhiên 5–7 ngày, sàng lọc loại bỏ hạt lép, đóng túi PE 500g dán nhãn mã vạch QR.", evidenceUrl: "" },
+      { stepType: "transport", stepName: "Vận chuyển", startTime: "2025-04-14T05:00", endTime: "2025-04-14T09:00", executor: "Xe tải HTX", locationCode: "LOC-VT-003", description: "Vận chuyển trong điều kiện khô ráo, nhiệt độ phòng, xe có mái che tránh ẩm.", evidenceUrl: "" },
+      { stepType: "distribution", stepName: "Phân phối", startTime: "2025-04-14T10:00", endTime: "2025-04-14T16:00", executor: "Công ty thương mại Đồng Nai", locationCode: "LOC-PP-004", description: "Phân phối tại 8 điểm bán hữu cơ, 2 sàn TMĐT và xuất lô 200kg sang thị trường Hà Nội.", evidenceUrl: "" },
+    ],
+  },
+  106: {
+    id: 106, productName: "Cà phê Robusta Định Quán", gtin: "8936001234566", lotCode: "LOT-2025-006",
+    businessName: "Cty TNHH Cà phê DNT", businessAddress: "KCN Định Quán, huyện Định Quán, Đồng Nai",
+    businessPhone: "0251 377 8899", industry: "Nông sản", category: "Thức uống", region: "Định Quán",
+    certifications: ["4C", "Rainforest Alliance"],
+    description: "Cà phê Robusta trồng trên đất đỏ bazan Định Quán, độ cao 400–600m, canh tác bền vững theo chứng nhận Rainforest Alliance.",
+    imageUrl: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=300&fit=crop",
+    province: "Đồng Nai", productionZone: "Vùng cà phê Định Quán – Tân Phú",
+    txngSteps: [
+      { stepType: "planting", stepName: "Gieo trồng / Nuôi trồng", startTime: "2024-10-01T07:00", endTime: "2024-10-01T17:00", executor: "Kỹ sư Phạm Văn Tú", locationCode: "LOC-DQ-001", description: "Trồng cà phê ghép chồi năng suất cao, mật độ 1.100 cây/ha trên đất bazan tầng dày.", evidenceUrl: "" },
+      { stepType: "care", stepName: "Chăm sóc", startTime: "2024-10-10T07:00", endTime: "2025-03-15T17:00", executor: "Đội kỹ thuật Cty DNT", locationCode: "LOC-DQ-001", description: "Tưới tiết kiệm nước theo cảm biến đất ẩm, bón phân NPK theo công thức cân bằng, không dùng thuốc cỏ hóa học.", evidenceUrl: "" },
+      { stepType: "harvest", stepName: "Thu hoạch", startTime: "2025-04-08T06:00", endTime: "2025-04-09T15:00", executor: "Đội thu hoạch 50 người", locationCode: "LOC-DQ-001", description: "Hái chọn lọc tay, chỉ thu quả chín đỏ ≥ 95%, năng suất lô này: 4,2 tấn tươi.", evidenceUrl: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&h=400&fit=crop" },
+      { stepType: "processing", stepName: "Sơ chế / Đóng gói", startTime: "2025-04-09T16:00", endTime: "2025-04-11T18:00", executor: "Xưởng chế biến DNT", locationCode: "LOC-SC-002", description: "Xát vỏ ướt, lên men 36 giờ, sấy khô đến độ ẩm 12%, xay xát đánh bóng, đóng bao PP 60kg.", evidenceUrl: "" },
+      { stepType: "transport", stepName: "Vận chuyển", startTime: "2025-04-12T05:00", endTime: "2025-04-12T10:00", executor: "Xe container Cty DNT", locationCode: "LOC-VT-003", description: "Container 20 feet, hàng xếp trên pallet gỗ, che phủ bằng bạt chống ẩm, kiểm soát nhiệt độ.", evidenceUrl: "" },
+      { stepType: "distribution", stepName: "Phân phối", startTime: "2025-04-12T12:00", endTime: "2025-04-12T17:00", executor: "Công ty xuất nhập khẩu Đồng Nai", locationCode: "LOC-PP-004", description: "Giao 2 tấn cho nhà rang xay nội địa, 2,2 tấn xuất khẩu qua cảng Cái Mép sang thị trường EU.", evidenceUrl: "" },
+    ],
+  },
+  107: {
+    id: 107, productName: "Mật ong rừng Định Quán", gtin: "8936001234567", lotCode: "LOT-2025-007",
+    businessName: "HTX Ong Mật Định Quán", businessAddress: "Ấp 3, xã Phú Vinh, huyện Định Quán, Đồng Nai",
+    businessPhone: "0251 399 4422", industry: "Thực phẩm", category: "Mật ong", region: "Định Quán",
+    certifications: ["OCOP 3★"],
+    description: "Mật ong nguyên chất từ rừng nguyên sinh Định Quán, thu hoạch thủ công theo mùa hoa, không pha trộn, giàu enzyme tự nhiên.",
+    imageUrl: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=300&fit=crop",
+    province: "Đồng Nai", productionZone: "Rừng phòng hộ Phú Vinh – Định Quán",
+    txngSteps: [
+      { stepType: "planting", stepName: "Nuôi ong / Đặt thùng", startTime: "2025-02-01T07:00", endTime: "2025-02-01T16:00", executor: "Trại nuôi HTX Ong Mật", locationCode: "LOC-DQ-010", description: "Đặt 80 thùng nuôi ong Ý tại vùng rừng tràm và keo, cách khu dân cư ≥ 2km, theo dõi đàn ong hàng ngày.", evidenceUrl: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?w=600&h=400&fit=crop" },
+      { stepType: "care", stepName: "Chăm sóc đàn ong", startTime: "2025-02-05T07:00", endTime: "2025-04-01T17:00", executor: "Kỹ thuật nuôi ong Lê Thanh Tú", locationCode: "LOC-DQ-010", description: "Kiểm tra sức khỏe đàn ong 2 lần/tuần, không dùng kháng sinh trong vòng 30 ngày trước khi khai thác.", evidenceUrl: "" },
+      { stepType: "harvest", stepName: "Khai thác mật", startTime: "2025-04-05T06:00", endTime: "2025-04-05T14:00", executor: "Đội khai thác HTX", locationCode: "LOC-DQ-010", description: "Quay mật bằng máy ly tâm inox, lọc qua lưới 200 mesh, thu được 480kg mật thô, độ ẩm ≤ 20%.", evidenceUrl: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=600&h=400&fit=crop" },
+      { stepType: "processing", stepName: "Lọc & Đóng chai", startTime: "2025-04-05T15:00", endTime: "2025-04-06T12:00", executor: "Xưởng đóng gói HTX", locationCode: "LOC-SC-011", description: "Lọc tinh qua màng lọc 400 mesh, kiểm tra HMF, đóng chai thủy tinh 500ml và 1 lít, dán tem chống hàng giả.", evidenceUrl: "" },
+      { stepType: "transport", stepName: "Vận chuyển", startTime: "2025-04-06T14:00", endTime: "2025-04-06T18:00", executor: "Xe giao hàng HTX", locationCode: "LOC-VT-003", description: "Vận chuyển ở nhiệt độ phòng, tránh ánh nắng trực tiếp, lô gồm 960 chai 500ml và 120 chai 1 lít.", evidenceUrl: "" },
+      { stepType: "distribution", stepName: "Phân phối", startTime: "2025-04-07T08:00", endTime: "2025-04-07T17:00", executor: "Đại lý OCOP Đồng Nai", locationCode: "LOC-PP-004", description: "Phân phối tại Trung tâm OCOP tỉnh, 5 cửa hàng đặc sản và sàn thương mại điện tử Sendo, Shopee.", evidenceUrl: "" },
+    ],
+  },
+};
+
+// Fallback detail for any lot not in the map
+function getMockDetail(lot: any): LotDetail {
+  return MOCK_LOT_DETAILS[lot.id as number] ?? {
+    id: lot.id,
+    productName: lot.productName,
+    gtin: lot.gtin,
+    lotCode: lot.lotCode,
+    businessName: lot.businessName,
+    businessAddress: "Đồng Nai, Việt Nam",
+    businessPhone: "0251 000 0000",
+    industry: "Nông sản",
+    category: "Trái cây",
+    region: "Đồng Nai",
+    certifications: [],
+    description: "Sản phẩm nông nghiệp đặc trưng tỉnh Đồng Nai, sản xuất theo quy trình chuẩn.",
+    imageUrl: lot.imageUrl ?? "",
+    province: "Đồng Nai",
+    productionZone: "Vùng sản xuất Đồng Nai",
+    txngSteps: [
+      { stepType: "planting", stepName: "Gieo trồng / Nuôi trồng", startTime: "2025-01-10T07:00", endTime: "2025-01-10T17:00", executor: "", locationCode: "", description: "", evidenceUrl: "" },
+      { stepType: "care", stepName: "Chăm sóc", startTime: "2025-02-01T07:00", endTime: "2025-03-31T17:00", executor: "", locationCode: "", description: "", evidenceUrl: "" },
+      { stepType: "harvest", stepName: "Thu hoạch", startTime: "2025-04-01T06:00", endTime: "2025-04-01T15:00", executor: "", locationCode: "", description: "", evidenceUrl: "" },
+      { stepType: "processing", stepName: "Sơ chế / Đóng gói", startTime: "2025-04-02T07:00", endTime: "2025-04-02T18:00", executor: "", locationCode: "", description: "", evidenceUrl: "" },
+      { stepType: "transport", stepName: "Vận chuyển", startTime: "2025-04-03T06:00", endTime: "2025-04-03T12:00", executor: "", locationCode: "", description: "", evidenceUrl: "" },
+      { stepType: "distribution", stepName: "Phân phối", startTime: "2025-04-03T13:00", endTime: "2025-04-03T18:00", executor: "", locationCode: "", description: "", evidenceUrl: "" },
+    ],
+  };
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
 // ─── TXNG Portal Sync Modal (Tab 2) ──────────────────────────────────────────
 
 interface SyncModalProps {
-  lotId: number;
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  lot: any;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (lotId: number) => void;
 }
 
-function SyncModal({ lotId, onClose, onSuccess }: SyncModalProps) {
-  const { data: detail, isLoading } = useGetPortalLotDetail(lotId);
-  const pushMutation = usePushToPortal();
-
-  const [province, setProvince] = useState("");
-  const [productionZone, setProductionZone] = useState("");
+function SyncModal({ lot, onClose, onSuccess }: SyncModalProps) {
+  const detail = getMockDetail(lot);
+  const [step, setStep] = useState<"basic" | "txng">("basic");
   const [pushed, setPushed] = useState(false);
-  const [pushedUrl, setPushedUrl] = useState<string | null>(null);
+  const [pushing, setPushing] = useState(false);
 
-  // Per-step overrides: keyed by stepType
-  const [stepOverrides, setStepOverrides] = useState<
-    Record<
-      string,
-      {
-        startTime: string;
-        endTime: string;
-        executor: string;
-        locationCode: string;
-        description: string;
-        evidenceUrl: string;
-      }
-    >
-  >({});
+  // Editable fields for basic info
+  const [province, setProvince] = useState(detail.province);
+  const [productionZone, setProductionZone] = useState(detail.productionZone);
 
-  useEffect(() => {
-    if (detail) {
-      setProvince(detail.province ?? "Đồng Nai");
-      setProductionZone(detail.productionZone ?? "");
-      // Pre-fill step overrides from API data
-      const overrides: typeof stepOverrides = {};
-      for (const s of detail.txngSteps) {
-        overrides[s.stepType] = {
-          startTime: toDatetimeLocal(s.startTime),
-          endTime: toDatetimeLocal(s.endTime),
-          executor: s.executor ?? "",
-          locationCode: s.locationCode ?? "",
-          description: s.description ?? "",
-          evidenceUrl: s.evidenceUrl ?? "",
-        };
-      }
-      setStepOverrides(overrides);
-    }
-  }, [detail?.id]);
+  // Editable TXNG steps
+  const [steps, setSteps] = useState<TxngStep[]>(detail.txngSteps.map((s) => ({ ...s })));
 
-  function setStepField(
-    stepType: string,
-    field: keyof (typeof stepOverrides)[string],
-    value: string,
-  ) {
-    setStepOverrides((prev) => ({
-      ...prev,
-      [stepType]: { ...(prev[stepType] ?? {}), [field]: value } as (typeof stepOverrides)[string],
-    }));
+  function setStepField(idx: number, field: keyof TxngStep, value: string) {
+    setSteps((prev) => prev.map((s, i) => i === idx ? { ...s, [field]: value } : s));
   }
 
-  async function handleSave() {
-    if (!detail) return;
-    const overridesArr = detail.txngSteps.map((s) => {
-      const ov = stepOverrides[s.stepType] ?? {};
-      return {
-        stepType: s.stepType,
-        stepName: s.stepName,
-        startTime: ov.startTime ? new Date(ov.startTime).toISOString() : null,
-        endTime: ov.endTime ? new Date(ov.endTime).toISOString() : null,
-        executor: ov.executor || null,
-        locationCode: ov.locationCode || null,
-        description: ov.description || null,
-        evidenceUrl: ov.evidenceUrl || null,
-      };
-    });
-
-    try {
-      const result = await pushMutation.mutateAsync({
-        lotId,
-        data: { province, productionZone, stepOverrides: overridesArr },
-      });
-      setPushedUrl(result.portalUrl);
-      setPushed(true);
-      onSuccess();
-    } catch {
-      // error shown via mutation.isError
-    }
+  async function handlePush() {
+    setPushing(true);
+    await new Promise((r) => setTimeout(r, 1200));
+    setPushing(false);
+    setPushed(true);
+    onSuccess(lot.id);
   }
 
-  const alreadySynced = detail?.syncStatus === "synced" || pushed;
+  const portalUrl = `https://txng.gov.vn/lot/${detail.lotCode.toLowerCase().replace("lot-", "")}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-4 pt-10 backdrop-blur-sm">
-      <div className="flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-4 pt-8 backdrop-blur-sm">
+      <div className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-          <p className="text-[13px] font-bold uppercase tracking-wide text-gray-800">
-            Đồng bộ lên cổng thông tin truy xuất nguồn gốc sản phẩm, hàng hóa quốc gia
-          </p>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100"
-          >
+        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[#2740BA]">Cổng TXNG Quốc gia</p>
+            <p className="mt-0.5 text-[14px] font-bold text-[#1d2944]">{detail.productName}</p>
+          </div>
+          <button onClick={onClose} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100">
             <X className="h-4 w-4" />
           </button>
         </div>
 
+        {/* Step indicator */}
+        {!pushed && (
+          <div className="flex items-center gap-0 border-b border-[#f0f2f8] bg-[#f9fafb] px-6 py-3">
+            {(["basic", "txng"] as const).map((s, i) => {
+              const labels = ["Thông tin cơ bản", "Thông tin TXNG"];
+              const active = step === s;
+              const done = s === "basic" && step === "txng";
+              return (
+                <div key={s} className="flex items-center">
+                  <div className="flex items-center gap-2">
+                    <div className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold ${done ? "bg-[#2a9d6e] text-white" : active ? "bg-[#2740BA] text-white" : "bg-[#e4e8f0] text-slate-400"}`}>
+                      {done ? <CheckCheck className="h-3.5 w-3.5" /> : i + 1}
+                    </div>
+                    <span className={`text-[12px] font-semibold ${active ? "text-[#2740BA]" : done ? "text-[#2a9d6e]" : "text-slate-400"}`}>{labels[i]}</span>
+                  </div>
+                  {i === 0 && <div className="mx-4 h-px w-10 bg-[#e4e8f0]" />}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
-          {isLoading ? (
-            <div className="flex h-40 items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-[#2740BA]" />
+
+          {/* ── SUCCESS STATE ── */}
+          {pushed && (
+            <div className="flex flex-col items-center gap-4 py-8 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#e8f5ed]">
+                <CheckCheck className="h-8 w-8 text-[#2a9d6e]" />
+              </div>
+              <div>
+                <p className="text-[18px] font-bold text-[#1d2944]">Đồng bộ thành công!</p>
+                <p className="mt-1 text-[12px] text-slate-500">Hồ sơ đã được đẩy lên Cổng thông tin TXNG quốc gia.</p>
+              </div>
+              <div className="flex items-center gap-2 rounded-xl border border-[#b8e2c8] bg-[#e8f5ed] px-4 py-2.5">
+                <ExternalLink className="h-3.5 w-3.5 text-[#2a9d6e]" />
+                <a href={portalUrl} target="_blank" rel="noreferrer" className="text-[12px] font-semibold text-[#2a9d6e] underline">{portalUrl}</a>
+              </div>
+              <div className="mt-2">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(portalUrl)}&color=2a9d6e&bgcolor=ffffff&margin=8`}
+                  alt="QR"
+                  className="h-32 w-32 rounded-xl border border-[#b8e2c8]"
+                />
+              </div>
             </div>
-          ) : !detail ? (
-            <p className="text-center text-gray-400">Không tìm thấy dữ liệu</p>
-          ) : (
+          )}
+
+          {/* ── STEP 1: Thông tin cơ bản ── */}
+          {!pushed && step === "basic" && (
             <>
-              {/* Portal link */}
-              <div className="flex items-center gap-1.5 text-[12px]">
-                <span className="text-gray-500">Link sau khi đưa lên cổng:</span>
-                {alreadySynced ? (
-                  <a
-                    href={pushedUrl ?? detail.portalUrl ?? "#"}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-semibold text-[#2740BA] underline"
-                  >
-                    Link
-                  </a>
-                ) : (
-                  <span className="text-gray-400 italic">Chưa đồng bộ</span>
-                )}
+              {/* Product overview */}
+              <div className="flex items-start gap-4 rounded-2xl border border-[#e4e8f0] bg-[#f9fafb] p-4">
+                <img src={detail.imageUrl} alt={detail.productName} className="h-20 w-20 rounded-xl border border-[#e4e8f0] object-cover shrink-0" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[15px] font-bold text-[#1d2944]">{detail.productName}</p>
+                  <p className="mt-0.5 text-[11px] text-slate-500">{detail.businessName}</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {detail.certifications.map((c) => (
+                      <span key={c} className="rounded-md bg-[#edf0ff] px-2 py-0.5 text-[9px] font-bold text-[#2740BA]">{c}</span>
+                    ))}
+                    <span className="rounded-md bg-[#e8f5ed] px-2 py-0.5 text-[9px] font-bold text-[#2a9d6e]">{detail.industry}</span>
+                  </div>
+                  <p className="mt-2 text-[11px] leading-relaxed text-slate-500">{detail.description}</p>
+                </div>
               </div>
 
-              {/* Basic info grid */}
+              {/* Info grid */}
               <div className="grid grid-cols-2 gap-4">
+                {[
+                  ["Mã GTIN", detail.gtin, true],
+                  ["Số lô/mẻ", detail.lotCode, true],
+                  ["Doanh nghiệp", detail.businessName, false],
+                  ["Số điện thoại", detail.businessPhone, false],
+                  ["Địa chỉ", detail.businessAddress, false],
+                  ["Ngành hàng", detail.industry, false],
+                  ["Danh mục", detail.category, false],
+                  ["Khu vực", detail.region, false],
+                ].map(([label, val, mono]) => (
+                  <div key={String(label)} className={String(label) === "Địa chỉ" || String(label) === "Doanh nghiệp" ? "col-span-2" : ""}>
+                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{String(label)}</p>
+                    <div className={`rounded-lg border border-[#e4e8f0] bg-[#f9fafb] px-3 py-2 text-[12px] ${mono ? "font-mono" : ""} text-[#25304b]`}>{String(val)}</div>
+                  </div>
+                ))}
+
+                {/* Editable province */}
                 <div>
-                  <label className="mb-1 block text-[11px] font-semibold text-gray-600">
-                    Mã GTIN <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    readOnly
-                    value={detail.gtin}
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-[12px] font-mono text-gray-700"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-[11px] font-semibold text-gray-600">
-                    Số lô/mẻ <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    readOnly
-                    value={detail.lotCode}
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-[12px] font-mono text-gray-700"
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="mb-1 block text-[11px] font-semibold text-gray-600">
-                    Tỉnh thành <span className="text-red-500">*</span>
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                    Tỉnh thành <span className="text-red-400">*</span>
                   </label>
                   <input
                     value={province}
                     onChange={(e) => setProvince(e.target.value)}
-                    placeholder="Chọn một tỉnh thành"
-                    className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-[12px] text-gray-700 outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15"
+                    className="w-full rounded-lg border border-[#e4e8f0] bg-white px-3 py-2 text-[12px] text-[#25304b] outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15"
                   />
                 </div>
+
+                {/* Editable production zone */}
                 <div>
-                  <label className="mb-1 block text-[11px] font-semibold text-gray-600">
-                    Vùng trồng/sản xuất <span className="text-red-500">*</span>
+                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                    Vùng trồng / sản xuất <span className="text-red-400">*</span>
                   </label>
                   <input
                     value={productionZone}
                     onChange={(e) => setProductionZone(e.target.value)}
-                    placeholder="Chọn một vùng trồng"
-                    className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-[12px] text-gray-700 outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-[11px] font-semibold text-gray-600">
-                    Ngành hàng <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    readOnly
-                    value={detail.industryName}
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-[12px] text-gray-700"
+                    className="w-full rounded-lg border border-[#e4e8f0] bg-white px-3 py-2 text-[12px] text-[#25304b] outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15"
                   />
                 </div>
               </div>
+            </>
+          )}
 
-              {/* TXNG Steps */}
-              {detail.txngSteps.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-gray-200 p-5 text-center text-[12px] text-gray-400">
-                  Chưa có công đoạn TXNG. Yêu cầu bắt buộc:{" "}
-                  <span className="font-semibold text-orange-500">
-                    {detail.requiredStepTypes.join(", ")}
-                  </span>
-                </div>
-              ) : (
-                detail.txngSteps.map((step) => {
-                  const ov = stepOverrides[step.stepType];
-                  return (
-                    <div
-                      key={step.stepType}
-                      className="overflow-hidden rounded-xl border border-gray-200"
-                    >
-                      {/* Step header */}
-                      <div className="border-b border-gray-200 bg-gray-50 px-5 py-3 text-center">
-                        <p className="text-[14px] font-bold text-gray-800">{step.stepName}</p>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 p-5">
-                        {/* Start time */}
-                        <div>
-                          <label className="mb-1 block text-[11px] font-semibold text-gray-600">
-                            Thời gian bắt đầu
-                          </label>
-                          <input
-                            type="datetime-local"
-                            value={ov?.startTime ?? ""}
-                            onChange={(e) =>
-                              setStepField(step.stepType, "startTime", e.target.value)
-                            }
-                            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-[12px] text-gray-700 outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15"
-                          />
-                        </div>
-                        {/* End time */}
-                        <div>
-                          <label className="mb-1 block text-[11px] font-semibold text-gray-600">
-                            Thời gian kết thúc
-                          </label>
-                          <input
-                            type="datetime-local"
-                            value={ov?.endTime ?? ""}
-                            onChange={(e) =>
-                              setStepField(step.stepType, "endTime", e.target.value)
-                            }
-                            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-[12px] text-gray-700 outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15"
-                          />
-                        </div>
-                        {/* Executor */}
-                        <div>
-                          <label className="mb-1 block text-[11px] font-semibold text-gray-600">
-                            Người thực hiện
-                          </label>
-                          <input
-                            value={ov?.executor ?? ""}
-                            onChange={(e) =>
-                              setStepField(step.stepType, "executor", e.target.value)
-                            }
-                            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-[12px] text-gray-700 outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15"
-                          />
-                        </div>
-                        {/* Location code */}
-                        <div>
-                          <label className="mb-1 block text-[11px] font-semibold text-gray-600">
-                            Mã truy vết địa điểm sản xuất{" "}
-                            <span className="text-red-500">*</span>
-                          </label>
-                          <input
-                            value={ov?.locationCode ?? ""}
-                            onChange={(e) =>
-                              setStepField(step.stepType, "locationCode", e.target.value)
-                            }
-                            placeholder="Chọn một mã truy vết địa điểm"
-                            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-[12px] text-gray-700 outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15"
-                          />
-                        </div>
-                        {/* Description */}
-                        <div className="col-span-2">
-                          <label className="mb-1 block text-[11px] font-semibold text-gray-600">
-                            Mô tả
-                          </label>
-                          <textarea
-                            value={ov?.description ?? ""}
-                            onChange={(e) =>
-                              setStepField(step.stepType, "description", e.target.value)
-                            }
-                            rows={3}
-                            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-[12px] text-gray-700 outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15"
-                          />
-                        </div>
-                        {/* Evidence URL */}
-                        <div className="col-span-2">
-                          <label className="mb-1 block text-[11px] font-semibold text-gray-600">
-                            Url ảnh minh chứng
-                          </label>
-                          <div className="flex items-start gap-3">
-                            <input
-                              value={ov?.evidenceUrl ?? ""}
-                              onChange={(e) =>
-                                setStepField(step.stepType, "evidenceUrl", e.target.value)
-                              }
-                              className="flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-[12px] font-mono text-gray-600 outline-none focus:border-[#2740BA]"
-                            />
-                            {isImageUrl(ov?.evidenceUrl) && (
-                              <img
-                                src={ov!.evidenceUrl}
-                                alt=""
-                                className="h-20 w-28 rounded-lg border border-gray-200 object-cover"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).style.display = "none";
-                                }}
-                              />
-                            )}
-                          </div>
-                        </div>
+          {/* ── STEP 2: Thông tin TXNG ── */}
+          {!pushed && step === "txng" && (
+            <div className="space-y-4">
+              {steps.map((s, idx) => (
+                <div key={s.stepType} className="overflow-hidden rounded-xl border border-[#e4e8f0]">
+                  <div className="flex items-center gap-2 border-b border-[#e4e8f0] bg-[#f9fafb] px-5 py-3">
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#2740BA] text-[9px] font-bold text-white">{idx + 1}</div>
+                    <p className="text-[13px] font-bold text-[#1d2944]">{s.stepName}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 p-5">
+                    <div>
+                      <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">Thời gian bắt đầu</label>
+                      <input type="datetime-local" value={s.startTime} onChange={(e) => setStepField(idx, "startTime", e.target.value)}
+                        className="w-full rounded-lg border border-[#e4e8f0] bg-white px-3 py-2 text-[12px] text-[#25304b] outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15" />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">Thời gian kết thúc</label>
+                      <input type="datetime-local" value={s.endTime} onChange={(e) => setStepField(idx, "endTime", e.target.value)}
+                        className="w-full rounded-lg border border-[#e4e8f0] bg-white px-3 py-2 text-[12px] text-[#25304b] outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15" />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">Người thực hiện</label>
+                      <input value={s.executor} onChange={(e) => setStepField(idx, "executor", e.target.value)}
+                        placeholder="Tên người / đơn vị thực hiện"
+                        className="w-full rounded-lg border border-[#e4e8f0] bg-white px-3 py-2 text-[12px] text-[#25304b] outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15" />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                        Mã truy vết địa điểm <span className="text-red-400">*</span>
+                      </label>
+                      <input value={s.locationCode} onChange={(e) => setStepField(idx, "locationCode", e.target.value)}
+                        placeholder="LOC-XXXX"
+                        className="w-full rounded-lg border border-[#e4e8f0] bg-white px-3 py-2 text-[12px] font-mono text-[#25304b] outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15" />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">Mô tả</label>
+                      <textarea value={s.description} onChange={(e) => setStepField(idx, "description", e.target.value)}
+                        rows={2}
+                        className="w-full rounded-lg border border-[#e4e8f0] bg-white px-3 py-2 text-[12px] text-[#25304b] outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15 resize-none" />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-400">URL ảnh minh chứng</label>
+                      <div className="flex items-start gap-3">
+                        <input value={s.evidenceUrl} onChange={(e) => setStepField(idx, "evidenceUrl", e.target.value)}
+                          placeholder="https://..."
+                          className="flex-1 rounded-lg border border-[#e4e8f0] bg-white px-3 py-2 text-[12px] font-mono text-[#25304b] outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15" />
+                        {isImageUrl(s.evidenceUrl) && (
+                          <img src={s.evidenceUrl} alt="" className="h-16 w-20 rounded-lg border border-[#e4e8f0] object-cover shrink-0"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                        )}
                       </div>
                     </div>
-                  );
-                })
-              )}
-            </>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 border-t border-gray-200 px-6 py-4">
-          {pushMutation.isError && (
-            <p className="mr-auto text-[11px] text-red-500">
-              Đẩy thất bại — hồ sơ chưa hoàn thiện hoặc lỗi hệ thống.
-            </p>
-          )}
-          <button
-            onClick={onClose}
-            className="rounded-lg border border-gray-200 px-5 py-2.5 text-[12px] font-semibold text-gray-600 hover:bg-gray-50"
-          >
-            Hủy
-          </button>
-          {alreadySynced ? (
-            <div className="flex items-center gap-2 rounded-lg bg-green-50 px-5 py-2.5 text-[12px] font-bold text-green-700">
-              <CheckCheck className="h-3.5 w-3.5" /> Đã đồng bộ thành công
-            </div>
-          ) : (
-            <button
-              onClick={handleSave}
-              disabled={pushMutation.isPending || isLoading || !detail?.isComplete}
-              title={!detail?.isComplete ? "Hồ sơ chưa hoàn thiện — cần đủ công đoạn TXNG" : undefined}
-              className="flex items-center gap-2 rounded-lg bg-[#2a9d6e] px-5 py-2.5 text-[12px] font-bold text-white hover:bg-[#238a5e] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {pushMutation.isPending ? (
-                <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Đang lưu...</>
-              ) : (
-                <>Lưu</>
-              )}
+        <div className="flex items-center justify-between border-t border-[#f0f2f8] px-6 py-4">
+          {pushed ? (
+            <button onClick={onClose} className="ml-auto rounded-lg bg-[#2a9d6e] px-6 py-2.5 text-[12px] font-bold text-white hover:bg-[#238a5e]">
+              Đóng
             </button>
+          ) : step === "basic" ? (
+            <>
+              <button onClick={onClose} className="rounded-lg border border-[#e4e8f0] px-5 py-2.5 text-[12px] font-semibold text-slate-600 hover:bg-[#f9fafb]">Hủy</button>
+              <button onClick={() => setStep("txng")} className="flex items-center gap-2 rounded-lg bg-[#2740BA] px-6 py-2.5 text-[12px] font-bold text-white hover:bg-[#1f32a3]">
+                Tiếp tục <Send className="h-3.5 w-3.5" />
+              </button>
+            </>
+          ) : (
+            <>
+              <button onClick={() => setStep("basic")} className="flex items-center gap-2 rounded-lg border border-[#e4e8f0] px-5 py-2.5 text-[12px] font-semibold text-slate-600 hover:bg-[#f9fafb]">
+                <X className="h-3.5 w-3.5" /> Quay lại
+              </button>
+              <button onClick={handlePush} disabled={pushing}
+                className="flex items-center gap-2 rounded-lg bg-[#2a9d6e] px-6 py-2.5 text-[12px] font-bold text-white hover:bg-[#238a5e] disabled:opacity-70">
+                {pushing ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Đang đẩy lên...</> : <><Upload className="h-3.5 w-3.5" /> Xác nhận đẩy lên Cổng</>}
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -640,8 +669,12 @@ function TxngPortalTab() {
   const [searchLot, setSearchLot] = useState("");
   const [searchBusiness, setSearchBusiness] = useState("");
   const [searchProduct, setSearchProduct] = useState("");
-  const [selectedLotId, setSelectedLotId] = useState<number | null>(null);
-  const [qrLot, setQrLot] = useState<typeof MOCK_TXNG_LOTS[0] | null>(null);
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  const [syncLot, setSyncLot] = useState<any | null>(null);
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  const [qrLot, setQrLot] = useState<any | null>(null);
+  // Track lots that have been synced in this session
+  const [sessionSynced, setSessionSynced] = useState<Set<number>>(new Set());
 
   const { data, isLoading, refetch } = useListPortalLots({
     syncStatus: filterStatus as ListPortalLotsSyncStatus,
@@ -805,28 +838,43 @@ function TxngPortalTab() {
                     )}
                   </td>
                   <td className="px-4 py-3.5">
-                    <div className="flex items-center gap-1.5">
-                      {lot.syncStatus === "synced" ? (
-                        /* Đã đồng bộ: chỉ hiện nút Mã QR */
-                        <button
-                          onClick={() => setQrLot(lot)}
-                          className="flex items-center gap-1 rounded-lg border border-[#2a9d6e] px-2.5 py-1.5 text-[11px] font-semibold text-[#2a9d6e] hover:bg-[#e6f7f7] transition-colors"
-                          title="Xem mã QR và link cổng TXNG"
-                        >
-                          <QrCode className="h-3.5 w-3.5" /> Mã QR
-                        </button>
-                      ) : (
-                        /* Chưa đồng bộ: nút đồng bộ lên Cổng thông tin */
-                        <button
-                          onClick={() => setSelectedLotId(lot.id)}
-                          disabled={!lot.isComplete}
-                          title={lot.isComplete ? "Đồng bộ lên Cổng thông tin" : "Hồ sơ chưa hoàn thiện — cần đủ công đoạn TXNG"}
-                          className="flex items-center gap-1 rounded-lg border border-[#2740BA] px-2.5 py-1.5 text-[11px] font-semibold text-[#2740BA] hover:bg-[#edf0ff] disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-300 transition-colors"
-                        >
-                          <RefreshCw className="h-3.5 w-3.5" /> Đồng bộ
-                        </button>
-                      )}
-                    </div>
+                    {(() => {
+                      const isSynced = lot.syncStatus === "synced" || sessionSynced.has(lot.id);
+                      return (
+                        <div className="flex items-center gap-1">
+                          {/* QR icon — always shown for synced; also shown for not_synced */}
+                          {isSynced && (
+                            <button
+                              onClick={() => setQrLot(isSynced ? { ...lot, syncStatus: "synced", portalUrl: lot.portalUrl ?? `https://txng.gov.vn/lot/${lot.lotCode.toLowerCase().replace("lot-", "")}` } : lot)}
+                              title="Xem mã QR cổng TXNG"
+                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#2a9d6e] text-[#2a9d6e] hover:bg-[#e6f7f7] transition-colors"
+                            >
+                              <QrCode className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                          {/* Sync icon — only for not_synced */}
+                          {!isSynced && (
+                            <>
+                              <button
+                                onClick={() => setQrLot(lot)}
+                                title="Xem mã QR"
+                                className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#e4e8f0] text-slate-400 hover:border-[#2a9d6e] hover:text-[#2a9d6e] transition-colors"
+                              >
+                                <QrCode className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={() => setSyncLot(lot)}
+                                disabled={!lot.isComplete}
+                                title={lot.isComplete ? "Đồng bộ lên Cổng thông tin TXNG" : "Hồ sơ chưa hoàn thiện — cần đủ công đoạn TXNG"}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#2740BA] text-[#2740BA] hover:bg-[#edf0ff] disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-300 transition-colors"
+                              >
+                                <RefreshCw className="h-3.5 w-3.5" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </td>
                 </tr>
               ))
@@ -844,11 +892,15 @@ function TxngPortalTab() {
       )}
 
       {/* Sync / detail modal */}
-      {selectedLotId !== null && (
+      {syncLot !== null && (
         <SyncModal
-          lotId={selectedLotId}
-          onClose={() => setSelectedLotId(null)}
-          onSuccess={() => refetch()}
+          lot={syncLot}
+          onClose={() => setSyncLot(null)}
+          onSuccess={(lotId) => {
+            setSessionSynced((prev) => new Set(prev).add(lotId));
+            setSyncLot(null);
+            refetch();
+          }}
         />
       )}
     </div>
