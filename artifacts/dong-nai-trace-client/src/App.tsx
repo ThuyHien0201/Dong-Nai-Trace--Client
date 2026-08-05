@@ -60,6 +60,7 @@ import System from "@/pages/system";
 import Sync from "@/pages/sync";
 import Connections from "@/pages/connections";
 import Accounts from "@/pages/accounts";
+import SettingsPage from "@/pages/settings";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Route, Switch, Router as WouterRouter, useLocation, Link } from "wouter";
 import {
@@ -1257,7 +1258,7 @@ function Router() {
       <Route path="/dashboard/ket-noi" component={Connections} />
       <Route path="/dashboard/tai-khoan" component={Accounts} />
       <Route path="/dashboard/cai-dat">
-        {() => <PlaceholderPage title="Cài đặt" />}
+        {() => <SettingsPage />}
       </Route>
       <Route path="/dashboard" component={Dashboard} />
       <Route component={NotFound} />

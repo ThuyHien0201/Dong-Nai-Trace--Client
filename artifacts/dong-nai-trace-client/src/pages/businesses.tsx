@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
+  EyeOff,
   Pencil,
   Lock,
   Unlock,
@@ -27,6 +28,9 @@ import {
   Trash2,
   Phone,
   MapPin,
+  KeyRound,
+  RefreshCw,
+  Copy,
 } from "lucide-react";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -131,6 +135,155 @@ function QrModal({ code, name, onClose }: { code: string; name: string; onClose:
   );
 }
 
+// ─── Reset Password Modal ────────────────────────────────────────────────────────
+function ResetPasswordModal({ business, onClose }: { business: Business; onClose: () => void }) {
+  const [newPwd, setNewPwd] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState("");
+
+  function generateRandom() {
+    const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$";
+    let pw = "";
+    for (let i = 0; i < 12; i++) pw += chars[Math.floor(Math.random() * chars.length)];
+    setNewPwd(pw);
+    setConfirmPwd(pw);
+    setShowNew(true);
+    setError("");
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (newPwd.length < 8) { setError("Mật khẩu tối thiểu 8 ký tự"); return; }
+    if (newPwd !== confirmPwd) { setError("Mật khẩu xác nhận không khớp"); return; }
+    setDone(true);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="w-full max-w-sm rounded-2xl bg-white shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-[#e4e8f0] px-6 py-4">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#fff4ed]">
+              <KeyRound className="h-4 w-4 text-[#E8650A]" />
+            </div>
+            <p className="text-[14px] font-bold text-[#1d2944]">Đặt lại mật khẩu</p>
+          </div>
+          <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-[#f1f3fa]">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {done ? (
+          <div className="px-6 py-8 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#e8f5ed]">
+              <Check className="h-7 w-7 text-[#1f7a45]" strokeWidth={2.5} />
+            </div>
+            <p className="text-[15px] font-bold text-[#1d2944]">Đặt lại thành công</p>
+            <p className="mt-2 text-[12px] text-slate-500">
+              Mật khẩu tài khoản doanh nghiệp <span className="font-semibold text-[#25304b]">{business.name}</span> đã được cập nhật.
+            </p>
+            <button
+              onClick={onClose}
+              className="mt-6 w-full rounded-xl bg-[#2740BA] py-3 text-[13px] font-bold text-white hover:bg-[#1e33a0] transition-colors"
+            >
+              Đóng
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+            <div className="rounded-xl border border-[#e4e8f0] bg-[#f9fafb] px-4 py-3">
+              <p className="text-[11px] text-slate-400">Tài khoản doanh nghiệp</p>
+              <p className="mt-0.5 text-[13px] font-semibold text-[#25304b]">{business.name}</p>
+              <p className="text-[11px] text-slate-400 font-mono">{business.id}</p>
+            </div>
+
+            {/* Generate random button */}
+            <button
+              type="button"
+              onClick={generateRandom}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#c5cef9] bg-[#f0f3ff] py-2.5 text-[12px] font-semibold text-[#2740BA] hover:bg-[#e4e8ff] transition-colors"
+            >
+              <RefreshCw className="h-3.5 w-3.5" /> Tạo mật khẩu ngẫu nhiên
+            </button>
+
+            {/* New password */}
+            <div>
+              <label className="mb-1.5 block text-[12px] font-semibold text-slate-600">
+                Mật khẩu mới <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <input
+                  type={showNew ? "text" : "password"}
+                  value={newPwd}
+                  onChange={(e) => { setNewPwd(e.target.value); setError(""); }}
+                  placeholder="Tối thiểu 8 ký tự"
+                  className="h-11 w-full rounded-xl border border-[#e4e8f0] bg-[#f9fafb] pl-10 pr-10 text-[13px] outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNew((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm password */}
+            <div>
+              <label className="mb-1.5 block text-[12px] font-semibold text-slate-600">
+                Xác nhận mật khẩu <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <input
+                  type={showConfirm ? "text" : "password"}
+                  value={confirmPwd}
+                  onChange={(e) => { setConfirmPwd(e.target.value); setError(""); }}
+                  placeholder="Nhập lại mật khẩu"
+                  className="h-11 w-full rounded-xl border border-[#e4e8f0] bg-[#f9fafb] pl-10 pr-10 text-[13px] outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <p className="rounded-lg bg-red-50 px-3 py-2 text-[11px] font-medium text-red-600">{error}</p>
+            )}
+
+            <div className="flex gap-3 border-t border-[#e4e8f0] pt-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 rounded-xl border border-[#e4e8f0] py-3 text-[13px] font-semibold text-slate-600 hover:border-slate-400 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                className="flex-1 rounded-xl bg-[#E8650A] py-3 text-[13px] font-bold text-white hover:bg-[#d95c08] transition-colors shadow-[0_4px_14px_rgba(232,101,10,.2)]"
+              >
+                Đặt lại mật khẩu
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Business Detail screen ─────────────────────────────────────────────────────
 function BusinessDetail({
   business,
@@ -142,6 +295,7 @@ function BusinessDetail({
   onUpdate: (id: string, updates: Partial<Business>) => void;
 }) {
   const [qrOpen, setQrOpen] = useState(false);
+  const [resetPwdOpen, setResetPwdOpen] = useState(false);
 
   const timelineItems = [
     { action: "Hồ sơ được tiếp nhận", actor: "Hệ thống tự động", time: "18/12/2024 08:30", color: "#2740BA", done: true },
@@ -163,6 +317,9 @@ function BusinessDetail({
           name={business.name}
           onClose={() => setQrOpen(false)}
         />
+      )}
+      {resetPwdOpen && (
+        <ResetPasswordModal business={business} onClose={() => setResetPwdOpen(false)} />
       )}
 
       <DashboardShell title="Chi tiết doanh nghiệp" subtitle={business.name}>
@@ -322,6 +479,14 @@ function BusinessDetail({
                   {business.status === "Đã khóa" ? "Mở khóa" : "Khóa"}
                 </button>
               </div>
+
+              {/* Reset password */}
+              <button
+                onClick={() => setResetPwdOpen(true)}
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-[#e4e8f0] bg-white py-3 text-[12px] font-semibold text-slate-600 transition hover:border-[#E8650A] hover:bg-[#fff8f5] hover:text-[#E8650A]"
+              >
+                <KeyRound className="h-3.5 w-3.5" /> Đặt lại mật khẩu
+              </button>
             </div>
 
             {/* Processing timeline */}
@@ -374,6 +539,7 @@ export default function Businesses() {
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [viewing, setViewing] = useState<Business | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [resetPwdBusiness, setResetPwdBusiness] = useState<Business | null>(null);
 
   const viewingBusiness = viewing ? (businesses.find((b) => b.id === viewing.id) ?? viewing) : null;
 
@@ -464,6 +630,9 @@ export default function Businesses() {
 
   return (
     <DashboardShell title="Quản lý doanh nghiệp" subtitle="Danh sách doanh nghiệp">
+      {resetPwdBusiness && (
+        <ResetPasswordModal business={resetPwdBusiness} onClose={() => setResetPwdBusiness(null)} />
+      )}
       {/* Page header */}
       <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
         <div>
@@ -599,6 +768,13 @@ export default function Businesses() {
                     <Pencil className="h-3.5 w-3.5" />
                   </button>
                   <button
+                    onClick={() => setResetPwdBusiness(b)}
+                    className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#fff8f5] hover:text-[#E8650A]"
+                    title="Đặt lại mật khẩu"
+                  >
+                    <KeyRound className="h-3.5 w-3.5" />
+                  </button>
+                  <button
                     onClick={() => handleDelete(b.id)}
                     className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#fef0f0] hover:text-[#c0392b]"
                     title="Xóa"
@@ -715,6 +891,13 @@ export default function Businesses() {
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
                       <button
+                        onClick={() => setResetPwdBusiness(b)}
+                        className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#fff8f5] hover:text-[#E8650A]"
+                        title="Đặt lại mật khẩu"
+                      >
+                        <KeyRound className="h-3.5 w-3.5" />
+                      </button>
+                      <button
                         onClick={() => handleUpdate(b.id, { status: b.status === "Đã khóa" ? "Đã duyệt" : "Đã khóa" })}
                         className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#f0f2f8] hover:text-slate-600"
                         title={b.status === "Đã khóa" ? "Mở khóa" : "Khóa"}
@@ -727,12 +910,6 @@ export default function Businesses() {
                         title="Xóa"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#f0f2f8] hover:text-slate-600"
-                        title="Thêm"
-                      >
-                        <MoreHorizontal className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   </td>
