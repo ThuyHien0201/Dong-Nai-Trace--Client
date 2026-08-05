@@ -112,81 +112,22 @@ function SelectFilter({ value, onChange, options }: { value: string; onChange: (
   );
 }
 
-// ─── Approval modal ─────────────────────────────────────────────────────────────
-function ApprovalSuccessModal({
-  businessName,
-  code,
-  onClose,
-  onViewDetail,
-}: {
-  businessName: string;
-  code: string;
-  onClose: () => void;
-  onViewDetail: () => void;
-}) {
-  const [copied, setCopied] = useState(false);
-
-  function handleCopy() {
-    navigator.clipboard.writeText(code).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1800);
-  }
-
+// ─── QR Code modal ──────────────────────────────────────────────────────────────
+function QrModal({ code, onClose }: { code: string; onClose: () => void }) {
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(code)}&color=2740BA&bgcolor=ffffff&margin=10`;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-200 rounded-3xl border border-[#b8e2c8] bg-white p-8 shadow-[0_32px_64px_rgba(0,0,0,.18)]">
-        {/* Icon */}
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#e8f5ed]">
-          <BadgeCheck className="h-8 w-8 text-[#1f7a45]" strokeWidth={1.8} />
-        </div>
-
-        {/* Heading */}
-        <h3 className="text-center text-[18px] font-bold tracking-[-0.04em] text-[#1d2944]">
-          Đã duyệt hồ sơ thành công
-        </h3>
-        <p className="mt-1.5 text-center text-[12px] text-slate-400">
-          {businessName} đã được phê duyệt và cấp mã định danh.
-        </p>
-
-        {/* Code block */}
-        <div className="mt-6 rounded-2xl border border-[#e4e8f0] bg-[#f7f8fd] p-4">
-          <p className="mb-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-            Mã định danh tổ chức
-          </p>
-          <div className="flex items-center gap-3">
-            <div className="flex flex-1 items-center gap-2.5 rounded-xl border border-[#dce3ff] bg-white px-4 py-3">
-              <QrCode className="h-4 w-4 shrink-0 text-[#2740BA]" />
-              <span className="flex-1 font-mono text-[15px] font-bold tracking-wider text-[#2740BA]">
-                {code}
-              </span>
-            </div>
-            <button
-              onClick={handleCopy}
-              title="Sao chép mã"
-              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border transition-colors ${copied ? "border-[#b8e2c8] bg-[#e8f5ed] text-[#1f7a45]" : "border-[#e4e8f0] bg-white text-slate-400 hover:border-[#2740BA] hover:text-[#2740BA]"}`}
-            >
-              {copied ? <Check className="h-4 w-4" strokeWidth={2.5} /> : <Copy className="h-4 w-4" />}
-            </button>
-          </div>
-          {copied && (
-            <p className="mt-1.5 text-center text-[10px] font-medium text-[#1f7a45]">Đã sao chép!</p>
-          )}
-        </div>
-
-        {/* Actions */}
-        <div className="mt-5 flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 rounded-xl border border-[#e4e8f0] py-3 text-[13px] font-semibold text-slate-600 transition-colors hover:border-[#2740BA] hover:text-[#2740BA]"
-          >
-            Đóng
+      <div className="w-full max-w-xs rounded-2xl bg-white p-6 shadow-2xl">
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-[14px] font-bold text-[#1d2944]">Mã QR định danh</p>
+          <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-[#f1f3fa]">
+            <X className="h-4 w-4" />
           </button>
-          <button
-            onClick={onViewDetail}
-            className="flex-1 rounded-xl bg-[#2740BA] py-3 text-[13px] font-bold text-white shadow-[0_4px_14px_rgba(39,64,186,.25)] transition-colors hover:bg-[#1e33a0]"
-          >
-            Xem chi tiết
-          </button>
+        </div>
+        <div className="flex flex-col items-center gap-3">
+          <img src={qrUrl} alt={`QR ${code}`} className="h-52 w-52 rounded-xl border border-[#e4e8f0] bg-white" />
+          <p className="font-mono text-[14px] font-bold text-[#2740BA]">{code}</p>
+          <p className="text-[11px] text-slate-400 text-center">Quét mã QR để xem thông tin truy xuất công khai</p>
         </div>
       </div>
     </div>
@@ -203,56 +144,33 @@ function ApprovalDetail({
   onBack: () => void;
   onApproved: (id: string, code: string) => void;
 }) {
-  const [comment, setComment] = useState("");
-  const [decision, setDecision] = useState<"approved" | "rejected" | null>(
-    business.status === "Đã duyệt" ? "approved" : business.status === "Từ chối" ? "rejected" : null
-  );
-  const [showModal, setShowModal] = useState(false);
-  const [issuedCode] = useState(
-    business.businessCode ?? generateCode(initialBusinesses.filter((b) => b.businessCode).length + 1)
-  );
+  const [qrOpen, setQrOpen] = useState(false);
+  const issuedCode = business.businessCode ?? generateCode(initialBusinesses.filter((b) => b.businessCode).length + 1);
 
   const isAlreadyDecided = business.status === "Đã duyệt" || business.status === "Từ chối" || business.status === "Đã khóa";
-
-  const effectiveStatus: Status =
-    decision === "approved" ? "Đã duyệt" :
-    decision === "rejected" ? "Từ chối" :
-    business.status;
 
   const timelineItems = [
     { action: "Hồ sơ được tiếp nhận", actor: "Hệ thống tự động", time: "18/12/2024 08:30", color: "#2740BA", done: true },
     { action: "Chuyển xét duyệt vòng 1", actor: "Admin · Nguyễn Hoàng", time: "18/12/2024 09:05", color: "#4f9a77", done: true },
     { action: "Xác minh tài liệu pháp lý", actor: "Chuyên viên · Minh Anh", time: "18/12/2024 10:30", color: "#2e9fbf", done: true },
-    ...(decision === "approved" || business.status === "Đã duyệt"
+    ...(business.status === "Đã duyệt"
       ? [{ action: "Phê duyệt & cấp mã định danh", actor: "Admin · Nguyễn Hoàng", time: "18/12/2024 11:15", color: "#1f7a45", done: true }]
-      : decision === "rejected" || business.status === "Từ chối"
+      : business.status === "Từ chối"
       ? [{ action: "Hồ sơ bị từ chối", actor: "Admin · Nguyễn Hoàng", time: "18/12/2024 11:15", color: "#c0392b", done: true }]
-      : [{ action: "Đang chờ quyết định duyệt", actor: "Quản trị viên", time: "18/12/2024 11:00", color: "#E8650A", done: false }]
+      : [{ action: "Đang chờ xử lý", actor: "Quản trị viên", time: "18/12/2024 11:00", color: "#E8650A", done: false }]
     ),
   ];
 
-  function handleApprove() {
-    setDecision("approved");
-    setShowModal(true);
-    onApproved(business.id, issuedCode);
-  }
-
-  function handleReject() {
-    setDecision("rejected");
-  }
-
   return (
     <>
-      {showModal && (
-        <ApprovalSuccessModal
-          businessName={business.name}
+      {qrOpen && (
+        <QrModal
           code={issuedCode}
-          onClose={() => setShowModal(false)}
-          onViewDetail={() => { setShowModal(false); }}
+          onClose={() => setQrOpen(false)}
         />
       )}
 
-      <DashboardShell title="Phê duyệt hồ sơ doanh nghiệp" subtitle={business.name}>
+      <DashboardShell title="Chi tiết doanh nghiệp" subtitle={business.name}>
         {/* Back */}
         <button
           onClick={onBack}
@@ -267,7 +185,7 @@ function ApprovalDetail({
             <p className="font-mono text-[10px] uppercase tracking-[.18em] text-[#E8650A]">Hồ sơ doanh nghiệp</p>
             <h2 className="mt-1 text-[20px] font-bold tracking-[-0.04em] text-[#1d2944]">{business.name}</h2>
           </div>
-          <StatusBadge status={effectiveStatus} />
+          <StatusBadge status={business.status} />
         </div>
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_380px]">
@@ -357,81 +275,41 @@ function ApprovalDetail({
 
           {/* ── RIGHT: decision + timeline ──────────────────────────────────────── */}
           <div className="space-y-5">
-            {/* Decision card */}
+            {/* Status + Actions card */}
             <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-[0_2px_12px_rgba(38,55,105,.04)]">
-              <p className="mb-4 text-[13px] font-bold text-[#1d2944]">Quyết định xét duyệt</p>
+              <p className="mb-4 text-[13px] font-bold text-[#1d2944]">Trạng thái & Thao tác</p>
 
-              {/* Already decided state */}
-              {isAlreadyDecided && (
-                <div className={`mb-4 flex items-center gap-3 rounded-xl border p-3.5 ${business.status === "Đã duyệt" ? "border-[#b8e2c8] bg-[#e8f5ed]" : business.status === "Từ chối" ? "border-[#f5bcbc] bg-[#fef0f0]" : "border-[#d9dce9] bg-[#f2f3f7]"}`}>
-                  {business.status === "Đã duyệt" ? <CheckCircle className="h-4 w-4 text-[#1f7a45] shrink-0" /> : <XCircle className="h-4 w-4 text-[#c0392b] shrink-0" />}
-                  <p className={`text-[12px] font-semibold ${business.status === "Đã duyệt" ? "text-[#1f7a45]" : "text-[#c0392b]"}`}>
-                    {business.status === "Đã duyệt" ? "Hồ sơ đã được phê duyệt" : business.status === "Từ chối" ? "Hồ sơ đã bị từ chối" : "Tài khoản đã bị khóa"}
-                  </p>
-                </div>
+              {/* Status badge */}
+              <div className={`mb-4 flex items-center gap-3 rounded-xl border p-3.5 ${business.status === "Đã duyệt" ? "border-[#b8e2c8] bg-[#e8f5ed]" : business.status === "Từ chối" ? "border-[#f5bcbc] bg-[#fef0f0]" : "border-[#e4e8f0] bg-[#f7f8fd]"}`}>
+                {business.status === "Đã duyệt"
+                  ? <CheckCircle className="h-4 w-4 text-[#1f7a45] shrink-0" />
+                  : business.status === "Từ chối"
+                  ? <XCircle className="h-4 w-4 text-[#c0392b] shrink-0" />
+                  : <Clock className="h-4 w-4 text-[#E8650A] shrink-0" />}
+                <p className={`text-[12px] font-semibold ${business.status === "Đã duyệt" ? "text-[#1f7a45]" : business.status === "Từ chối" ? "text-[#c0392b]" : "text-[#E8650A]"}`}>
+                  {business.status === "Đã duyệt" ? "Đã được phê duyệt" : business.status === "Từ chối" ? "Đã bị từ chối" : business.status === "Đã khóa" ? "Tài khoản bị khóa" : "Đang chờ xử lý"}
+                </p>
+              </div>
+
+              {/* QR code button (approved) */}
+              {isAlreadyDecided && business.status === "Đã duyệt" && (
+                <button
+                  onClick={() => setQrOpen(true)}
+                  className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-[#dce3ff] bg-[#f0f2ff] py-3 text-[12px] font-semibold text-[#2740BA] transition hover:bg-[#e4e8ff]"
+                >
+                  <QrCode className="h-4 w-4" /> Xem mã QR định danh
+                </button>
               )}
 
-              <label className="mb-1.5 block text-[11px] font-semibold text-slate-500">Nhận xét / Lý do</label>
-              <textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                rows={4}
-                disabled={isAlreadyDecided}
-                placeholder={isAlreadyDecided ? "Hồ sơ đã được xử lý." : "Nhập nhận xét hoặc lý do từ chối hồ sơ này..."}
-                className="w-full resize-none rounded-xl border border-[#e4e8f0] bg-[#f9fafb] p-3 text-[12px] text-[#25304b] placeholder:text-slate-400 outline-none transition focus:border-[#2740BA] focus:bg-white focus:ring-2 focus:ring-[#2740BA]/15 disabled:cursor-not-allowed disabled:opacity-60"
-              />
-
-              {/* Buttons — show only if pending */}
-              {!isAlreadyDecided && decision === null && (
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <button
-                    onClick={handleApprove}
-                    className="flex items-center justify-center gap-2 rounded-xl bg-[#2740BA] py-3.5 text-[13px] font-bold text-white shadow-[0_4px_14px_rgba(39,64,186,.25)] transition-all hover:bg-[#1e33a0] hover:shadow-[0_6px_18px_rgba(39,64,186,.32)] active:scale-[.98]"
-                  >
-                    <CheckCircle className="h-4 w-4" /> Duyệt
-                  </button>
-                  <button
-                    onClick={handleReject}
-                    className="flex items-center justify-center gap-2 rounded-xl border-2 border-[#e04040] bg-white py-3.5 text-[13px] font-bold text-[#c0392b] transition-all hover:bg-[#fef0f0] active:scale-[.98]"
-                  >
-                    <XCircle className="h-4 w-4" /> Từ chối
-                  </button>
-                </div>
-              )}
-
-              {/* Rejected in-session: confirm */}
-              {!isAlreadyDecided && decision === "rejected" && (
-                <div className="mt-4 rounded-xl border border-[#f5bcbc] bg-[#fef0f0] p-4">
-                  <div className="mb-2 flex items-center gap-2 text-[#c0392b]">
-                    <XCircle className="h-4 w-4 shrink-0" />
-                    <p className="text-[12px] font-bold">Hồ sơ đã bị từ chối</p>
-                  </div>
-                  <p className="text-[11px] text-[#c0392b]/70">Doanh nghiệp sẽ nhận được thông báo qua email.</p>
-                  <button
-                    onClick={() => setDecision(null)}
-                    className="mt-3 text-[11px] font-semibold text-slate-500 underline hover:text-[#2740BA]"
-                  >
-                    Hoàn tác
-                  </button>
-                </div>
-              )}
-
-              {/* Approved in-session */}
-              {!isAlreadyDecided && decision === "approved" && (
-                <div className="mt-4 rounded-xl border border-[#b8e2c8] bg-[#e8f5ed] p-4">
-                  <div className="mb-2 flex items-center gap-2 text-[#1f7a45]">
-                    <CheckCircle className="h-4 w-4 shrink-0" />
-                    <p className="text-[12px] font-bold">Đã phê duyệt thành công</p>
-                  </div>
-                  <p className="text-[11px] text-[#1f7a45]/70">Mã định danh đã được cấp tự động cho doanh nghiệp.</p>
-                  <button
-                    onClick={() => setShowModal(true)}
-                    className="mt-3 flex items-center gap-1.5 text-[11px] font-semibold text-[#2740BA] hover:underline"
-                  >
-                    <QrCode className="h-3 w-3" /> Xem lại mã định danh
-                  </button>
-                </div>
-              )}
+              {/* Edit / Delete actions */}
+              <div className="grid grid-cols-2 gap-3">
+                <button className="flex items-center justify-center gap-2 rounded-xl border border-[#e4e8f0] bg-white py-3 text-[12px] font-semibold text-slate-600 transition hover:border-[#2740BA] hover:text-[#2740BA]">
+                  <Pencil className="h-3.5 w-3.5" /> Chỉnh sửa
+                </button>
+                <button className="flex items-center justify-center gap-2 rounded-xl border border-[#e04040] bg-white py-3 text-[12px] font-semibold text-[#c0392b] transition hover:bg-[#fef0f0]">
+                  <Trash2 className="h-3.5 w-3.5" /> Xóa
+                </button>
+              </div>
             </div>
 
             {/* Processing timeline */}

@@ -143,17 +143,7 @@ function TraceSidebar({ open, onClose }: { open: boolean; onClose: () => void })
         </div>
 
         <nav className="dashboard-scrollbar mt-7 flex-1 space-y-1 overflow-y-auto" aria-label="Các mục quản trị">
-          <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[.17em] text-slate-400">
-            Không gian làm việc
-          </p>
-          {workspaceNav.map((item) => (
-            <NavItem key={item.href} {...item} />
-          ))}
-
-          <p className="mb-3 mt-8 px-3 text-[10px] font-bold uppercase tracking-[.17em] text-slate-400">
-            Hệ thống
-          </p>
-          {systemNav.map((item) => (
+          {[...workspaceNav, ...systemNav].map((item) => (
             <NavItem key={item.href} {...item} />
           ))}
         </nav>
