@@ -30,6 +30,8 @@ import {
   AlertCircle,
   ChevronDown,
   SlidersHorizontal,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -363,7 +365,7 @@ function ProductDetail({
 
   return (
     <DashboardShell
-      title={isPending ? "Phê duyệt sản phẩm" : "Chi tiết sản phẩm"}
+      title="Chi tiết sản phẩm"
       subtitle={product.name}
     >
       {/* Back */}
@@ -511,38 +513,19 @@ function ProductDetail({
 
           {/* Right */}
           <div className="space-y-5">
-            {/* Pending: decision card */}
-            {isPending && (
-              <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-sm">
-                <p className="mb-4 text-[13px] font-bold text-[#1d2944]">Quyết định phê duyệt</p>
-                <div className="mb-4 rounded-xl border border-[#e4e8f0] bg-[#f9fafb] p-3">
-                  <p className="text-[11px] font-semibold text-slate-500">Trạng thái hiện tại</p>
-                  <StatusBadge status={product.status} />
-                </div>
-                <label className="mb-1.5 block text-[11px] font-semibold text-slate-500">Ghi chú / Lý do</label>
-                <textarea
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  rows={4}
-                  placeholder="Nhập ghi chú hoặc lý do từ chối..."
-                  className="w-full resize-none rounded-xl border border-[#e4e8f0] bg-[#f9fafb] p-3 text-[12px] outline-none focus:border-[#2740BA] focus:bg-white focus:ring-2 focus:ring-[#2740BA]/15"
-                />
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => setDecision("approved")}
-                    className={`flex items-center justify-center gap-2 rounded-xl py-3.5 text-[13px] font-bold transition-all ${decision === "approved" ? "bg-[#1f7a45] text-white" : "bg-[#2740BA] text-white hover:bg-[#1e33a0] shadow-[0_4px_14px_rgba(39,64,186,.25)]"}`}
-                  >
-                    <CheckCircle className="h-4 w-4" /> Phê duyệt
-                  </button>
-                  <button
-                    onClick={() => setDecision("rejected")}
-                    className={`flex items-center justify-center gap-2 rounded-xl border-2 py-3.5 text-[13px] font-bold transition-all ${decision === "rejected" ? "border-[#c0392b] bg-[#c0392b] text-white" : "border-[#e04040] bg-white text-[#c0392b] hover:bg-[#fef0f0]"}`}
-                  >
-                    <XCircle className="h-4 w-4" /> Từ chối
-                  </button>
-                </div>
+            {/* Status card */}
+            <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-sm">
+              <p className="mb-3 text-[13px] font-bold text-[#1d2944]">Trạng thái</p>
+              <StatusBadge status={product.status} />
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <button className="flex items-center justify-center gap-2 rounded-xl border border-[#e4e8f0] bg-white py-3 text-[12px] font-semibold text-slate-600 transition hover:border-[#2740BA] hover:text-[#2740BA]">
+                  <Pencil className="h-3.5 w-3.5" /> Chỉnh sửa
+                </button>
+                <button className="flex items-center justify-center gap-2 rounded-xl border border-[#e04040] bg-white py-3 text-[12px] font-semibold text-[#c0392b] transition hover:bg-[#fef0f0]">
+                  <Trash2 className="h-3.5 w-3.5" /> Xóa
+                </button>
               </div>
-            )}
+            </div>
 
             {/* Approved: traceability link */}
             {product.status === "Đã duyệt" && (

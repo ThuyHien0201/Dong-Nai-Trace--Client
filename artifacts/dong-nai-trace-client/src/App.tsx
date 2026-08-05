@@ -40,6 +40,12 @@ import {
   ArrowLeft,
   Phone,
   ChevronRight,
+  Tags,
+  Newspaper,
+  LifeBuoy,
+  Server,
+  Network,
+  RefreshCw,
 } from "lucide-react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -53,6 +59,7 @@ import Support from "@/pages/support";
 import System from "@/pages/system";
 import Sync from "@/pages/sync";
 import Connections from "@/pages/connections";
+import Accounts from "@/pages/accounts";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Route, Switch, Router as WouterRouter, useLocation, Link } from "wouter";
 import {
@@ -88,7 +95,7 @@ function TraceMark({
       data-testid="brand-logo"
     >
       <div
-        className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-white shadow-[0_8px_18px_rgba(39,64,186,.16)] ${compact ? "h-10 w-10" : "h-[52px] w-[52px]"}`}
+        className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#2740BA] ${compact ? "h-10 w-10" : "h-[52px] w-[52px]"}`}
       >
         <img
           src={skhcnLogo}
@@ -474,6 +481,12 @@ const navigationItems: {
   { label: "Sản phẩm", icon: Package, href: "/dashboard/san-pham" },
   { label: "Báo cáo & phân tích", icon: BarChart3, href: "/dashboard/bao-cao" },
   { label: "Tài khoản", icon: UsersRound, href: "/dashboard/tai-khoan" },
+  { label: "Đồng bộ dữ liệu", icon: RefreshCw, href: "/dashboard/dong-bo" },
+  { label: "Danh mục & địa bàn", icon: Tags, href: "/dashboard/danh-muc" },
+  { label: "Tin tức & banner", icon: Newspaper, href: "/dashboard/tin-tuc" },
+  { label: "Hỗ trợ & thông báo", icon: LifeBuoy, href: "/dashboard/ho-tro" },
+  { label: "Hệ thống", icon: Server, href: "/dashboard/he-thong" },
+  { label: "Cài đặt", icon: Settings, href: "/dashboard/cai-dat" },
 ];
 
 const trendData = [
@@ -610,21 +623,6 @@ function TraceSidebar({
               </Link>
             );
           })}
-          <p className="mb-3 mt-8 px-3 text-[10px] font-bold uppercase tracking-[.17em] text-slate-400">
-            Hệ thống
-          </p>
-          <Link
-            href="/dashboard/cai-dat"
-            onClick={onClose}
-            data-testid="button-nav-settings"
-            className={`group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-[12px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2740BA] ${isActive("/dashboard/cai-dat") ? "bg-[#edf0ff] text-[#2740BA]" : "text-slate-500 hover:bg-[#f7f8fc] hover:text-[#2740BA]"}`}
-          >
-            <Settings
-              className={`h-[18px] w-[18px] ${isActive("/dashboard/cai-dat") ? "text-[#2740BA]" : "text-slate-400 group-hover:text-[#2740BA]"}`}
-              strokeWidth={isActive("/dashboard/cai-dat") ? 2 : 1.7}
-            />
-            <span>Cài đặt</span>
-          </Link>
         </nav>
         <div className="mt-4 flex items-center gap-3 border-t border-[#edf0f5] px-2 pt-4">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#dce3ff] text-[11px] font-bold text-[#2740BA]">
@@ -1264,9 +1262,7 @@ function Router() {
       <Route path="/dashboard/he-thong" component={System} />
       <Route path="/dashboard/dong-bo" component={Sync} />
       <Route path="/dashboard/ket-noi" component={Connections} />
-      <Route path="/dashboard/tai-khoan">
-        {() => <PlaceholderPage title="Quản lý tài khoản" />}
-      </Route>
+      <Route path="/dashboard/tai-khoan" component={Accounts} />
       <Route path="/dashboard/cai-dat">
         {() => <PlaceholderPage title="Cài đặt" />}
       </Route>

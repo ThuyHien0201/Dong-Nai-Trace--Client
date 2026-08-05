@@ -402,6 +402,17 @@ function SyncModal({ lotId, onClose, onSuccess }: SyncModalProps) {
   );
 }
 
+// ─── Mock lots (shown when API returns empty / no DB connected) ───────────────
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const MOCK_SOLUTION_LOTS: any[] = [
+  { id: 1, productName: "Bưởi Tân Triều", gtin: "8936001234561", lotCode: "LOT-2025-001", businessName: "Cơ sở Bưởi Tân Triều", activatedAt: "2025-04-20T08:00:00.000Z", imageUrl: "https://images.unsplash.com/photo-1588165171080-c89acfa5ee83?w=80&h=80&fit=crop", syncStatus: "not_synced", portalUrl: null },
+  { id: 2, productName: "Xoài cát Hòa Lộc", gtin: "8936001234562", lotCode: "LOT-2025-002", businessName: "HTX Xoài Hòa Lộc", activatedAt: "2025-04-18T09:30:00.000Z", imageUrl: "https://images.unsplash.com/photo-1553279768-865429fa0078?w=80&h=80&fit=crop", syncStatus: "not_synced", portalUrl: null },
+  { id: 3, productName: "Sầu riêng Monthong", gtin: "8936001234563", lotCode: "LOT-2025-003", businessName: "Cty TNHH Nông sản Đồng Nai", activatedAt: "2025-04-15T10:00:00.000Z", imageUrl: "https://images.unsplash.com/photo-1600423115367-87ea7661688f?w=80&h=80&fit=crop", syncStatus: "synced", portalUrl: "https://txng.gov.vn/lot/003" },
+  { id: 4, productName: "Tiêu đen Xuân Lộc", gtin: "8936001234564", lotCode: "LOT-2025-004", businessName: "HTX Tiêu Xuân Lộc", activatedAt: "2025-04-12T07:45:00.000Z", imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=80&h=80&fit=crop", syncStatus: "not_synced", portalUrl: null },
+  { id: 5, productName: "Điều rang muối", gtin: "8936001234565", lotCode: "LOT-2025-005", businessName: "Cty CP Điều Đồng Nai", activatedAt: "2025-04-10T13:00:00.000Z", imageUrl: "https://images.unsplash.com/photo-1509358271058-acd22cc93898?w=80&h=80&fit=crop", syncStatus: "synced", portalUrl: "https://txng.gov.vn/lot/005" },
+];
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
 // ─── Tab 1: Đồng bộ sang đơn vị giải pháp ────────────────────────────────────
 
 function SolutionProviderTab() {
@@ -421,8 +432,9 @@ function SolutionProviderTab() {
     pageSize: 50,
   });
 
-  const lots = data?.data ?? [];
-  const total = data?.total ?? 0;
+  const rawLots = data?.data ?? [];
+  const lots = rawLots.length > 0 ? rawLots : (!isLoading ? MOCK_SOLUTION_LOTS : []);
+  const total = data?.total ?? lots.length;
 
   async function handleSend(lotId: number) {
     setSendingLot(lotId);
