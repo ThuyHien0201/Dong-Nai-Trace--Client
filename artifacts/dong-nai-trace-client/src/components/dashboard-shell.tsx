@@ -61,7 +61,6 @@ const workspaceNav = [
 ];
 
 const systemNav = [
-  { label: "Đồng bộ dữ liệu", icon: RefreshCw, href: "/dashboard/dong-bo" },
   { label: "Danh mục & địa bàn", icon: Tags, href: "/dashboard/danh-muc" },
   { label: "Tin tức & banner", icon: Newspaper, href: "/dashboard/tin-tuc" },
   { label: "Hỗ trợ & thông báo", icon: LifeBuoy, href: "/dashboard/ho-tro" },
