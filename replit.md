@@ -1,44 +1,35 @@
 # Đồng Nai Trace
 
-A Vietnamese product traceability platform for Đồng Nai province. Businesses can register products and QR codes; the system tracks and verifies supply chain provenance.
+A product traceability platform for Đồng Nai province, Vietnam. Enables government departments and businesses to register, manage, and trace agricultural/industrial products via QR codes and a public portal.
 
-## Stack
+## Architecture
 
-- **Frontend**: React + Vite + Tailwind CSS + shadcn/ui (`artifacts/dong-nai-trace-client`)
-- **API**: Express 5 + Drizzle ORM + PostgreSQL (`artifacts/api-server`)
-- **Monorepo**: pnpm workspaces
-- **Shared libs**: `lib/api-zod` (Zod schemas), `lib/api-client-react` (React Query hooks), `lib/db` (Drizzle + schema), `lib/api-spec` (OpenAPI spec + Orval codegen)
+| Package | Role |
+|---|---|
+| `artifacts/dong-nai-trace-client` | React + Vite admin dashboard (frontend) |
+| `artifacts/api-server` | Express.js REST API (backend) |
+| `lib/db` | PostgreSQL schema & migrations via Drizzle ORM |
+| `lib/api-spec` | OpenAPI spec + Orval codegen |
+| `lib/api-zod` | Generated Zod validation schemas |
+| `lib/api-client-react` | Generated React Query hooks for the frontend |
 
-## Running the app
+## Running
 
-The frontend dev server starts automatically via the managed workflow `artifacts/dong-nai-trace-client: web`.
+Both services start automatically via managed workflows:
 
-To start the API server (requires `DATABASE_URL`):
-```
-WorkflowsRestart: artifacts/api-server: API Server
-```
+- **Frontend** — `artifacts/dong-nai-trace-client: web` (port `$PORT`, default 21771)
+- **API server** — `artifacts/api-server: API Server` (port 8080)
 
-## Environment variables
+The API server requires `DATABASE_URL` (provisioned automatically by Replit PostgreSQL).
 
-| Variable       | Required by        | Description                        |
-|----------------|--------------------|------------------------------------|
-| `DATABASE_URL` | `api-server`, `db` | PostgreSQL connection string       |
-| `SESSION_SECRET` | `api-server`     | Secret for session signing         |
-
-## Database
-
-Uses Drizzle ORM. To push schema to the database:
-```
-pnpm --filter @workspace/db run push
+To install/update dependencies:
+```bash
+pnpm install
 ```
 
-## API codegen
-
-OpenAPI spec lives at `lib/api-spec/openapi.yaml`. To regenerate React Query hooks and Zod schemas:
-```
-pnpm run --filter @workspace/api-spec codegen
+To run DB migrations:
+```bash
+pnpm --filter @workspace/db run db:migrate
 ```
 
 ## User preferences
-
-<!-- Add user preferences here -->
