@@ -27,12 +27,22 @@ interface Account {
   name: string;
   username: string;
   email: string;
-  role: Role;
+  role: string;
   status: AccountStatus;
   createdAt: string;
   lastLogin: string;
   avatar: string;
+  permissions?: string[];
 }
+
+const ACCESS_MODULES = [
+  "Tổng quan",        "Tài khoản",
+  "Doanh nghiệp",     "Đồng bộ dữ liệu",
+  "Sản phẩm",         "Danh mục & địa bàn",
+  "Báo cáo & phân tích", "Tin tức & banner",
+  "Hỗ trợ & thông báo",  "Hệ thống",
+  "Cài đặt",
+] as const;
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
 const initialAccounts: Account[] = [
@@ -79,8 +89,11 @@ const permissionMatrix: { feature: string; admin: boolean; editor: boolean; view
 const roles: Role[] = ["Quản trị viên", "Biên tập viên", "Người xem"];
 const PAGE_SIZE = 8;
 
-function RoleBadge({ role }: { role: Role }) {
-  const cfg = roleConfig[role];
+function RoleBadge({ role }: { role: string }) {
+  const cfg = roleConfig[role as Role] ?? {
+    cls: "bg-[#f0f3ff] text-[#2740BA] border border-[#c5cef9]",
+    icon: Shield,
+  };
   const Icon = cfg.icon;
   return (
     <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${cfg.cls}`}>
@@ -104,10 +117,17 @@ function AccountModal({
   const [name, setName] = useState(account?.name ?? "");
   const [username, setUsername] = useState(account?.username ?? "");
   const [email, setEmail] = useState(account?.email ?? "");
-  const [role, setRole] = useState<Role>(account?.role ?? "Người xem");
+  const [role, setRole] = useState<string>(account?.role ?? "");
+  const [permissions, setPermissions] = useState<string[]>(account?.permissions ?? []);
   const [status, setStatus] = useState<AccountStatus>(account?.status ?? "Đang hoạt động");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  function togglePermission(mod: string) {
+    setPermissions((prev) =>
+      prev.includes(mod) ? prev.filter((p) => p !== mod) : [...prev, mod]
+    );
+  }
 
   function validate() {
     const errs: Record<string, string> = {};
@@ -115,6 +135,7 @@ function AccountModal({
     if (!username.trim()) errs.username = "Vui lòng nhập tên đăng nhập";
     if (!email.trim()) errs.email = "Vui lòng nhập email";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = "Email không hợp lệ";
+    if (!role.trim()) errs.role = "Vui lòng nhập vai trò";
     if (!isEdit && !password.trim()) errs.password = "Vui lòng nhập mật khẩu";
     else if (!isEdit && password.length < 6) errs.password = "Mật khẩu tối thiểu 6 ký tự";
     return errs;
@@ -124,7 +145,7 @@ function AccountModal({
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
-    onSave({ name, username, email, role, status });
+    onSave({ name, username, email, role, status, permissions });
   }
 
   const inputCls = (field: string) =>
@@ -142,10 +163,12 @@ function AccountModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+        <form onSubmit={handleSubmit} className="max-h-[80vh] overflow-y-auto px-6 py-5 space-y-4">
           {/* Name */}
           <div>
-            <label className="mb-1.5 block text-[12px] font-semibold text-slate-600">Họ và tên <span className="text-red-500">*</span></label>
+            <label className="mb-1.5 block text-[12px] font-semibold text-slate-600">
+              Họ và tên <span className="text-red-500">*</span>
+            </label>
             <div className="relative">
               <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nguyễn Văn A" className={inputCls("name")} />
@@ -156,7 +179,9 @@ function AccountModal({
           {/* Username + Email row */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1.5 block text-[12px] font-semibold text-slate-600">Tên đăng nhập <span className="text-red-500">*</span></label>
+              <label className="mb-1.5 block text-[12px] font-semibold text-slate-600">
+                Tên đăng nhập <span className="text-red-500">*</span>
+              </label>
               <div className="relative">
                 <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="vana.nguyen" className={inputCls("username")} />
@@ -164,7 +189,9 @@ function AccountModal({
               {errors.username && <p className="mt-1 text-[11px] text-red-500">{errors.username}</p>}
             </div>
             <div>
-              <label className="mb-1.5 block text-[12px] font-semibold text-slate-600">Email <span className="text-red-500">*</span></label>
+              <label className="mb-1.5 block text-[12px] font-semibold text-slate-600">
+                Email <span className="text-red-500">*</span>
+              </label>
               <div className="relative">
                 <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@dongnai.gov.vn" className={inputCls("email")} />
@@ -176,7 +203,9 @@ function AccountModal({
           {/* Password (only for add) */}
           {!isEdit && (
             <div>
-              <label className="mb-1.5 block text-[12px] font-semibold text-slate-600">Mật khẩu <span className="text-red-500">*</span></label>
+              <label className="mb-1.5 block text-[12px] font-semibold text-slate-600">
+                Mật khẩu <span className="text-red-500">*</span>
+              </label>
               <div className="relative">
                 <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Tối thiểu 6 ký tự" className={inputCls("password")} />
@@ -185,40 +214,67 @@ function AccountModal({
             </div>
           )}
 
-          {/* Role */}
+          {/* Role — text input */}
           <div>
-            <label className="mb-1.5 block text-[12px] font-semibold text-slate-600">Vai trò <span className="text-red-500">*</span></label>
-            <div className="grid grid-cols-3 gap-2">
-              {roles.map((r) => {
-                const cfg = roleConfig[r];
-                const Icon = cfg.icon;
-                const active = role === r;
+            <label className="mb-1.5 block text-[12px] font-semibold text-slate-600">
+              Vai trò <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <Shield className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                placeholder="Nhập vai trò"
+                className={inputCls("role")}
+              />
+            </div>
+            {errors.role && <p className="mt-1 text-[11px] text-red-500">{errors.role}</p>}
+          </div>
+
+          {/* Permissions */}
+          <div>
+            <label className="mb-3 block text-[12px] font-semibold text-slate-600">
+              Phân quyền truy cập
+            </label>
+            <div className="grid grid-cols-2 gap-y-2.5 gap-x-4 rounded-xl border border-[#e4e8f0] bg-[#f9fafb] p-4">
+              {ACCESS_MODULES.map((mod) => {
+                const checked = permissions.includes(mod);
                 return (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => setRole(r)}
-                    className={`flex flex-col items-center gap-1.5 rounded-xl border-2 p-3 text-center transition-all ${active ? "border-[#2740BA] bg-[#edf0ff]" : "border-[#e4e8f0] bg-white hover:border-[#2740BA]/40"}`}
+                  <label
+                    key={mod}
+                    className="flex cursor-pointer items-center gap-2.5 text-[12px] font-medium text-[#25304b] select-none"
                   >
-                    <Icon className={`h-5 w-5 ${active ? "text-[#2740BA]" : "text-slate-400"}`} strokeWidth={1.8} />
-                    <span className={`text-[11px] font-semibold ${active ? "text-[#2740BA]" : "text-slate-500"}`}>{r}</span>
-                  </button>
+                    <span
+                      onClick={() => togglePermission(mod)}
+                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
+                        checked
+                          ? "border-[#2740BA] bg-[#2740BA]"
+                          : "border-[#c4cbdf] bg-white hover:border-[#2740BA]"
+                      }`}
+                    >
+                      {checked && <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />}
+                    </span>
+                    <span onClick={() => togglePermission(mod)}>{mod}</span>
+                  </label>
                 );
               })}
             </div>
-            <p className="mt-2 text-[11px] text-slate-400">{roleConfig[role].desc}</p>
           </div>
 
           {/* Status */}
           <div className="flex items-center justify-between rounded-xl border border-[#e4e8f0] bg-[#f9fafb] px-4 py-3">
             <div>
               <p className="text-[12px] font-semibold text-[#25304b]">Trạng thái tài khoản</p>
-              <p className="mt-0.5 text-[11px] text-slate-400">{status === "Đang hoạt động" ? "Tài khoản có thể đăng nhập và sử dụng hệ thống" : "Tài khoản bị tạm khóa, không thể đăng nhập"}</p>
+              <p className="mt-0.5 text-[11px] text-slate-400">
+                {status === "Đang hoạt động"
+                  ? "Tài khoản có thể đăng nhập và sử dụng hệ thống"
+                  : "Tài khoản bị tạm khóa, không thể đăng nhập"}
+              </p>
             </div>
             <button
               type="button"
-              onClick={() => setStatus(s => s === "Đang hoạt động" ? "Tạm khóa" : "Đang hoạt động")}
-              className={`relative h-6 w-11 rounded-full transition-colors ${status === "Đang hoạt động" ? "bg-[#2740BA]" : "bg-slate-300"}`}
+              onClick={() => setStatus((s) => s === "Đang hoạt động" ? "Tạm khóa" : "Đang hoạt động")}
+              className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${status === "Đang hoạt động" ? "bg-[#2740BA]" : "bg-slate-300"}`}
             >
               <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${status === "Đang hoạt động" ? "translate-x-5" : "translate-x-0.5"}`} />
             </button>
@@ -226,10 +282,17 @@ function AccountModal({
 
           {/* Actions */}
           <div className="flex gap-3 border-t border-[#e4e8f0] pt-4">
-            <button type="button" onClick={onClose} className="flex-1 rounded-xl border border-[#e4e8f0] py-3 text-[13px] font-semibold text-slate-600 transition-colors hover:border-[#2740BA] hover:text-[#2740BA]">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 rounded-xl border border-[#e4e8f0] py-3 text-[13px] font-semibold text-slate-600 transition-colors hover:border-[#2740BA] hover:text-[#2740BA]"
+            >
               Hủy
             </button>
-            <button type="submit" className="flex-1 rounded-xl bg-[#2740BA] py-3 text-[13px] font-bold text-white shadow-[0_4px_14px_rgba(39,64,186,.25)] transition-colors hover:bg-[#1e33a0]">
+            <button
+              type="submit"
+              className="flex-1 rounded-xl bg-[#2740BA] py-3 text-[13px] font-bold text-white shadow-[0_4px_14px_rgba(39,64,186,.25)] transition-colors hover:bg-[#1e33a0]"
+            >
               {isEdit ? "Lưu thay đổi" : "Tạo tài khoản"}
             </button>
           </div>
