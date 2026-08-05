@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import {
   Download,
@@ -17,7 +17,24 @@ import {
   PackageCheck,
   FileStack,
   Cpu,
+  Search,
+  X,
+  ExternalLink,
+  Upload,
+  CheckCheck,
+  Package,
+  Loader2,
 } from "lucide-react";
+import {
+  useListPortalLots,
+  useGetPortalLotDetail,
+  usePushToPortal,
+} from "@workspace/api-client-react";
+import type {
+  PortalLotItem,
+  PortalLotDetail,
+  ListPortalLotsSyncStatus,
+} from "@workspace/api-client-react";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type SyncStatus = "success" | "error" | "partial" | "pending";
@@ -303,68 +320,522 @@ function MonitorTab() {
 }
 
 // ─── Push Tab (UC-84) ─────────────────────────────────────────────────────────
-function PushTab() {
+// ─── Portal Sync Modal ───────────────────────────────────────────────────────
+
+function fmtDate(iso: string | null | undefined) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function isImageUrl(url: string | null | undefined) {
+  if (!url) return false;
+  return /\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i.test(url);
+}
+
+interface SyncModalProps {
+  lotId: number;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+function SyncModal({ lotId, onClose, onSuccess }: SyncModalProps) {
+  const { data: detail, isLoading } = useGetPortalLotDetail(lotId);
+  const pushMutation = usePushToPortal();
+
+  const [province, setProvince] = useState<string>("");
+  const [productionZone, setProductionZone] = useState<string>("");
+  const [locationOverrides, setLocationOverrides] = useState<Record<string, string>>({});
+  const [pushed, setPushed] = useState(false);
+  const [pushedUrl, setPushedUrl] = useState<string | null>(null);
+
+  // Pre-fill once detail loads
+  useEffect(() => {
+    if (detail) {
+      setProvince(detail.province ?? "Đồng Nai");
+      setProductionZone(detail.productionZone ?? "");
+    }
+  }, [detail?.id]);
+
+  const handlePush = async () => {
+    if (!detail) return;
+    const stepOverrides = detail.txngSteps
+      .filter((s) => locationOverrides[s.stepType])
+      .map((s) => ({
+        stepType: s.stepType,
+        stepName: s.stepName,
+        startTime: s.startTime ?? null,
+        endTime: s.endTime ?? null,
+        executor: s.executor ?? null,
+        locationCode: locationOverrides[s.stepType] || s.locationCode || null,
+        description: s.description ?? null,
+        evidenceUrl: s.evidenceUrl ?? null,
+      }));
+
+    try {
+      const result = await pushMutation.mutateAsync({
+        lotId,
+        data: { province, productionZone, stepOverrides },
+      });
+      setPushedUrl(result.portalUrl);
+      setPushed(true);
+      onSuccess();
+    } catch {
+      // error handled by mutation state
+    }
+  };
+
   return (
-    <div className="space-y-5">
-      {/* Push targets */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {[
-          { target: "Portal Đồng Nai", total: 2283, today: 520, rate: "100%",  color: "#2740BA", status: "active" as const },
-          { target: "App Mobile",      total: 1820, today: 380, rate: "98.4%", color: "#4f9a77", status: "active" as const },
-          { target: "Cổng TXNG Quốc gia", total: 48520, today: 1200, rate: "99.2%", color: "#6b5ce7", status: "active" as const },
-        ].map((t) => (
-          <div key={t.target} className="rounded-2xl border border-[#e4e8f0] bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <p className="font-bold text-[#1d2944]">{t.target}</p>
-              <span className="h-2 w-2 rounded-full bg-[#4caf7d]" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-[#e4e8f0] px-6 py-4">
+          <p className="text-[13px] font-bold uppercase tracking-wide text-[#1d2944]">
+            Đồng bộ lên cổng thông tin truy xuất nguồn gốc sản phẩm, hàng hóa quốc gia
+          </p>
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-[#f1f3f9] hover:text-slate-600"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+          {isLoading ? (
+            <div className="flex h-40 items-center justify-center">
+              <Loader2 className="h-6 w-6 animate-spin text-[#2740BA]" />
             </div>
-            <div className="mt-4 space-y-2.5 text-[12px]">
-              <div className="flex justify-between"><span className="text-slate-400">Đẩy hôm nay</span><span className="font-semibold" style={{ color: t.color }}>{t.today.toLocaleString()} bản ghi</span></div>
-              <div className="flex justify-between"><span className="text-slate-400">Tổng cộng</span><span className="font-semibold text-[#25304b]">{t.total.toLocaleString()}</span></div>
-              <div className="flex justify-between"><span className="text-slate-400">Tỷ lệ thành công</span><span className="font-semibold text-[#1f7a45]">{t.rate}</span></div>
-            </div>
-            <button className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl border border-[#e4e8f0] py-2 text-[11px] font-semibold text-slate-600 hover:border-[#2740BA] hover:text-[#2740BA]">
-              <Play className="h-3 w-3" /> Đẩy ngay
+          ) : !detail ? (
+            <p className="text-center text-slate-400">Không tìm thấy dữ liệu</p>
+          ) : (
+            <>
+              {/* Portal link */}
+              {(pushed || detail.syncStatus === "synced") && (
+                <div className="flex items-center gap-2 rounded-xl border border-[#c9ddf4] bg-[#f3f8ff] px-4 py-2.5 text-[12px]">
+                  <ExternalLink className="h-3.5 w-3.5 text-[#2740BA]" />
+                  <span className="text-slate-500">Link sau khi đưa lên cổng:</span>
+                  <a
+                    href={pushedUrl ?? detail.portalUrl ?? "#"}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-semibold text-[#2740BA] underline"
+                  >
+                    {pushedUrl ?? detail.portalUrl ?? "Link"}
+                  </a>
+                </div>
+              )}
+
+              {/* Basic info */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                    Mã GTIN <span className="text-[#c0392b]">*</span>
+                  </label>
+                  <input
+                    readOnly
+                    value={detail.gtin}
+                    className="w-full rounded-xl border border-[#e4e8f0] bg-[#f9fafb] px-3.5 py-2.5 text-[12px] font-mono text-[#25304b]"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                    Số lô/mẻ <span className="text-[#c0392b]">*</span>
+                  </label>
+                  <input
+                    readOnly
+                    value={detail.lotCode}
+                    className="w-full rounded-xl border border-[#e4e8f0] bg-[#f9fafb] px-3.5 py-2.5 text-[12px] font-mono text-[#25304b]"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                    Tỉnh thành <span className="text-[#c0392b]">*</span>
+                  </label>
+                  <input
+                    value={province}
+                    onChange={(e) => setProvince(e.target.value)}
+                    className="w-full rounded-xl border border-[#e4e8f0] bg-white px-3.5 py-2.5 text-[12px] text-[#25304b] outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                    Ngành hàng <span className="text-[#c0392b]">*</span>
+                  </label>
+                  <input
+                    readOnly
+                    value={detail.industryName}
+                    className="w-full rounded-xl border border-[#e4e8f0] bg-[#f9fafb] px-3.5 py-2.5 text-[12px] text-[#25304b]"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                    Vùng trồng/sản xuất <span className="text-[#c0392b]">*</span>
+                  </label>
+                  <input
+                    value={productionZone}
+                    onChange={(e) => setProductionZone(e.target.value)}
+                    className="w-full rounded-xl border border-[#e4e8f0] bg-white px-3.5 py-2.5 text-[12px] text-[#25304b] outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15"
+                    placeholder="Ví dụ: Vùng bưởi Tân Triều, Xuân Lộc..."
+                  />
+                </div>
+              </div>
+
+              {/* TXNG Steps */}
+              {detail.txngSteps.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-[#e4e8f0] p-5 text-center text-[12px] text-slate-400">
+                  Chưa có công đoạn TXNG nào được đơn vị cung cấp giải pháp đẩy lên.
+                  <br />
+                  Các công đoạn bắt buộc:{" "}
+                  <span className="font-semibold text-[#E8650A]">
+                    {detail.requiredStepTypes.join(", ")}
+                  </span>
+                </div>
+              ) : (
+                detail.txngSteps.map((step) => (
+                  <div
+                    key={step.stepType}
+                    className="overflow-hidden rounded-2xl border border-[#e4e8f0]"
+                  >
+                    <div className="border-b border-[#e4e8f0] bg-[#f7f8fd] px-5 py-3">
+                      <p className="text-[13px] font-bold text-[#1d2944]">{step.stepName}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 p-5">
+                      <div>
+                        <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                          Thời gian bắt đầu
+                        </p>
+                        <p className="text-[12px] text-[#25304b]">{fmtDate(step.startTime)}</p>
+                      </div>
+                      <div>
+                        <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                          Thời gian kết thúc
+                        </p>
+                        <p className="text-[12px] text-[#25304b]">{fmtDate(step.endTime)}</p>
+                      </div>
+                      <div>
+                        <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                          Người thực hiện
+                        </p>
+                        <p className="text-[12px] text-[#25304b]">{step.executor ?? "—"}</p>
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                          Mã truy vết địa điểm sản xuất{" "}
+                          <span className="text-[#c0392b]">*</span>
+                        </label>
+                        <input
+                          value={
+                            locationOverrides[step.stepType] !== undefined
+                              ? locationOverrides[step.stepType]
+                              : (step.locationCode ?? "")
+                          }
+                          onChange={(e) =>
+                            setLocationOverrides((prev) => ({
+                              ...prev,
+                              [step.stepType]: e.target.value,
+                            }))
+                          }
+                          placeholder="Nhập mã truy vết..."
+                          className="w-full rounded-xl border border-[#e4e8f0] bg-white px-3 py-2 text-[12px] text-[#25304b] outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15"
+                        />
+                      </div>
+                      {step.description && (
+                        <div className="col-span-2">
+                          <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                            Mô tả
+                          </p>
+                          <p className="text-[12px] text-[#25304b]">{step.description}</p>
+                        </div>
+                      )}
+                      {step.evidenceUrl && (
+                        <div className="col-span-2">
+                          <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                            URL ảnh minh chứng
+                          </p>
+                          <div className="flex items-start gap-3">
+                            <input
+                              readOnly
+                              value={step.evidenceUrl}
+                              className="flex-1 rounded-xl border border-[#e4e8f0] bg-[#f9fafb] px-3 py-2 text-[11px] font-mono text-slate-500"
+                            />
+                            {isImageUrl(step.evidenceUrl) && (
+                              <img
+                                src={step.evidenceUrl}
+                                alt="minh chứng"
+                                className="h-16 w-24 rounded-xl border border-[#e4e8f0] object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).style.display = "none";
+                                }}
+                              />
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 border-t border-[#e4e8f0] px-6 py-4">
+          <button
+            onClick={onClose}
+            className="rounded-xl border border-[#e4e8f0] px-5 py-2.5 text-[12px] font-semibold text-slate-600 hover:border-slate-300 hover:bg-[#f9fafb]"
+          >
+            Hủy
+          </button>
+          {!pushed && detail?.syncStatus !== "synced" && (
+            <button
+              onClick={handlePush}
+              disabled={
+                pushMutation.isPending ||
+                !detail?.isComplete ||
+                isLoading
+              }
+              className="flex items-center gap-2 rounded-xl bg-[#2740BA] px-5 py-2.5 text-[12px] font-bold text-white shadow-sm hover:bg-[#1e339e] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {pushMutation.isPending ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Đang đẩy lên...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-3.5 w-3.5" /> Lưu & đẩy lên cổng
+                </>
+              )}
             </button>
+          )}
+          {(pushed || detail?.syncStatus === "synced") && (
+            <div className="flex items-center gap-2 rounded-xl bg-[#e8f5ed] px-5 py-2.5 text-[12px] font-bold text-[#1f7a45]">
+              <CheckCheck className="h-3.5 w-3.5" /> Đã đồng bộ thành công
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Portal Sync Tab ─────────────────────────────────────────────────────────
+
+function PushTab() {
+  type FilterStatus = "all" | "not_synced" | "synced";
+
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
+  const [searchGtin, setSearchGtin] = useState("");
+  const [searchLot, setSearchLot] = useState("");
+  const [searchBusiness, setSearchBusiness] = useState("");
+  const [searchProduct, setSearchProduct] = useState("");
+  const [selectedLotId, setSelectedLotId] = useState<number | null>(null);
+
+  const { data, isLoading, refetch } = useListPortalLots({
+    syncStatus: filterStatus as ListPortalLotsSyncStatus,
+    gtin: searchGtin || undefined,
+    lotCode: searchLot || undefined,
+    businessName: searchBusiness || undefined,
+    productName: searchProduct || undefined,
+    pageSize: 50,
+  });
+
+  const lots = data?.data ?? [];
+  const total = data?.total ?? 0;
+  const notSyncedCount = data?.notSyncedCount ?? 0;
+  const syncedCount = data?.syncedCount ?? 0;
+
+  const tabs: { id: FilterStatus; label: string; count: number; cls: string }[] = [
+    { id: "all",        label: "Tất cả",         count: total,          cls: filterStatus === "all"        ? "bg-[#2740BA] text-white" : "bg-[#edf0ff] text-[#2740BA] hover:bg-[#dde2ff]" },
+    { id: "not_synced", label: "Chưa đồng bộ",   count: notSyncedCount, cls: filterStatus === "not_synced" ? "bg-[#E8650A] text-white" : "bg-[#fff4ed] text-[#E8650A] hover:bg-[#ffe8d5]" },
+    { id: "synced",     label: "Đã đồng bộ",     count: syncedCount,    cls: filterStatus === "synced"     ? "bg-[#1f7a45] text-white" : "bg-[#e8f5ed] text-[#1f7a45] hover:bg-[#d5eddf]" },
+  ];
+
+  return (
+    <div className="space-y-4">
+      {/* Section header */}
+      <div>
+        <h3 className="text-[15px] font-bold tracking-[-0.03em] text-[#1d2944]">
+          Đồng bộ dữ liệu cổng thông tin TXNG QG
+        </h3>
+        <p className="mt-0.5 text-[11px] text-slate-400">
+          Xem xét hồ sơ hoàn thiện và đẩy lên Cổng thông tin truy xuất nguồn gốc sản phẩm, hàng hóa quốc gia
+        </p>
+      </div>
+
+      {/* Status filter badges */}
+      <div className="flex flex-wrap items-center gap-2">
+        {tabs.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setFilterStatus(t.id)}
+            className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[12px] font-bold transition-colors ${t.cls}`}
+          >
+            {t.label}
+            <span
+              className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+                filterStatus === t.id
+                  ? "bg-white/25 text-white"
+                  : "bg-white/80 text-current"
+              }`}
+            >
+              {t.count}
+            </span>
+          </button>
+        ))}
+        <button
+          onClick={() => refetch()}
+          className="ml-auto rounded-xl border border-[#e4e8f0] p-2 text-slate-400 hover:border-[#2740BA] hover:text-[#2740BA]"
+          title="Làm mới"
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+        </button>
+      </div>
+
+      {/* Search bar */}
+      <div className="flex flex-wrap gap-2">
+        {[
+          { placeholder: "Lô thương phẩm", value: searchLot, set: setSearchLot },
+          { placeholder: "Tên doanh nghiệp", value: searchBusiness, set: setSearchBusiness },
+          { placeholder: "Tên thương phẩm", value: searchProduct, set: setSearchProduct },
+          { placeholder: "GTIN", value: searchGtin, set: setSearchGtin },
+        ].map(({ placeholder, value, set }) => (
+          <div key={placeholder} className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <input
+              value={value}
+              onChange={(e) => set(e.target.value)}
+              placeholder={placeholder}
+              className="h-9 rounded-xl border border-[#e4e8f0] bg-[#f9fafb] pl-8 pr-3 text-[12px] text-[#25304b] outline-none transition focus:border-[#2740BA] focus:bg-white focus:ring-2 focus:ring-[#2740BA]/15"
+            />
           </div>
         ))}
       </div>
 
-      {/* Push job table */}
+      {/* Table */}
       <div className="overflow-hidden rounded-2xl border border-[#e4e8f0] bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-[#e4e8f0] bg-[#f9fafb] px-5 py-3">
-          <p className="text-[12px] font-bold text-[#1d2944]">Lịch sử đẩy dữ liệu (UC-84)</p>
-          <button className="flex items-center gap-1.5 rounded-xl bg-[#E8650A] px-3.5 py-2 text-[11px] font-bold text-white hover:bg-[#d95c08]">
-            <Play className="h-3.5 w-3.5" /> Đẩy toàn bộ
-          </button>
-        </div>
         <table className="min-w-full text-[12px]">
           <thead>
             <tr className="border-b border-[#e4e8f0] bg-[#f9fafb]">
-              {["Mã", "Đích", "Loại dữ liệu", "Số bản ghi", "Thời gian", "Trạng thái"].map((h) => (
-                <th key={h} className="whitespace-nowrap px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">{h}</th>
-              ))}
+              {["STT", "GTIN / Thương phẩm", "Lô thương phẩm", "Doanh nghiệp", "Ngày kích hoạt", "Trạng thái đồng bộ VNTP", "Thao tác"].map(
+                (h) => (
+                  <th
+                    key={h}
+                    className="whitespace-nowrap px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400"
+                  >
+                    {h}
+                  </th>
+                ),
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-[#f0f2f8]">
-            {pushJobs.map((job) => {
-              const cfg = statusCfg[job.status];
-              return (
-                <tr key={job.id} className="hover:bg-[#f7f8fd]">
-                  <td className="whitespace-nowrap px-4 py-3 font-mono text-[10px] text-slate-400">{job.id}</td>
-                  <td className="px-4 py-3 font-semibold text-[#25304b]">{job.target}</td>
-                  <td className="px-4 py-3 text-slate-500">{job.type}</td>
-                  <td className="px-4 py-3 font-semibold text-[#25304b]">{job.records.toLocaleString()}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-slate-400">{job.time}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${cfg.cls}`}>{cfg.label}</span>
+            {isLoading ? (
+              <tr>
+                <td colSpan={7} className="px-4 py-10 text-center">
+                  <Loader2 className="mx-auto h-5 w-5 animate-spin text-[#2740BA]" />
+                </td>
+              </tr>
+            ) : lots.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="px-4 py-10 text-center text-slate-400">
+                  Không có dữ liệu phù hợp
+                </td>
+              </tr>
+            ) : (
+              lots.map((lot, idx) => (
+                <tr key={lot.id} className="hover:bg-[#f9fafb] transition-colors">
+                  <td className="px-4 py-3.5 text-slate-400">{idx + 1}</td>
+                  <td className="px-4 py-3.5">
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#e4e8f0] bg-[#f9fafb]">
+                        {lot.imageUrl ? (
+                          <img
+                            src={lot.imageUrl}
+                            alt=""
+                            className="h-7 w-7 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <Package className="h-4 w-4 text-slate-300" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-[#25304b]">{lot.productName}</p>
+                        <p className="font-mono text-[10px] text-slate-400">GTIN: {lot.gtin}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3.5 font-mono font-semibold text-[#2740BA]">
+                    {lot.lotCode}
+                  </td>
+                  <td className="px-4 py-3.5 text-slate-500">{lot.businessName}</td>
+                  <td className="whitespace-nowrap px-4 py-3.5 text-slate-400">
+                    {fmtDate(lot.activatedAt)}
+                  </td>
+                  <td className="px-4 py-3.5">
+                    {lot.syncStatus === "synced" ? (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-[#b8e2c8] bg-[#e8f5ed] px-2.5 py-0.5 text-[10px] font-bold text-[#1f7a45]">
+                        <CheckCheck className="h-3 w-3" /> Đã đồng bộ
+                      </span>
+                    ) : lot.isComplete ? (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-[#fcd9bb] bg-[#fff4ed] px-2.5 py-0.5 text-[10px] font-bold text-[#E8650A]">
+                        <Upload className="h-3 w-3" /> Chưa đồng bộ
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-[#d9dce9] bg-[#f2f3f7] px-2.5 py-0.5 text-[10px] font-bold text-[#6b7694]">
+                        <Clock className="h-3 w-3" /> Thiếu dữ liệu TXNG
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <div className="flex items-center gap-1.5">
+                      {lot.syncStatus === "synced" ? (
+                        <a
+                          href={lot.portalUrl ?? "#"}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-lg p-1.5 text-[#1f7a45] hover:bg-[#e8f5ed]"
+                          title="Xem trên cổng"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      ) : (
+                        <button
+                          onClick={() => setSelectedLotId(lot.id)}
+                          disabled={!lot.isComplete}
+                          title={lot.isComplete ? "Đẩy lên cổng" : "Hồ sơ chưa hoàn thiện — cần đơn vị giải pháp đẩy dữ liệu TXNG"}
+                          className="flex items-center gap-1 rounded-lg border border-[#2740BA] px-2.5 py-1 text-[10px] font-semibold text-[#2740BA] hover:bg-[#edf0ff] disabled:cursor-not-allowed disabled:border-[#d9dce9] disabled:text-slate-400"
+                        >
+                          <Upload className="h-3 w-3" /> Đẩy lên cổng
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
-              );
-            })}
+              ))
+            )}
           </tbody>
         </table>
       </div>
+
+      {/* Modal */}
+      {selectedLotId !== null && (
+        <SyncModal
+          lotId={selectedLotId}
+          onClose={() => setSelectedLotId(null)}
+          onSuccess={() => {
+            refetch();
+          }}
+        />
+      )}
     </div>
   );
 }

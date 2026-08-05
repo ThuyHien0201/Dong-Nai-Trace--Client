@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: sync
+    description: Portal sync — TXNG QG national traceability portal
 paths:
   /healthz:
     get:
@@ -24,6 +26,143 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /sync/portal-lots:
+    get:
+      operationId: listPortalLots
+      tags: [sync]
+      summary: List product lots for portal sync
+      description: Returns product lots with their sync status. Used by the admin to review and push records to the national TXNG QG portal.
+      parameters:
+        - name: syncStatus
+          in: query
+          description: Filter by sync status
+          schema:
+            type: string
+            enum: [all, not_synced, synced]
+            default: all
+        - name: gtin
+          in: query
+          schema:
+            type: string
+        - name: lotCode
+          in: query
+          schema:
+            type: string
+        - name: businessName
+          in: query
+          schema:
+            type: string
+        - name: productName
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PortalLotListResponse"
+
+  /sync/portal-lots/{lotId}:
+    get:
+      operationId: getPortalLotDetail
+      tags: [sync]
+      summary: Get lot detail including all TXNG steps
+      parameters:
+        - name: lotId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PortalLotDetail"
+        "404":
+          description: Not found
+
+  /sync/portal-lots/{lotId}/steps:
+    post:
+      operationId: pushTxngSteps
+      tags: [sync]
+      summary: Push TXNG process steps (solution provider API)
+      description: |
+        Called by an external solution provider to supply traceability process
+        steps for a product lot. Each call upserts steps by stepType — pushing
+        the same stepType twice replaces the previous entry.
+        No authentication required in the current development environment.
+      parameters:
+        - name: lotId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PushTxngStepsRequest"
+      responses:
+        "200":
+          description: Steps saved, returns updated lot completeness info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PushTxngStepsResponse"
+        "404":
+          description: Lot not found
+
+  /sync/portal-lots/{lotId}/push-to-portal:
+    post:
+      operationId: pushToPortal
+      tags: [sync]
+      summary: Push a completed lot record to the national TXNG QG portal
+      description: |
+        Marks a product lot as synced to the national traceability portal.
+        Currently mocked — sets sync_status to "synced" and returns a simulated
+        portal URL. Replace the mock with a real portal API call when available.
+      parameters:
+        - name: lotId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PushToPortalRequest"
+      responses:
+        "200":
+          description: Successfully synced
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PushToPortalResponse"
+        "400":
+          description: Lot is incomplete — required TXNG steps are missing
+        "404":
+          description: Lot not found
+        "409":
+          description: Lot already synced
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +173,224 @@ components:
       required:
         - status
 
+    TxngStepItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        lotId:
+          type: integer
+        stepType:
+          type: string
+          description: Machine key e.g. thu_mua, dong_goi, van_chuyen
+        stepName:
+          type: string
+          description: Display label e.g. "Thu mua", "Đóng gói"
+        startTime:
+          type: string
+          format: date-time
+          nullable: true
+        endTime:
+          type: string
+          format: date-time
+          nullable: true
+        executor:
+          type: string
+          nullable: true
+        locationCode:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        evidenceUrl:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - lotId
+        - stepType
+        - stepName
+        - createdAt
+
+    PortalLotItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        lotCode:
+          type: string
+        gtin:
+          type: string
+        productName:
+          type: string
+        businessName:
+          type: string
+        industryName:
+          type: string
+        imageUrl:
+          type: string
+          nullable: true
+        activatedAt:
+          type: string
+          format: date-time
+          nullable: true
+        syncStatus:
+          type: string
+          enum: [not_synced, synced]
+        syncedAt:
+          type: string
+          format: date-time
+          nullable: true
+        portalUrl:
+          type: string
+          nullable: true
+        isComplete:
+          type: boolean
+          description: True when all required TXNG steps for the industry are present
+      required:
+        - id
+        - lotCode
+        - gtin
+        - productName
+        - businessName
+        - industryName
+        - syncStatus
+        - isComplete
+
+    PortalLotDetail:
+      allOf:
+        - $ref: "#/components/schemas/PortalLotItem"
+        - type: object
+          properties:
+            province:
+              type: string
+              nullable: true
+            productionZone:
+              type: string
+              nullable: true
+            industryCode:
+              type: string
+            requiredStepTypes:
+              type: array
+              items:
+                type: string
+            txngSteps:
+              type: array
+              items:
+                $ref: "#/components/schemas/TxngStepItem"
+          required:
+            - industryCode
+            - requiredStepTypes
+            - txngSteps
+
+    PortalLotListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/PortalLotItem"
+        total:
+          type: integer
+        notSyncedCount:
+          type: integer
+        syncedCount:
+          type: integer
+      required:
+        - data
+        - total
+        - notSyncedCount
+        - syncedCount
+
+    PushTxngStepItem:
+      type: object
+      properties:
+        stepType:
+          type: string
+        stepName:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+          nullable: true
+        endTime:
+          type: string
+          format: date-time
+          nullable: true
+        executor:
+          type: string
+          nullable: true
+        locationCode:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        evidenceUrl:
+          type: string
+          nullable: true
+      required:
+        - stepType
+        - stepName
+
+    PushTxngStepsRequest:
+      type: object
+      properties:
+        steps:
+          type: array
+          items:
+            $ref: "#/components/schemas/PushTxngStepItem"
+          minItems: 1
+      required:
+        - steps
+
+    PushTxngStepsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        isComplete:
+          type: boolean
+        txngSteps:
+          type: array
+          items:
+            $ref: "#/components/schemas/TxngStepItem"
+      required:
+        - success
+        - isComplete
+        - txngSteps
+
+    PushToPortalRequest:
+      type: object
+      properties:
+        province:
+          type: string
+          nullable: true
+        productionZone:
+          type: string
+          nullable: true
+        stepOverrides:
+          description: Optional per-step field overrides (e.g. fill in missing locationCode)
+          type: array
+          items:
+            $ref: "#/components/schemas/PushTxngStepItem"
+      required: []
+
+    PushToPortalResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        portalUrl:
+          type: string
+        syncedAt:
+          type: string
+          format: date-time
+      required:
+        - success
+        - portalUrl
+        - syncedAt
