@@ -17,17 +17,16 @@ import {
   Building2,
   FileText,
   ArrowLeft,
-  CheckCircle,
-  XCircle,
+  QrCode,
   ChevronUp,
   ArrowUpDown,
-  QrCode,
-  Copy,
-  BadgeCheck,
   MoreHorizontal,
   SlidersHorizontal,
   LayoutGrid,
   List,
+  Trash2,
+  Phone,
+  MapPin,
 } from "lucide-react";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -46,25 +45,26 @@ interface Business {
   representative: string;
   phone: string;
   businessCode: string | null;
+  imageUrl: string;
 }
 
 // ─── Mock data ─────────────────────────────────────────────────────────────────
 const initialBusinesses: Business[] = [
-  { id: "DN-001", name: "Công ty TNHH Nông sản An Phú", taxCode: "3601234567", region: "Biên Hòa", sector: "Nông sản", status: "Đã duyệt", registeredAt: "12/10/2024", representative: "Nguyễn Văn An", phone: "0901 234 567", businessCode: "DNT-2024-0001" },
-  { id: "DN-002", name: "HTX Nông nghiệp Xuân Lộc", taxCode: "3607654321", region: "Xuân Lộc", sector: "OCOP", status: "Chờ duyệt", registeredAt: "18/12/2024", representative: "Trần Thị Bình", phone: "0912 345 678", businessCode: null },
-  { id: "DN-003", name: "Công ty CP Thực phẩm Đồng Nai", taxCode: "3601112233", region: "Long Khánh", sector: "Thực phẩm CB", status: "Đã duyệt", registeredAt: "05/09/2024", representative: "Lê Hoàng Nam", phone: "0923 456 789", businessCode: "DNT-2024-0002" },
-  { id: "DN-004", name: "Trại nuôi thủy sản Nhơn Trạch", taxCode: "3608889900", region: "Nhơn Trạch", sector: "Thủy sản", status: "Từ chối", registeredAt: "22/11/2024", representative: "Phạm Minh Cường", phone: "0934 567 890", businessCode: null },
-  { id: "DN-005", name: "Trang trại hữu cơ Long Thành", taxCode: "3605556677", region: "Long Thành", sector: "Nông sản", status: "Đã khóa", registeredAt: "01/08/2024", representative: "Vũ Thị Dung", phone: "0945 678 901", businessCode: "DNT-2024-0003" },
-  { id: "DN-006", name: "Cơ sở chế biến Bưởi Tân Triều", taxCode: "3602223344", region: "Vĩnh Cửu", sector: "OCOP", status: "Chờ duyệt", registeredAt: "15/12/2024", representative: "Đỗ Văn Em", phone: "0956 789 012", businessCode: null },
-  { id: "DN-007", name: "Công ty TNHH Dược liệu Định Quán", taxCode: "3609990011", region: "Định Quán", sector: "Dược liệu", status: "Đã duyệt", registeredAt: "30/07/2024", representative: "Bùi Thị Phương", phone: "0967 890 123", businessCode: "DNT-2024-0004" },
-  { id: "DN-008", name: "HTX Chăn nuôi Tân Phú", taxCode: "3604445566", region: "Tân Phú", sector: "Chăn nuôi", status: "Chờ duyệt", registeredAt: "19/12/2024", representative: "Hoàng Văn Giang", phone: "0978 901 234", businessCode: null },
-  { id: "DN-009", name: "Công ty TNHH Xuất khẩu Xoài Đồng Nai", taxCode: "3603334455", region: "Cao Lãnh", sector: "Nông sản", status: "Đã duyệt", registeredAt: "14/06/2024", representative: "Nguyễn Thị Hoa", phone: "0989 012 345", businessCode: "DNT-2024-0005" },
-  { id: "DN-010", name: "HTX Nông nghiệp Sạch Trảng Bom", taxCode: "3606667788", region: "Trảng Bom", sector: "Nông sản", status: "Chờ duyệt", registeredAt: "20/12/2024", representative: "Trần Văn Inh", phone: "0990 123 456", businessCode: null },
-  { id: "DN-011", name: "Công ty CP Chế biến Cacao Việt", taxCode: "3600001122", region: "Biên Hòa", sector: "Thực phẩm CB", status: "Đã duyệt", registeredAt: "28/05/2024", representative: "Lê Thị Kim", phone: "0901 234 567", businessCode: "DNT-2024-0006" },
-  { id: "DN-012", name: "Trang trại hữu cơ Xuân Thành", taxCode: "3607778899", region: "Xuân Lộc", sector: "Nông sản", status: "Từ chối", registeredAt: "08/11/2024", representative: "Phạm Văn Long", phone: "0912 345 678", businessCode: null },
-  { id: "DN-013", name: "Cơ sở nuôi trồng Đông trùng Hạ thảo", taxCode: "3608881122", region: "Định Quán", sector: "Dược liệu", status: "Đã duyệt", registeredAt: "17/04/2024", representative: "Vũ Hoàng Minh", phone: "0923 456 789", businessCode: "DNT-2024-0007" },
-  { id: "DN-014", name: "HTX Thủy sản sạch Long Thành", taxCode: "3601113344", region: "Long Thành", sector: "Thủy sản", status: "Đã khóa", registeredAt: "03/03/2024", representative: "Đỗ Thị Nga", phone: "0934 567 890", businessCode: "DNT-2024-0008" },
-  { id: "DN-015", name: "Công ty TNHH OCOP Nhơn Trạch", taxCode: "3604445678", region: "Nhơn Trạch", sector: "OCOP", status: "Chờ duyệt", registeredAt: "21/12/2024", representative: "Bùi Văn Oanh", phone: "0945 678 901", businessCode: null },
+  { id: "DN-001", name: "Công ty TNHH Nông sản An Phú", taxCode: "3601234567", region: "Biên Hòa", sector: "Nông sản", status: "Đã duyệt", registeredAt: "12/10/2024", representative: "Nguyễn Văn An", phone: "0901 234 567", businessCode: "DNT-2024-0001", imageUrl: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400&h=220&fit=crop" },
+  { id: "DN-002", name: "HTX Nông nghiệp Xuân Lộc", taxCode: "3607654321", region: "Xuân Lộc", sector: "OCOP", status: "Chờ duyệt", registeredAt: "18/12/2024", representative: "Trần Thị Bình", phone: "0912 345 678", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=220&fit=crop" },
+  { id: "DN-003", name: "Công ty CP Thực phẩm Đồng Nai", taxCode: "3601112233", region: "Long Khánh", sector: "Thực phẩm CB", status: "Đã duyệt", registeredAt: "05/09/2024", representative: "Lê Hoàng Nam", phone: "0923 456 789", businessCode: "DNT-2024-0002", imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=220&fit=crop" },
+  { id: "DN-004", name: "Trại nuôi thủy sản Nhơn Trạch", taxCode: "3608889900", region: "Nhơn Trạch", sector: "Thủy sản", status: "Từ chối", registeredAt: "22/11/2024", representative: "Phạm Minh Cường", phone: "0934 567 890", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=220&fit=crop" },
+  { id: "DN-005", name: "Trang trại hữu cơ Long Thành", taxCode: "3605556677", region: "Long Thành", sector: "Nông sản", status: "Đã khóa", registeredAt: "01/08/2024", representative: "Vũ Thị Dung", phone: "0945 678 901", businessCode: "DNT-2024-0003", imageUrl: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=400&h=220&fit=crop" },
+  { id: "DN-006", name: "Cơ sở chế biến Bưởi Tân Triều", taxCode: "3602223344", region: "Vĩnh Cửu", sector: "OCOP", status: "Chờ duyệt", registeredAt: "15/12/2024", representative: "Đỗ Văn Em", phone: "0956 789 012", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1588165171080-c89acfa5ee83?w=400&h=220&fit=crop" },
+  { id: "DN-007", name: "Công ty TNHH Dược liệu Định Quán", taxCode: "3609990011", region: "Định Quán", sector: "Dược liệu", status: "Đã duyệt", registeredAt: "30/07/2024", representative: "Bùi Thị Phương", phone: "0967 890 123", businessCode: "DNT-2024-0004", imageUrl: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=400&h=220&fit=crop" },
+  { id: "DN-008", name: "HTX Chăn nuôi Tân Phú", taxCode: "3604445566", region: "Tân Phú", sector: "Chăn nuôi", status: "Chờ duyệt", registeredAt: "19/12/2024", representative: "Hoàng Văn Giang", phone: "0978 901 234", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=400&h=220&fit=crop" },
+  { id: "DN-009", name: "Công ty TNHH Xuất khẩu Xoài Đồng Nai", taxCode: "3603334455", region: "Cao Lãnh", sector: "Nông sản", status: "Đã duyệt", registeredAt: "14/06/2024", representative: "Nguyễn Thị Hoa", phone: "0989 012 345", businessCode: "DNT-2024-0005", imageUrl: "https://images.unsplash.com/photo-1553279768-865429fa0078?w=400&h=220&fit=crop" },
+  { id: "DN-010", name: "HTX Nông nghiệp Sạch Trảng Bom", taxCode: "3606667788", region: "Trảng Bom", sector: "Nông sản", status: "Chờ duyệt", registeredAt: "20/12/2024", representative: "Trần Văn Inh", phone: "0990 123 456", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&h=220&fit=crop" },
+  { id: "DN-011", name: "Công ty CP Chế biến Cacao Việt", taxCode: "3600001122", region: "Biên Hòa", sector: "Thực phẩm CB", status: "Đã duyệt", registeredAt: "28/05/2024", representative: "Lê Thị Kim", phone: "0901 234 567", businessCode: "DNT-2024-0006", imageUrl: "https://images.unsplash.com/photo-1606312619070-d48b4c652a52?w=400&h=220&fit=crop" },
+  { id: "DN-012", name: "Trang trại hữu cơ Xuân Thành", taxCode: "3607778899", region: "Xuân Lộc", sector: "Nông sản", status: "Từ chối", registeredAt: "08/11/2024", representative: "Phạm Văn Long", phone: "0912 345 678", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400&h=220&fit=crop" },
+  { id: "DN-013", name: "Cơ sở nuôi trồng Đông trùng Hạ thảo", taxCode: "3608881122", region: "Định Quán", sector: "Dược liệu", status: "Đã duyệt", registeredAt: "17/04/2024", representative: "Vũ Hoàng Minh", phone: "0923 456 789", businessCode: "DNT-2024-0007", imageUrl: "https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?w=400&h=220&fit=crop" },
+  { id: "DN-014", name: "HTX Thủy sản sạch Long Thành", taxCode: "3601113344", region: "Long Thành", sector: "Thủy sản", status: "Đã khóa", registeredAt: "03/03/2024", representative: "Đỗ Thị Nga", phone: "0934 567 890", businessCode: "DNT-2024-0008", imageUrl: "https://images.unsplash.com/photo-1534787238916-9ba6764efd4f?w=400&h=220&fit=crop" },
+  { id: "DN-015", name: "Công ty TNHH OCOP Nhơn Trạch", taxCode: "3604445678", region: "Nhơn Trạch", sector: "OCOP", status: "Chờ duyệt", registeredAt: "21/12/2024", representative: "Bùi Văn Oanh", phone: "0945 678 901", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1471193945509-9ad0617afabf?w=400&h=220&fit=crop" },
 ];
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
@@ -80,10 +80,6 @@ const statusConfig: Record<Status, { cls: string; icon: typeof Check }> = {
   "Từ chối": { cls: "bg-[#fef0f0] text-[#c0392b] border border-[#f5bcbc]", icon: X },
   "Đã khóa": { cls: "bg-[#f2f3f7] text-[#6b7694] border border-[#d9dce9]", icon: Lock },
 };
-
-function generateCode(seq: number) {
-  return `DNT-${new Date().getFullYear()}-${String(seq).padStart(4, "0")}`;
-}
 
 // ─── Shared ─────────────────────────────────────────────────────────────────────
 function StatusBadge({ status }: { status: Status }) {
@@ -113,8 +109,8 @@ function SelectFilter({ value, onChange, options }: { value: string; onChange: (
 }
 
 // ─── QR Code modal ──────────────────────────────────────────────────────────────
-function QrModal({ code, onClose }: { code: string; onClose: () => void }) {
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(code)}&color=2740BA&bgcolor=ffffff&margin=10`;
+function QrModal({ code, name, onClose }: { code: string; name: string; onClose: () => void }) {
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`https://trace.dongnai.gov.vn/dn/${code}`)}&color=2740BA&bgcolor=ffffff&margin=10`;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="w-full max-w-xs rounded-2xl bg-white p-6 shadow-2xl">
@@ -126,28 +122,26 @@ function QrModal({ code, onClose }: { code: string; onClose: () => void }) {
         </div>
         <div className="flex flex-col items-center gap-3">
           <img src={qrUrl} alt={`QR ${code}`} className="h-52 w-52 rounded-xl border border-[#e4e8f0] bg-white" />
-          <p className="font-mono text-[14px] font-bold text-[#2740BA]">{code}</p>
-          <p className="text-[11px] text-slate-400 text-center">Quét mã QR để xem thông tin truy xuất công khai</p>
+          <p className="font-mono text-[13px] font-bold text-[#2740BA]">{code}</p>
+          <p className="text-[11px] text-slate-500 font-medium text-center">{name}</p>
+          <p className="text-[10px] text-slate-400 text-center">Quét mã QR để xem thông tin truy xuất công khai</p>
         </div>
       </div>
     </div>
   );
 }
 
-// ─── Approval detail screen ─────────────────────────────────────────────────────
-function ApprovalDetail({
+// ─── Business Detail screen ─────────────────────────────────────────────────────
+function BusinessDetail({
   business,
   onBack,
-  onApproved,
+  onUpdate,
 }: {
   business: Business;
   onBack: () => void;
-  onApproved: (id: string, code: string) => void;
+  onUpdate: (id: string, updates: Partial<Business>) => void;
 }) {
   const [qrOpen, setQrOpen] = useState(false);
-  const issuedCode = business.businessCode ?? generateCode(initialBusinesses.filter((b) => b.businessCode).length + 1);
-
-  const isAlreadyDecided = business.status === "Đã duyệt" || business.status === "Từ chối" || business.status === "Đã khóa";
 
   const timelineItems = [
     { action: "Hồ sơ được tiếp nhận", actor: "Hệ thống tự động", time: "18/12/2024 08:30", color: "#2740BA", done: true },
@@ -163,9 +157,10 @@ function ApprovalDetail({
 
   return (
     <>
-      {qrOpen && (
+      {qrOpen && business.businessCode && (
         <QrModal
-          code={issuedCode}
+          code={business.businessCode}
+          name={business.name}
           onClose={() => setQrOpen(false)}
         />
       )}
@@ -189,8 +184,18 @@ function ApprovalDetail({
         </div>
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_380px]">
-          {/* ── LEFT: hồ sơ ────────────────────────────────────────────────────── */}
+          {/* ── LEFT ──────────────────────────────────────────────────── */}
           <div className="space-y-5">
+            {/* Cover image */}
+            <div className="overflow-hidden rounded-2xl border border-[#e4e8f0] shadow-[0_2px_12px_rgba(38,55,105,.04)]">
+              <img
+                src={business.imageUrl}
+                alt={business.name}
+                className="h-48 w-full object-cover"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+              />
+            </div>
+
             {/* Business info */}
             <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-[0_2px_12px_rgba(38,55,105,.04)]">
               <div className="mb-5 flex items-center gap-3">
@@ -222,13 +227,13 @@ function ApprovalDetail({
               </div>
 
               {/* Issued code (if approved) */}
-              {(decision === "approved" || business.status === "Đã duyệt") && (
+              {business.status === "Đã duyệt" && business.businessCode && (
                 <div className="mt-5 rounded-xl border border-[#b8e2c8] bg-[#e8f5ed] p-3.5">
                   <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#1f7a45]">Mã định danh tổ chức</p>
                   <div className="flex items-center gap-2">
                     <QrCode className="h-3.5 w-3.5 text-[#1f7a45]" />
                     <span className="font-mono text-[13px] font-bold tracking-wider text-[#1f7a45]">
-                      {business.businessCode ?? issuedCode}
+                      {business.businessCode}
                     </span>
                   </div>
                 </div>
@@ -263,7 +268,6 @@ function ApprovalDetail({
                   </div>
                 ))}
               </div>
-              {/* Preview placeholder */}
               <div className="mt-4 flex h-36 items-center justify-center rounded-xl border-2 border-dashed border-[#e4e8f0] bg-[#f9fafb] text-slate-400">
                 <div className="text-center">
                   <FileText className="mx-auto h-7 w-7 opacity-40" />
@@ -273,26 +277,18 @@ function ApprovalDetail({
             </div>
           </div>
 
-          {/* ── RIGHT: decision + timeline ──────────────────────────────────────── */}
+          {/* ── RIGHT ────────────────────────────────────────────────── */}
           <div className="space-y-5">
             {/* Status + Actions card */}
             <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-[0_2px_12px_rgba(38,55,105,.04)]">
               <p className="mb-4 text-[13px] font-bold text-[#1d2944]">Trạng thái & Thao tác</p>
 
-              {/* Status badge */}
-              <div className={`mb-4 flex items-center gap-3 rounded-xl border p-3.5 ${business.status === "Đã duyệt" ? "border-[#b8e2c8] bg-[#e8f5ed]" : business.status === "Từ chối" ? "border-[#f5bcbc] bg-[#fef0f0]" : "border-[#e4e8f0] bg-[#f7f8fd]"}`}>
-                {business.status === "Đã duyệt"
-                  ? <CheckCircle className="h-4 w-4 text-[#1f7a45] shrink-0" />
-                  : business.status === "Từ chối"
-                  ? <XCircle className="h-4 w-4 text-[#c0392b] shrink-0" />
-                  : <Clock className="h-4 w-4 text-[#E8650A] shrink-0" />}
-                <p className={`text-[12px] font-semibold ${business.status === "Đã duyệt" ? "text-[#1f7a45]" : business.status === "Từ chối" ? "text-[#c0392b]" : "text-[#E8650A]"}`}>
-                  {business.status === "Đã duyệt" ? "Đã được phê duyệt" : business.status === "Từ chối" ? "Đã bị từ chối" : business.status === "Đã khóa" ? "Tài khoản bị khóa" : "Đang chờ xử lý"}
-                </p>
+              <div className="mb-4">
+                <StatusBadge status={business.status} />
               </div>
 
-              {/* QR code button (approved) */}
-              {isAlreadyDecided && business.status === "Đã duyệt" && (
+              {/* QR code button (approved only) */}
+              {business.status === "Đã duyệt" && business.businessCode && (
                 <button
                   onClick={() => setQrOpen(true)}
                   className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-[#dce3ff] bg-[#f0f2ff] py-3 text-[12px] font-semibold text-[#2740BA] transition hover:bg-[#e4e8ff]"
@@ -301,13 +297,29 @@ function ApprovalDetail({
                 </button>
               )}
 
+              {/* Contact info */}
+              <div className="mb-4 space-y-2 rounded-xl border border-[#e4e8f0] bg-[#f9fafb] p-3.5">
+                <div className="flex items-center gap-2 text-[12px] text-slate-500">
+                  <Phone className="h-3.5 w-3.5 shrink-0 text-[#2740BA]" />
+                  <span>{business.phone}</span>
+                </div>
+                <div className="flex items-center gap-2 text-[12px] text-slate-500">
+                  <MapPin className="h-3.5 w-3.5 shrink-0 text-[#E8650A]" />
+                  <span>{business.region}, Đồng Nai</span>
+                </div>
+              </div>
+
               {/* Edit / Delete actions */}
               <div className="grid grid-cols-2 gap-3">
                 <button className="flex items-center justify-center gap-2 rounded-xl border border-[#e4e8f0] bg-white py-3 text-[12px] font-semibold text-slate-600 transition hover:border-[#2740BA] hover:text-[#2740BA]">
                   <Pencil className="h-3.5 w-3.5" /> Chỉnh sửa
                 </button>
-                <button className="flex items-center justify-center gap-2 rounded-xl border border-[#e04040] bg-white py-3 text-[12px] font-semibold text-[#c0392b] transition hover:bg-[#fef0f0]">
-                  <Trash2 className="h-3.5 w-3.5" /> Xóa
+                <button
+                  onClick={() => onUpdate(business.id, { status: business.status === "Đã khóa" ? "Đã duyệt" : "Đã khóa" })}
+                  className="flex items-center justify-center gap-2 rounded-xl border border-[#e4e8f0] bg-white py-3 text-[12px] font-semibold text-slate-600 transition hover:border-[#E8650A] hover:text-[#E8650A]"
+                >
+                  {business.status === "Đã khóa" ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                  {business.status === "Đã khóa" ? "Mở khóa" : "Khóa"}
                 </button>
               </div>
             </div>
@@ -360,13 +372,11 @@ export default function Businesses() {
   const [page, setPage] = useState(1);
   const [sortKey, setSortKey] = useState<SortKey>("registeredAt");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
-  const [approving, setApproving] = useState<Business | null>(null);
+  const [viewing, setViewing] = useState<Business | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
-  // Sync approving business from list when businesses state changes
-  const approvingBusiness = approving ? (businesses.find((b) => b.id === approving.id) ?? approving) : null;
+  const viewingBusiness = viewing ? (businesses.find((b) => b.id === viewing.id) ?? viewing) : null;
 
-  // ── All hooks must be declared before any early return ─────────────────────
   const filtered = useMemo(() => {
     let list = businesses.filter((b) => {
       const q = search.toLowerCase();
@@ -397,16 +407,18 @@ export default function Businesses() {
     return counts;
   }, [businesses]);
 
-  // ── Derived values (non-hook) ───────────────────────────────────────────────
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const pageIds = paginated.map((b) => b.id);
   const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selected.includes(id));
 
-  function handleApproved(id: string, code: string) {
-    setBusinesses((prev) =>
-      prev.map((b) => b.id === id ? { ...b, status: "Đã duyệt", businessCode: code } : b)
-    );
+  function handleUpdate(id: string, updates: Partial<Business>) {
+    setBusinesses((prev) => prev.map((b) => b.id === id ? { ...b, ...updates } : b));
+  }
+
+  function handleDelete(id: string) {
+    setBusinesses((prev) => prev.filter((b) => b.id !== id));
+    if (viewing?.id === id) setViewing(null);
   }
 
   function handleSort(key: SortKey) {
@@ -427,9 +439,9 @@ export default function Businesses() {
 
   function toggleAll() {
     const ids = paginated.map((b) => b.id);
-    const allSelected = ids.every((id) => selected.includes(id));
+    const allSel = ids.every((id) => selected.includes(id));
     setSelected((prev) =>
-      allSelected ? prev.filter((id) => !ids.includes(id)) : [...new Set([...prev, ...ids])]
+      allSel ? prev.filter((id) => !ids.includes(id)) : [...new Set([...prev, ...ids])]
     );
   }
 
@@ -440,19 +452,18 @@ export default function Businesses() {
     return <ArrowUpDown className="ml-1 inline h-3 w-3 text-slate-300" />;
   }
 
-  // ── Early return after all hooks ────────────────────────────────────────────
-  if (approvingBusiness) {
+  if (viewingBusiness) {
     return (
-      <ApprovalDetail
-        business={approvingBusiness}
-        onBack={() => setApproving(null)}
-        onApproved={handleApproved}
+      <BusinessDetail
+        business={viewingBusiness}
+        onBack={() => setViewing(null)}
+        onUpdate={handleUpdate}
       />
     );
   }
 
   return (
-    <DashboardShell title="Quản lý doanh nghiệp" subtitle="Danh sách và phê duyệt hồ sơ">
+    <DashboardShell title="Quản lý doanh nghiệp" subtitle="Danh sách doanh nghiệp">
       {/* Page header */}
       <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
         <div>
@@ -550,30 +561,25 @@ export default function Businesses() {
           ) : paginated.map((b) => (
             <div
               key={b.id}
-              className="group relative flex flex-col gap-3 rounded-2xl border border-[#e4e8f0] bg-white p-5 shadow-[0_2px_12px_rgba(38,55,105,.04)] transition-shadow hover:shadow-[0_6px_20px_rgba(38,55,105,.1)]"
+              className="group relative flex flex-col gap-0 rounded-2xl border border-[#e4e8f0] bg-white shadow-[0_2px_12px_rgba(38,55,105,.04)] transition-shadow hover:shadow-[0_6px_20px_rgba(38,55,105,.1)] overflow-hidden"
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#edf0ff]">
-                  <Building2 className="h-5 w-5 text-[#2740BA]" strokeWidth={1.8} />
+              <div className="relative h-36 overflow-hidden bg-[#f7f8fd]">
+                <img
+                  src={b.imageUrl}
+                  alt={b.name}
+                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                  onError={(e) => { (e.target as HTMLImageElement).src = ""; }}
+                />
+                <div className="absolute top-2 right-2">
+                  <StatusBadge status={b.status} />
                 </div>
-                <StatusBadge status={b.status} />
               </div>
-              <div>
+              <div className="flex flex-1 flex-col gap-2 p-4">
                 <p className="font-semibold leading-snug text-[#1d2944]">{b.name}</p>
-                <p className="mt-0.5 font-mono text-[10px] text-slate-400">{b.id} · MST: {b.taxCode}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[11px]">
-                <div>
-                  <span className="text-slate-400">Địa bàn: </span>
-                  <span className="font-medium text-[#25304b]">{b.region}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400">Ngành: </span>
-                  <span className="font-medium text-[#25304b]">{b.sector}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400">Đăng ký: </span>
-                  <span className="font-medium text-[#25304b]">{b.registeredAt}</span>
+                <p className="font-mono text-[10px] text-slate-400">{b.id} · MST: {b.taxCode}</p>
+                <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
+                  <div><span className="text-slate-400">Địa bàn: </span><span className="font-medium text-[#25304b]">{b.region}</span></div>
+                  <div><span className="text-slate-400">Ngành: </span><span className="font-medium text-[#25304b]">{b.sector}</span></div>
                 </div>
                 {b.businessCode && (
                   <div className="flex items-center gap-1">
@@ -581,29 +587,25 @@ export default function Businesses() {
                     <span className="font-mono text-[10px] font-semibold text-[#2740BA]">{b.businessCode}</span>
                   </div>
                 )}
-              </div>
-              <div className="mt-auto flex items-center gap-1 border-t border-[#f0f2f8] pt-3">
-                {b.status === "Chờ duyệt" && (
+                <div className="mt-auto flex items-center gap-1 border-t border-[#f0f2f8] pt-3">
                   <button
-                    onClick={() => setApproving(b)}
-                    className="flex items-center gap-1 rounded-lg border border-[#2740BA] px-2.5 py-1 text-[10px] font-semibold text-[#2740BA] transition-colors hover:bg-[#edf0ff]"
+                    onClick={() => setViewing(b)}
+                    className="ml-auto rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#edf0ff] hover:text-[#2740BA]"
+                    title="Xem chi tiết"
                   >
-                    <CheckCircle className="h-3 w-3" /> Duyệt hồ sơ
+                    <Eye className="h-3.5 w-3.5" />
                   </button>
-                )}
-                <button
-                  onClick={() => setApproving(b)}
-                  className="ml-auto rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#edf0ff] hover:text-[#2740BA]"
-                  title="Xem chi tiết"
-                >
-                  <Eye className="h-3.5 w-3.5" />
-                </button>
-                <button className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#fff4ed] hover:text-[#E8650A]" title="Chỉnh sửa">
-                  <Pencil className="h-3.5 w-3.5" />
-                </button>
-                <button className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#f0f2f8] hover:text-slate-600" title={b.status === "Đã khóa" ? "Mở khóa" : "Khóa"}>
-                  {b.status === "Đã khóa" ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
-                </button>
+                  <button className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#fff4ed] hover:text-[#E8650A]" title="Chỉnh sửa">
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(b.id)}
+                    className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#fef0f0] hover:text-[#c0392b]"
+                    title="Xóa"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -667,13 +669,22 @@ export default function Businesses() {
                     />
                   </td>
                   <td className="px-4 py-3.5">
-                    <p className="font-semibold text-[#25304b]">{b.name}</p>
-                    <p className="mt-0.5 font-mono text-[10px] text-slate-400">{b.id}</p>
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={b.imageUrl}
+                        alt={b.name}
+                        className="h-9 w-9 rounded-lg object-cover border border-[#e4e8f0]"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                      />
+                      <div>
+                        <p className="font-semibold text-[#25304b]">{b.name}</p>
+                        <p className="mt-0.5 font-mono text-[10px] text-slate-400">{b.id}</p>
+                      </div>
+                    </div>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3.5 font-mono text-slate-500">{b.taxCode}</td>
                   <td className="px-4 py-3.5 text-slate-500">{b.region}</td>
                   <td className="px-4 py-3.5 text-slate-500">{b.sector}</td>
-                  {/* Mã định danh column */}
                   <td className="whitespace-nowrap px-4 py-3.5">
                     {b.businessCode ? (
                       <span className="flex items-center gap-1.5 font-mono text-[11px] font-semibold text-[#2740BA]">
@@ -690,18 +701,10 @@ export default function Businesses() {
                   <td className="whitespace-nowrap px-4 py-3.5 text-slate-500">{b.registeredAt}</td>
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-1">
-                      {b.status === "Chờ duyệt" && (
-                        <button
-                          onClick={() => setApproving(b)}
-                          className="flex items-center gap-1 rounded-lg border border-[#2740BA] px-2.5 py-1 text-[10px] font-semibold text-[#2740BA] transition-colors hover:bg-[#edf0ff]"
-                        >
-                          <CheckCircle className="h-3 w-3" /> Duyệt hồ sơ
-                        </button>
-                      )}
                       <button
-                        onClick={() => setApproving(b)}
+                        onClick={() => setViewing(b)}
                         className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#edf0ff] hover:text-[#2740BA]"
-                        title="Xem / Phê duyệt"
+                        title="Xem chi tiết"
                       >
                         <Eye className="h-3.5 w-3.5" />
                       </button>
@@ -712,10 +715,18 @@ export default function Businesses() {
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
                       <button
+                        onClick={() => handleUpdate(b.id, { status: b.status === "Đã khóa" ? "Đã duyệt" : "Đã khóa" })}
                         className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#f0f2f8] hover:text-slate-600"
                         title={b.status === "Đã khóa" ? "Mở khóa" : "Khóa"}
                       >
                         {b.status === "Đã khóa" ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(b.id)}
+                        className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#fef0f0] hover:text-[#c0392b]"
+                        title="Xóa"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
                       </button>
                       <button
                         className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#f0f2f8] hover:text-slate-600"

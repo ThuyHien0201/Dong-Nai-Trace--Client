@@ -578,6 +578,58 @@ function SolutionProviderTab() {
   );
 }
 
+// ─── Mock lots for Tab 2 (shown when API returns empty / no DB connected) ─────
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const MOCK_TXNG_LOTS: any[] = [
+  { id: 101, productName: "Bưởi Tân Triều", gtin: "8936001234561", lotCode: "LOT-2025-001", businessName: "Cơ sở Bưởi Tân Triều", activatedAt: "2025-04-20T08:00:00.000Z", imageUrl: "https://images.unsplash.com/photo-1588165171080-c89acfa5ee83?w=80&h=80&fit=crop", syncStatus: "synced", isComplete: true, portalUrl: "https://txng.gov.vn/lot/001" },
+  { id: 102, productName: "Sầu riêng Monthong", gtin: "8936001234563", lotCode: "LOT-2025-003", businessName: "Cty TNHH Nông sản Đồng Nai", activatedAt: "2025-04-15T10:00:00.000Z", imageUrl: "https://images.unsplash.com/photo-1600423115367-87ea7661688f?w=80&h=80&fit=crop", syncStatus: "synced", isComplete: true, portalUrl: "https://txng.gov.vn/lot/003" },
+  { id: 103, productName: "Điều rang muối", gtin: "8936001234565", lotCode: "LOT-2025-005", businessName: "Cty CP Điều Đồng Nai", activatedAt: "2025-04-10T13:00:00.000Z", imageUrl: "https://images.unsplash.com/photo-1509358271058-acd22cc93898?w=80&h=80&fit=crop", syncStatus: "synced", isComplete: true, portalUrl: "https://txng.gov.vn/lot/005" },
+  { id: 104, productName: "Xoài cát Hòa Lộc", gtin: "8936001234562", lotCode: "LOT-2025-002", businessName: "HTX Xoài Hòa Lộc", activatedAt: "2025-04-18T09:30:00.000Z", imageUrl: "https://images.unsplash.com/photo-1553279768-865429fa0078?w=80&h=80&fit=crop", syncStatus: "not_synced", isComplete: true, portalUrl: null },
+  { id: 105, productName: "Tiêu đen Xuân Lộc", gtin: "8936001234564", lotCode: "LOT-2025-004", businessName: "HTX Tiêu Xuân Lộc", activatedAt: "2025-04-12T07:45:00.000Z", imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=80&h=80&fit=crop", syncStatus: "not_synced", isComplete: true, portalUrl: null },
+  { id: 106, productName: "Cà phê Robusta Định Quán", gtin: "8936001234566", lotCode: "LOT-2025-006", businessName: "Cty TNHH Cà phê DNT", activatedAt: "2025-04-08T11:00:00.000Z", imageUrl: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=80&h=80&fit=crop", syncStatus: "not_synced", isComplete: false, portalUrl: null },
+  { id: 107, productName: "Mật ong rừng Định Quán", gtin: "8936001234567", lotCode: "LOT-2025-007", businessName: "HTX Ong Mật Định Quán", activatedAt: "2025-04-05T08:20:00.000Z", imageUrl: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=80&h=80&fit=crop", syncStatus: "not_synced", isComplete: false, portalUrl: null },
+];
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
+// ─── QR Modal for Tab 2 ──────────────────────────────────────────────────────
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function PortalQrModal({ lot, onClose }: { lot: any; onClose: () => void }) {
+  const qrData = lot.portalUrl ?? `https://txng.gov.vn/lot/${lot.id}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}&color=2a9d6e&bgcolor=ffffff&margin=10`;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="w-full max-w-xs rounded-2xl bg-white p-6 shadow-2xl">
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-[14px] font-bold text-[#1d2944]">Mã QR cổng TXNG</p>
+          <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-[#f1f3fa]">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="flex flex-col items-center gap-3">
+          <img src={qrUrl} alt="QR" className="h-48 w-48 rounded-xl border border-[#e4e8f0] bg-white" />
+          <p className="font-mono text-[12px] font-bold text-[#2a9d6e] text-center">{lot.lotCode}</p>
+          <p className="text-[11px] text-slate-500 font-medium text-center">{lot.productName}</p>
+          <p className="text-[11px] text-slate-400 text-center">{lot.businessName}</p>
+          {lot.syncStatus === "synced" && lot.portalUrl && (
+            <a
+              href={lot.portalUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#2a9d6e] py-2.5 text-[12px] font-semibold text-[#2a9d6e] hover:bg-[#e6f7f7] transition-colors"
+            >
+              <ExternalLink className="h-3.5 w-3.5" /> Xem trên cổng TXNG
+            </a>
+          )}
+          {lot.syncStatus !== "synced" && (
+            <p className="text-[10px] text-slate-400 text-center italic">Chưa đồng bộ lên cổng — QR sẽ hoạt động sau khi đồng bộ.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
 // ─── Tab 2: Cổng thông tin TXNG QG ───────────────────────────────────────────
 
 function TxngPortalTab() {
@@ -589,6 +641,7 @@ function TxngPortalTab() {
   const [searchBusiness, setSearchBusiness] = useState("");
   const [searchProduct, setSearchProduct] = useState("");
   const [selectedLotId, setSelectedLotId] = useState<number | null>(null);
+  const [qrLot, setQrLot] = useState<typeof MOCK_TXNG_LOTS[0] | null>(null);
 
   const { data, isLoading, refetch } = useListPortalLots({
     syncStatus: filterStatus as ListPortalLotsSyncStatus,
@@ -599,10 +652,21 @@ function TxngPortalTab() {
     pageSize: 50,
   });
 
-  const lots = data?.data ?? [];
-  const total = data?.total ?? 0;
-  const notSyncedCount = data?.notSyncedCount ?? 0;
-  const syncedCount = data?.syncedCount ?? 0;
+  const rawLots = data?.data ?? [];
+  const useMock = !isLoading && rawLots.length === 0;
+
+  // Apply mock filtering
+  const mockFiltered = MOCK_TXNG_LOTS.filter((l) => {
+    const q = searchLot.toLowerCase() + searchBusiness.toLowerCase() + searchProduct.toLowerCase() + searchGtin.toLowerCase();
+    if (q && !l.lotCode.toLowerCase().includes(q) && !l.businessName.toLowerCase().includes(q) && !l.productName.toLowerCase().includes(q) && !l.gtin.includes(q)) return false;
+    if (filterStatus !== "all" && l.syncStatus !== filterStatus) return false;
+    return true;
+  });
+
+  const lots = useMock ? mockFiltered : rawLots;
+  const total = useMock ? mockFiltered.length : (data?.total ?? 0);
+  const notSyncedCount = useMock ? MOCK_TXNG_LOTS.filter((l) => l.syncStatus === "not_synced").length : (data?.notSyncedCount ?? 0);
+  const syncedCount = useMock ? MOCK_TXNG_LOTS.filter((l) => l.syncStatus === "synced").length : (data?.syncedCount ?? 0);
 
   const filterTabs: { id: FilterStatus; label: string; count: number; active: string; inactive: string }[] = [
     {
@@ -742,11 +806,11 @@ function TxngPortalTab() {
                   </td>
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-1.5">
-                      {/* QR / detail icon */}
+                      {/* QR modal button */}
                       <button
-                        onClick={() => setSelectedLotId(lot.id)}
-                        className="rounded-lg p-1.5 text-slate-400 hover:bg-[#f0f2f8] hover:text-[#2740BA]"
-                        title="Xem chi tiết"
+                        onClick={() => setQrLot(lot)}
+                        className="rounded-lg p-1.5 text-slate-400 hover:bg-[#e6f7f7] hover:text-[#2a9d6e]"
+                        title="Xem mã QR"
                       >
                         <QrCode className="h-3.5 w-3.5" />
                       </button>
@@ -778,7 +842,15 @@ function TxngPortalTab() {
         </table>
       </div>
 
-      {/* Modal */}
+      {/* QR Modal */}
+      {qrLot !== null && (
+        <PortalQrModal
+          lot={qrLot}
+          onClose={() => setQrLot(null)}
+        />
+      )}
+
+      {/* Sync / detail modal */}
       {selectedLotId !== null && (
         <SyncModal
           lotId={selectedLotId}

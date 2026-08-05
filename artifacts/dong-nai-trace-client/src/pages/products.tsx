@@ -13,20 +13,16 @@ import {
   Clock,
   X,
   ArrowLeft,
-  CheckCircle,
-  XCircle,
   Star,
   QrCode,
   Link2,
   Download,
-  RefreshCw,
   Leaf,
   Truck,
   Package,
   FlaskConical,
   Sprout,
   Store,
-  FileText,
   AlertCircle,
   ChevronDown,
   SlidersHorizontal,
@@ -51,7 +47,8 @@ interface Product {
   unit: string;
   region: string;
   certifications: string[];
-  emoji: string;
+  imageUrl: string;
+  images: string[];
   category: string;
   description: string;
   hasTrace: boolean;
@@ -69,10 +66,14 @@ const mockProducts: Product[] = [
     unit: "kg",
     region: "Vĩnh Cửu",
     certifications: ["OCOP 4★", "VietGAP"],
-    emoji: "🍊",
+    imageUrl: "https://images.unsplash.com/photo-1588165171080-c89acfa5ee83?w=400&h=300&fit=crop",
+    images: [
+      "https://images.unsplash.com/photo-1588165171080-c89acfa5ee83?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=600&h=400&fit=crop",
+    ],
     category: "Trái cây",
-    description:
-      "Bưởi Tân Triều – đặc sản nổi tiếng vùng Vĩnh Cửu, được trồng theo quy trình VietGAP, không thuốc trừ sâu hóa học. Vỏ mỏng, múi ngọt thanh, mọng nước, đạt chuẩn OCOP 4 sao.",
+    description: "Bưởi Tân Triều – đặc sản nổi tiếng vùng Vĩnh Cửu, được trồng theo quy trình VietGAP, không thuốc trừ sâu hóa học. Vỏ mỏng, múi ngọt thanh, mọng nước, đạt chuẩn OCOP 4 sao.",
     hasTrace: true,
   },
   {
@@ -85,10 +86,14 @@ const mockProducts: Product[] = [
     unit: "lọ",
     region: "Định Quán",
     certifications: ["OCOP 3★"],
-    emoji: "🍯",
+    imageUrl: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400&h=300&fit=crop",
+    images: [
+      "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1471193945509-9ad0617afabf?w=600&h=400&fit=crop",
+    ],
     category: "Thực phẩm",
-    description:
-      "Mật ong nguyên chất từ rừng nguyên sinh Định Quán, thu hoạch thủ công theo mùa, không pha trộn. Giàu enzyme tự nhiên, màu vàng hổ phách, hương thơm đặc trưng.",
+    description: "Mật ong nguyên chất từ rừng nguyên sinh Định Quán, thu hoạch thủ công theo mùa, không pha trộn. Giàu enzyme tự nhiên, màu vàng hổ phách, hương thơm đặc trưng.",
     hasTrace: false,
   },
   {
@@ -101,10 +106,14 @@ const mockProducts: Product[] = [
     unit: "kg",
     region: "Nhơn Trạch",
     certifications: ["VietGAP"],
-    emoji: "🐟",
+    imageUrl: "https://images.unsplash.com/photo-1534787238916-9ba6764efd4f?w=400&h=300&fit=crop",
+    images: [
+      "https://images.unsplash.com/photo-1534787238916-9ba6764efd4f?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?w=600&h=400&fit=crop",
+    ],
     category: "Thủy sản",
-    description:
-      "Cá điêu hồng nuôi ao lồng tại Nhơn Trạch, thức ăn công nghiệp đạt chuẩn, không sử dụng chất kháng sinh cấm. Thịt chắc, thơm ngon, đạt tiêu chuẩn VietGAP.",
+    description: "Cá điêu hồng nuôi ao lồng tại Nhơn Trạch, thức ăn công nghiệp đạt chuẩn, không sử dụng chất kháng sinh cấm. Thịt chắc, thơm ngon, đạt tiêu chuẩn VietGAP.",
     hasTrace: false,
   },
   {
@@ -117,10 +126,14 @@ const mockProducts: Product[] = [
     unit: "kg",
     region: "Long Thành",
     certifications: [],
-    emoji: "🫐",
+    imageUrl: "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?w=400&h=300&fit=crop",
+    images: [
+      "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=600&h=400&fit=crop",
+    ],
     category: "Trái cây",
-    description:
-      "Thanh long ruột đỏ trồng tại Long Thành, thu hoạch theo vụ. Đặc điểm: vỏ đỏ đẹp, ruột đỏ tươi, vị ngọt nhẹ.",
+    description: "Thanh long ruột đỏ trồng tại Long Thành, thu hoạch theo vụ. Đặc điểm: vỏ đỏ đẹp, ruột đỏ tươi, vị ngọt nhẹ.",
     hasTrace: false,
   },
   {
@@ -133,10 +146,14 @@ const mockProducts: Product[] = [
     unit: "kg",
     region: "Xuân Lộc",
     certifications: ["OCOP 4★", "GlobalGAP"],
-    emoji: "🍈",
+    imageUrl: "https://images.unsplash.com/photo-1600423115367-87ea7661688f?w=400&h=300&fit=crop",
+    images: [
+      "https://images.unsplash.com/photo-1600423115367-87ea7661688f?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=600&h=400&fit=crop",
+    ],
     category: "Trái cây",
-    description:
-      "Sầu riêng Ri6 và Musang King trồng tại Xuân Lộc, đất đỏ bazan giàu dinh dưỡng. Quy trình canh tác GlobalGAP, kiểm soát dư lượng thuốc BVTV chặt chẽ.",
+    description: "Sầu riêng Ri6 và Musang King trồng tại Xuân Lộc, đất đỏ bazan giàu dinh dưỡng. Quy trình canh tác GlobalGAP, kiểm soát dư lượng thuốc BVTV chặt chẽ.",
     hasTrace: true,
   },
   {
@@ -149,10 +166,14 @@ const mockProducts: Product[] = [
     unit: "kg",
     region: "Long Khánh",
     certifications: ["HACCP"],
-    emoji: "🦐",
+    imageUrl: "https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?w=400&h=300&fit=crop",
+    images: [
+      "https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1534787238916-9ba6764efd4f?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&h=400&fit=crop",
+    ],
     category: "Thủy sản",
-    description:
-      "Tôm thẻ chân trắng nuôi ao HDPE công nghệ cao tại Long Khánh. Kiểm soát vi sinh, không kháng sinh, đạt tiêu chuẩn HACCP, phù hợp xuất khẩu.",
+    description: "Tôm thẻ chân trắng nuôi ao HDPE công nghệ cao tại Long Khánh. Kiểm soát vi sinh, không kháng sinh, đạt tiêu chuẩn HACCP, phù hợp xuất khẩu.",
     hasTrace: false,
   },
   {
@@ -165,10 +186,14 @@ const mockProducts: Product[] = [
     unit: "kg",
     region: "Định Quán",
     certifications: ["4C", "Rainforest Alliance"],
-    emoji: "☕",
+    imageUrl: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=300&fit=crop",
+    images: [
+      "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1606312619070-d48b4c652a52?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?w=600&h=400&fit=crop",
+    ],
     category: "Nông sản",
-    description:
-      "Cà phê Robusta trồng trên đất đỏ bazan Định Quán, độ cao 400–600m. Chứng nhận 4C và Rainforest Alliance, canh tác bền vững, không phá rừng.",
+    description: "Cà phê Robusta trồng trên đất đỏ bazan Định Quán, độ cao 400–600m. Chứng nhận 4C và Rainforest Alliance, canh tác bền vững, không phá rừng.",
     hasTrace: false,
   },
   {
@@ -181,10 +206,14 @@ const mockProducts: Product[] = [
     unit: "kg",
     region: "Vĩnh Cửu",
     certifications: ["OCOP 3★", "Organic"],
-    emoji: "⚫",
+    imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
+    images: [
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=600&h=400&fit=crop",
+    ],
     category: "Gia vị",
-    description:
-      "Tiêu đen hữu cơ vùng Vĩnh Cửu, trồng theo phương pháp canh tác hữu cơ, không phân bón hóa học. Hạt chắc, mùi thơm nồng, độ cay vừa phải.",
+    description: "Tiêu đen hữu cơ vùng Vĩnh Cửu, trồng theo phương pháp canh tác hữu cơ, không phân bón hóa học. Hạt chắc, mùi thơm nồng, độ cay vừa phải.",
     hasTrace: true,
   },
 ];
@@ -240,19 +269,49 @@ function SelectFilter({ value, onChange, options }: { value: string; onChange: (
   );
 }
 
+// ─── QR Modal ────────────────────────────────────────────────────────────────
+function QrModal({ productId, name, onClose }: { productId: string; name: string; onClose: () => void }) {
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(`https://trace.dongnai.gov.vn/sp/${productId}`)}&color=0e7c7c&bgcolor=ffffff&margin=10`;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="w-full max-w-xs rounded-2xl bg-white p-6 shadow-2xl">
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-[14px] font-bold text-[#1d2944]">Mã QR sản phẩm</p>
+          <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-[#f1f3fa]">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="flex flex-col items-center gap-3">
+          <img src={qrUrl} alt={`QR ${productId}`} className="h-52 w-52 rounded-xl border border-[#e4e8f0] bg-white" />
+          <p className="font-mono text-[13px] font-bold text-[#0e7c7c]">{productId}-DNT-2025</p>
+          <p className="text-[11px] text-slate-500 font-medium text-center">{name}</p>
+          <p className="text-[10px] text-slate-400 text-center">Quét mã QR để xem thông tin truy xuất công khai</p>
+          <button className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#0e7c7c] py-2.5 text-[12px] font-semibold text-[#0e7c7c] hover:bg-[#e6f7f7] transition-colors">
+            <Download className="h-3.5 w-3.5" /> Tải về QR Code
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Screen 1: Product card (grid) ──────────────────────────────────────────
 function ProductCard({ product, onView }: { product: Product; onView: () => void }) {
-  const cfg = statusConfig[product.status];
   return (
-    <div className="flex flex-col rounded-2xl border border-[#e4e8f0] bg-white shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex h-36 items-center justify-center rounded-t-2xl bg-[#f7f8fd] text-6xl">
-        {product.emoji}
-      </div>
-      <div className="flex flex-1 flex-col p-4">
-        <div className="flex items-start justify-between gap-2">
-          <p className="font-bold text-[13px] text-[#1d2944] leading-snug">{product.name}</p>
+    <div className="flex flex-col rounded-2xl border border-[#e4e8f0] bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+      <div className="relative h-40 overflow-hidden bg-[#f7f8fd]">
+        <img
+          src={product.imageUrl}
+          alt={product.name}
+          className="h-full w-full object-cover transition-transform hover:scale-105"
+          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+        />
+        <div className="absolute top-2 right-2">
           <StatusBadge status={product.status} />
         </div>
+      </div>
+      <div className="flex flex-1 flex-col p-4">
+        <p className="font-bold text-[13px] text-[#1d2944] leading-snug">{product.name}</p>
         <p className="mt-0.5 text-[11px] text-slate-400">{product.company}</p>
         <p className="mt-0.5 text-[10px] text-slate-300">{product.region} · {product.sector}</p>
         <div className="mt-2 flex flex-wrap gap-1">
@@ -279,7 +338,7 @@ function ProductCard({ product, onView }: { product: Product; onView: () => void
   );
 }
 
-// ─── Screen 2: Basic info + approval ────────────────────────────────────────
+// ─── Screen 2: Product detail ────────────────────────────────────────────────
 function ProductDetail({
   product,
   onBack,
@@ -289,85 +348,39 @@ function ProductDetail({
   onBack: () => void;
   initialTab?: "basic" | "trace";
 }) {
-  const [comment, setComment] = useState("");
-  const [decision, setDecision] = useState<"approved" | "rejected" | null>(null);
   const [imgIdx, setImgIdx] = useState(0);
   const [activeTab, setActiveTab] = useState<"basic" | "trace">(
     product.status === "Đã có truy xuất nguồn gốc" ? (initialTab ?? "trace") : "basic"
   );
+  const [qrOpen, setQrOpen] = useState(false);
 
-  const emojis = [product.emoji, "📦", "🏷️"];
-  const isPending = product.status === "Chờ duyệt";
-  const isTrace = product.status === "Đã có truy xuất nguồn gốc";
-  const showTabs = isTrace || product.status === "Đã duyệt";
-
-  const effectiveStatus =
-    decision === "approved" ? "Đã duyệt" : decision === "rejected" ? "Từ chối" : product.status;
+  const showTabs = product.status === "Đã có truy xuất nguồn gốc" || product.status === "Đã duyệt";
 
   // Timeline steps for traceability
   const traceSteps = [
-    {
-      icon: Sprout,
-      label: "Gieo trồng / Nuôi trồng",
-      date: "10/01/2025",
-      desc: "Giống được kiểm định và gieo trồng tại vùng canh tác đã đăng ký.",
-      color: "#1f7a45",
-      done: true,
-    },
-    {
-      icon: Leaf,
-      label: "Chăm sóc",
-      date: "15/02/2025",
-      desc: "Bón phân hữu cơ, phun thuốc BVTV sinh học theo lịch khuyến cáo.",
-      color: "#2e9fbf",
-      done: true,
-    },
-    {
-      icon: Package,
-      label: "Thu hoạch",
-      date: "20/04/2025",
-      desc: "Thu hoạch đúng độ chín, không sử dụng chất bảo quản sau thu hoạch.",
-      color: "#E8650A",
-      done: true,
-    },
-    {
-      icon: FlaskConical,
-      label: "Sơ chế / Đóng gói",
-      date: "22/04/2025",
-      desc: "Phân loại, làm sạch và đóng gói tại kho sơ chế đạt chuẩn VSATTP.",
-      color: "#7c3aed",
-      done: true,
-    },
-    {
-      icon: Truck,
-      label: "Vận chuyển",
-      date: "25/04/2025",
-      desc: "Vận chuyển bằng xe lạnh đạt chuẩn, nhiệt độ 4–8°C, theo lộ trình đã khai báo.",
-      color: "#2740BA",
-      done: true,
-    },
-    {
-      icon: Store,
-      label: "Phân phối",
-      date: "27/04/2025",
-      desc: "Phân phối đến các điểm bán lẻ và siêu thị đối tác trong tỉnh.",
-      color: "#0e7c7c",
-      done: false,
-    },
+    { icon: Sprout, label: "Gieo trồng / Nuôi trồng", date: "10/01/2025", desc: "Giống được kiểm định và gieo trồng tại vùng canh tác đã đăng ký.", color: "#1f7a45", done: true },
+    { icon: Leaf, label: "Chăm sóc", date: "15/02/2025", desc: "Bón phân hữu cơ, phun thuốc BVTV sinh học theo lịch khuyến cáo.", color: "#2e9fbf", done: true },
+    { icon: Package, label: "Thu hoạch", date: "20/04/2025", desc: "Thu hoạch đúng độ chín, không sử dụng chất bảo quản sau thu hoạch.", color: "#E8650A", done: true },
+    { icon: FlaskConical, label: "Sơ chế / Đóng gói", date: "22/04/2025", desc: "Phân loại, làm sạch và đóng gói tại kho sơ chế đạt chuẩn VSATTP.", color: "#7c3aed", done: true },
+    { icon: Truck, label: "Vận chuyển", date: "25/04/2025", desc: "Vận chuyển bằng xe lạnh đạt chuẩn, nhiệt độ 4–8°C, theo lộ trình đã khai báo.", color: "#2740BA", done: true },
+    { icon: Store, label: "Phân phối", date: "27/04/2025", desc: "Phân phối đến các điểm bán lẻ và siêu thị đối tác trong tỉnh.", color: "#0e7c7c", done: false },
   ];
 
   const approvalTimeline = [
     { action: "Hồ sơ được tiếp nhận", actor: "Hệ thống", time: "12/04/2025 08:15", done: true, color: "#2740BA" },
     { action: "Xác minh thông tin doanh nghiệp", actor: "Admin · Nguyễn Hoàng", time: "12/04/2025 10:30", done: true, color: "#4f9a77" },
-    ...(product.status === "Đã duyệt" ? [{ action: "Phê duyệt hồ sơ sản phẩm", actor: "Admin · Nguyễn Hoàng", time: "13/04/2025 09:05", done: true, color: "#1f7a45" }] : []),
-    ...(product.status === "Từ chối" ? [{ action: "Từ chối hồ sơ sản phẩm", actor: "Admin · Minh Anh", time: "13/04/2025 11:20", done: true, color: "#c0392b" }] : []),
+    ...(product.status === "Đã duyệt" || product.status === "Đã có truy xuất nguồn gốc"
+      ? [{ action: "Phê duyệt hồ sơ sản phẩm", actor: "Admin · Nguyễn Hoàng", time: "13/04/2025 09:05", done: true, color: "#1f7a45" }]
+      : []),
+    ...(product.status === "Từ chối"
+      ? [{ action: "Từ chối hồ sơ sản phẩm", actor: "Admin · Minh Anh", time: "13/04/2025 11:20", done: true, color: "#c0392b" }]
+      : []),
   ];
 
   return (
-    <DashboardShell
-      title="Chi tiết sản phẩm"
-      subtitle={product.name}
-    >
+    <DashboardShell title="Chi tiết sản phẩm" subtitle={product.name}>
+      {qrOpen && <QrModal productId={product.id} name={product.name} onClose={() => setQrOpen(false)} />}
+
       {/* Back */}
       <button
         onClick={onBack}
@@ -376,26 +389,16 @@ function ProductDetail({
         <ArrowLeft className="h-4 w-4" /> Quay lại danh sách sản phẩm
       </button>
 
-      {/* Decision banner */}
-      {decision && (
-        <div className={`mb-5 flex items-center gap-3 rounded-2xl border p-4 ${decision === "approved" ? "border-[#b8e2c8] bg-[#e8f5ed] text-[#1f7a45]" : "border-[#f5bcbc] bg-[#fef0f0] text-[#c0392b]"}`}>
-          {decision === "approved" ? <CheckCircle className="h-5 w-5 shrink-0" /> : <XCircle className="h-5 w-5 shrink-0" />}
-          <p className="text-[13px] font-semibold">
-            {decision === "approved" ? "Sản phẩm đã được phê duyệt thành công." : "Sản phẩm đã bị từ chối. Doanh nghiệp sẽ nhận được thông báo."}
-          </p>
-        </div>
-      )}
-
       {/* Header */}
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-[.18em] text-[#E8650A]">Sản phẩm</p>
           <h2 className="mt-1 text-[20px] font-bold tracking-[-0.04em] text-[#1d2944]">{product.name}</h2>
         </div>
-        <StatusBadge status={effectiveStatus as ProductStatus} />
+        <StatusBadge status={product.status} />
       </div>
 
-      {/* Tabs (for approved/trace) */}
+      {/* Tabs */}
       {showTabs && (
         <div className="mb-5 flex gap-1 rounded-xl border border-[#e4e8f0] bg-[#f7f8fd] p-1">
           <button
@@ -413,35 +416,52 @@ function ProductDetail({
         </div>
       )}
 
-      {/* ── TAB: Thông tin cơ bản ─────────────────────────────────────────── */}
+      {/* ── TAB: Thông tin cơ bản ──────────────────────────────────────────── */}
       {(!showTabs || activeTab === "basic") && (
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_360px]">
           {/* Left */}
           <div className="space-y-5">
             {/* Image carousel */}
             <div className="rounded-2xl border border-[#e4e8f0] bg-white p-5 shadow-sm">
-              <div className="relative flex h-52 items-center justify-center rounded-xl bg-[#f7f8fd] text-8xl">
-                {emojis[imgIdx]}
+              <div className="relative h-56 overflow-hidden rounded-xl bg-[#f7f8fd]">
+                <img
+                  src={product.images[imgIdx]}
+                  alt={product.name}
+                  className="h-full w-full object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                />
                 <button
-                  onClick={() => setImgIdx((i) => (i - 1 + emojis.length) % emojis.length)}
-                  className="absolute left-3 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-md text-slate-500 hover:text-[#2740BA]"
+                  onClick={() => setImgIdx((i) => (i - 1 + product.images.length) % product.images.length)}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 shadow-md text-slate-600 hover:bg-white hover:text-[#2740BA]"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => setImgIdx((i) => (i + 1) % emojis.length)}
-                  className="absolute right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-md text-slate-500 hover:text-[#2740BA]"
+                  onClick={() => setImgIdx((i) => (i + 1) % product.images.length)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 shadow-md text-slate-600 hover:bg-white hover:text-[#2740BA]"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
               <div className="mt-3 flex justify-center gap-1.5">
-                {emojis.map((_, i) => (
+                {product.images.map((_, i) => (
                   <button
                     key={i}
                     onClick={() => setImgIdx(i)}
                     className={`h-1.5 rounded-full transition-all ${i === imgIdx ? "w-5 bg-[#2740BA]" : "w-1.5 bg-[#d1d8f0]"}`}
                   />
+                ))}
+              </div>
+              {/* Thumbnail strip */}
+              <div className="mt-3 flex gap-2">
+                {product.images.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setImgIdx(i)}
+                    className={`h-14 w-14 overflow-hidden rounded-lg border-2 transition-all ${i === imgIdx ? "border-[#2740BA]" : "border-[#e4e8f0]"}`}
+                  >
+                    <img src={img} alt="" className="h-full w-full object-cover" />
+                  </button>
                 ))}
               </div>
             </div>
@@ -484,39 +504,48 @@ function ProductDetail({
               </div>
             </div>
 
-            {/* Approval history (non-pending) */}
-            {!isPending && (
-              <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-sm">
-                <p className="mb-5 text-[13px] font-bold text-[#1d2944]">Lịch sử xử lý</p>
-                <div className="space-y-0">
-                  {approvalTimeline.map((item, i) => (
-                    <div key={i} className="relative flex gap-4 pb-5 last:pb-0">
-                      {i < approvalTimeline.length - 1 && (
-                        <span className="absolute left-[11px] top-6 h-full w-px bg-[#e4e8f0]" />
-                      )}
-                      <div
-                        className="relative z-10 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
-                        style={{ background: item.color, boxShadow: `0 0 0 3px ${item.color}22` }}
-                      >
-                        <Check className="h-3 w-3 text-white" strokeWidth={3} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[12px] font-semibold text-[#25304b]">{item.action}</p>
-                        <p className="mt-0.5 text-[10px] text-slate-400">{item.actor} · {item.time}</p>
-                      </div>
+            {/* Approval history */}
+            <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-sm">
+              <p className="mb-5 text-[13px] font-bold text-[#1d2944]">Lịch sử xử lý</p>
+              <div className="space-y-0">
+                {approvalTimeline.map((item, i) => (
+                  <div key={i} className="relative flex gap-4 pb-5 last:pb-0">
+                    {i < approvalTimeline.length - 1 && (
+                      <span className="absolute left-[11px] top-6 h-full w-px bg-[#e4e8f0]" />
+                    )}
+                    <div
+                      className="relative z-10 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
+                      style={{ background: item.color, boxShadow: `0 0 0 3px ${item.color}22` }}
+                    >
+                      <Check className="h-3 w-3 text-white" strokeWidth={3} />
                     </div>
-                  ))}
-                </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[12px] font-semibold text-[#25304b]">{item.action}</p>
+                      <p className="mt-0.5 text-[10px] text-slate-400">{item.actor} · {item.time}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Right */}
           <div className="space-y-5">
-            {/* Status card */}
+            {/* Status + actions card */}
             <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-sm">
               <p className="mb-3 text-[13px] font-bold text-[#1d2944]">Trạng thái</p>
               <StatusBadge status={product.status} />
+
+              {/* QR code button for approved/traced */}
+              {(product.status === "Đã duyệt" || product.status === "Đã có truy xuất nguồn gốc") && (
+                <button
+                  onClick={() => setQrOpen(true)}
+                  className="mt-4 mb-2 flex w-full items-center justify-center gap-2 rounded-xl border border-[#dce3ff] bg-[#f0f2ff] py-3 text-[12px] font-semibold text-[#2740BA] transition hover:bg-[#e4e8ff]"
+                >
+                  <QrCode className="h-4 w-4" /> Xem mã QR sản phẩm
+                </button>
+              )}
+
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <button className="flex items-center justify-center gap-2 rounded-xl border border-[#e4e8f0] bg-white py-3 text-[12px] font-semibold text-slate-600 transition hover:border-[#2740BA] hover:text-[#2740BA]">
                   <Pencil className="h-3.5 w-3.5" /> Chỉnh sửa
@@ -527,7 +556,20 @@ function ProductDetail({
               </div>
             </div>
 
-            {/* Approved: traceability link */}
+            {/* Rejected status info */}
+            {product.status === "Từ chối" && (
+              <div className="rounded-2xl border border-[#f5bcbc] bg-[#fef0f0] p-5 shadow-sm">
+                <div className="flex items-center gap-2 text-[#c0392b]">
+                  <X className="h-5 w-5 shrink-0" />
+                  <p className="text-[13px] font-bold">Hồ sơ bị từ chối</p>
+                </div>
+                <p className="mt-2 text-[12px] text-[#c0392b]/70">
+                  Sản phẩm này đã bị từ chối. Doanh nghiệp cần cập nhật thông tin và đăng ký lại.
+                </p>
+              </div>
+            )}
+
+            {/* Traceability placeholder (approved but no trace data) */}
             {product.status === "Đã duyệt" && (
               <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-sm">
                 <p className="mb-3 text-[13px] font-bold text-[#1d2944]">Truy xuất nguồn gốc</p>
@@ -538,37 +580,11 @@ function ProductDetail({
                 </div>
               </div>
             )}
-
-            {/* QR preview (pending only) */}
-            {isPending && (
-              <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-sm">
-                <p className="mb-3 text-[13px] font-bold text-[#1d2944]">Mã QR xem trước</p>
-                <div className="flex flex-col items-center gap-2">
-                  <div className="flex h-28 w-28 items-center justify-center rounded-xl bg-[#f7f8fd]">
-                    <QrCode className="h-12 w-12 text-[#2740BA] opacity-40" />
-                  </div>
-                  <p className="text-center text-[10px] text-slate-400">{product.id} · QR sẽ được cấp sau khi phê duyệt</p>
-                </div>
-              </div>
-            )}
-
-            {/* Status card (rejected) */}
-            {product.status === "Từ chối" && (
-              <div className="rounded-2xl border border-[#f5bcbc] bg-[#fef0f0] p-5 shadow-sm">
-                <div className="flex items-center gap-2 text-[#c0392b]">
-                  <XCircle className="h-5 w-5 shrink-0" />
-                  <p className="text-[13px] font-bold">Hồ sơ bị từ chối</p>
-                </div>
-                <p className="mt-2 text-[12px] text-[#c0392b]/70">
-                  Sản phẩm này đã bị từ chối. Doanh nghiệp cần cập nhật thông tin và đăng ký lại.
-                </p>
-              </div>
-            )}
           </div>
         </div>
       )}
 
-      {/* ── TAB: Truy xuất nguồn gốc ─────────────────────────────────────── */}
+      {/* ── TAB: Truy xuất nguồn gốc ──────────────────────────────────────── */}
       {showTabs && activeTab === "trace" && (
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_340px]">
           {/* Left: timeline */}
@@ -581,9 +597,11 @@ function ProductDetail({
                   <p className="mt-1 text-[14px] font-bold text-[#1d2944]">iTrace Việt Nam</p>
                   <p className="mt-0.5 text-[11px] text-slate-400">Cập nhật lần cuối: 27/04/2025 · 14:32</p>
                 </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#edf0ff]">
-                  <Link2 className="h-6 w-6 text-[#2740BA]" />
-                </div>
+                <img
+                  src={product.imageUrl}
+                  alt={product.name}
+                  className="h-14 w-14 rounded-xl object-cover border border-[#e4e8f0]"
+                />
               </div>
             </div>
 
@@ -603,10 +621,7 @@ function ProductDetail({
                       )}
                       <div
                         className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
-                        style={{
-                          background: step.done ? step.color : "#f0f2f8",
-                          boxShadow: step.done ? `0 0 0 4px ${step.color}18` : "none",
-                        }}
+                        style={{ background: step.done ? step.color : "#f0f2f8", boxShadow: step.done ? `0 0 0 4px ${step.color}18` : "none" }}
                       >
                         <Icon className={`h-4 w-4 ${step.done ? "text-white" : "text-slate-400"}`} />
                       </div>
@@ -620,9 +635,7 @@ function ProductDetail({
                           )}
                         </div>
                         <p className="mt-0.5 text-[10px] text-slate-400">{step.date}</p>
-                        <p className="mt-1.5 rounded-xl bg-[#f7f8fd] p-3 text-[11px] leading-4.5 text-slate-500">
-                          {step.desc}
-                        </p>
+                        <p className="mt-1.5 rounded-xl bg-[#f7f8fd] p-3 text-[11px] leading-4.5 text-slate-500">{step.desc}</p>
                       </div>
                     </div>
                   );
@@ -665,13 +678,28 @@ function ProductDetail({
             <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-sm">
               <p className="mb-4 text-[13px] font-bold text-[#1d2944]">Mã QR truy xuất</p>
               <div className="flex flex-col items-center gap-3">
-                <div className="flex h-36 w-36 items-center justify-center rounded-2xl border-2 border-[#dce3ff] bg-[#f7f8fd]">
-                  <QrCode className="h-20 w-20 text-[#2740BA]" />
-                </div>
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(`https://trace.dongnai.gov.vn/sp/${product.id}`)}&color=0e7c7c&bgcolor=ffffff&margin=8`}
+                  alt="QR Code"
+                  className="h-36 w-36 rounded-2xl border-2 border-[#9edad9]"
+                />
                 <p className="font-mono text-[11px] font-bold text-[#25304b]">{product.id}-QR-2025</p>
                 <p className="text-center text-[10px] text-slate-400">Quét để xem thông tin truy xuất công khai</p>
                 <button className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#2740BA] py-2.5 text-[12px] font-semibold text-[#2740BA] hover:bg-[#edf0ff] transition-colors">
                   <Download className="h-3.5 w-3.5" /> Tải về QR Code
+                </button>
+              </div>
+            </div>
+
+            {/* Edit/Delete */}
+            <div className="rounded-2xl border border-[#e4e8f0] bg-white p-5 shadow-sm">
+              <p className="mb-3 text-[13px] font-bold text-[#1d2944]">Thao tác</p>
+              <div className="grid grid-cols-2 gap-3">
+                <button className="flex items-center justify-center gap-2 rounded-xl border border-[#e4e8f0] bg-white py-3 text-[12px] font-semibold text-slate-600 transition hover:border-[#2740BA] hover:text-[#2740BA]">
+                  <Pencil className="h-3.5 w-3.5" /> Chỉnh sửa
+                </button>
+                <button className="flex items-center justify-center gap-2 rounded-xl border border-[#e04040] bg-white py-3 text-[12px] font-semibold text-[#c0392b] transition hover:bg-[#fef0f0]">
+                  <Trash2 className="h-3.5 w-3.5" /> Xóa
                 </button>
               </div>
             </div>
@@ -753,7 +781,7 @@ export default function Products() {
   }
 
   return (
-    <DashboardShell title="Quản lý sản phẩm" subtitle="Danh sách và phê duyệt sản phẩm">
+    <DashboardShell title="Quản lý sản phẩm" subtitle="Danh sách sản phẩm">
       {/* Header */}
       <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
         <div>
@@ -843,7 +871,7 @@ export default function Products() {
             <table className="min-w-full text-[12px]">
               <thead>
                 <tr className="border-b border-[#e4e8f0] bg-[#f9fafb]">
-                  {["Sản phẩm", "Doanh nghiệp", "Ngành hàng", "Khu vực", "Giá", "Trạng thái", ""].map((h) => (
+                  {["Sản phẩm", "Doanh nghiệp", "Ngành hàng", "Khu vực", "Giá", "Trạng thái", "Thao tác"].map((h) => (
                     <th key={h} className="whitespace-nowrap px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">{h}</th>
                   ))}
                 </tr>
@@ -859,7 +887,12 @@ export default function Products() {
                   <tr key={p.id} className="hover:bg-[#f9fafb] transition-colors">
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl">{p.emoji}</span>
+                        <img
+                          src={p.imageUrl}
+                          alt={p.name}
+                          className="h-10 w-10 rounded-lg object-cover border border-[#e4e8f0]"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                        />
                         <div>
                           <p className="font-semibold text-[#25304b]">{p.name}</p>
                           <p className="text-[10px] text-slate-400">{p.id}</p>
@@ -875,20 +908,24 @@ export default function Products() {
                     </td>
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-1">
-                        {p.status === "Chờ duyệt" && (
-                          <button
-                            onClick={() => openDetail(p, "basic")}
-                            className="flex items-center gap-1 rounded-lg border border-[#2740BA] px-2.5 py-1 text-[10px] font-semibold text-[#2740BA] hover:bg-[#edf0ff] transition-colors"
-                          >
-                            <CheckCircle className="h-3 w-3" /> Duyệt
-                          </button>
-                        )}
                         <button
                           onClick={() => openDetail(p)}
                           className="rounded-lg p-1.5 text-slate-400 hover:bg-[#edf0ff] hover:text-[#2740BA] transition-colors"
                           title="Xem chi tiết"
                         >
                           <Eye className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          className="rounded-lg p-1.5 text-slate-400 hover:bg-[#fff4ed] hover:text-[#E8650A] transition-colors"
+                          title="Chỉnh sửa"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          className="rounded-lg p-1.5 text-slate-400 hover:bg-[#fef0f0] hover:text-[#c0392b] transition-colors"
+                          title="Xóa"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </td>

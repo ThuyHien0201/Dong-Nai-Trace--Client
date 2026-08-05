@@ -1129,7 +1129,6 @@ function PlaceholderPage({ title }: { title: string }) {
 }
 
 function Dashboard() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const kpis = [
     {
       label: "Tổng doanh nghiệp",
@@ -1174,13 +1173,9 @@ function Dashboard() {
     },
   ];
   return (
-    <div className="dashboard-shell flex min-h-[100dvh] text-[#25304b]">
-      <TraceSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <DashboardHeader onMenu={() => setSidebarOpen(true)} />
-        <main className="dashboard-scrollbar flex-1 overflow-y-auto px-5 py-7 sm:px-8 lg:px-10 lg:py-9">
-          <div className="mx-auto max-w-[1440px]">
-            <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
+    <DashboardShell title="Tổng quan hệ thống" subtitle="Không gian quản trị">
+      <div>
+        <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="font-mono text-[10px] uppercase tracking-[.18em] text-[#E8650A]">
                   Thứ Năm, 19 tháng 12, 2024
@@ -1242,10 +1237,8 @@ function Dashboard() {
                 </div>
               </article>
             </section>
-          </div>
-        </main>
       </div>
-    </div>
+    </DashboardShell>
   );
 }
 

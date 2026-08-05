@@ -22,32 +22,20 @@ import {
 } from "lucide-react";
 import skhcnLogo from "@assets/Logo-SKHCN-2026_1785046021867.png";
 
-function TraceMark({ compact }: { compact?: boolean }) {
+function TraceMark({ compact: _compact }: { compact?: boolean }) {
   return (
     <div className="flex items-center gap-2.5">
-      <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#2740BA]">
-        <img src={skhcnLogo} alt="SKHCN Logo" className="h-7 w-7 object-contain" />
+      <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#2740BA]">
+        <img src={skhcnLogo} alt="SKHCN Logo" className="h-full w-full object-contain" />
       </div>
-      {!compact && (
-        <div>
-          <p className="text-[13px] font-bold tracking-[-0.03em] text-[#1d2944]">
-            Đồng Nai <span className="text-[#2740BA]">Trace</span>
-          </p>
-          <p className="text-[9px] uppercase tracking-[.15em] text-slate-400">
-            Trace with confidence
-          </p>
-        </div>
-      )}
-      {compact && (
-        <div>
-          <p className="text-[13px] font-bold tracking-[-0.03em] text-[#1d2944]">
-            Đồng Nai <span className="text-[#2740BA]">Trace</span>
-          </p>
-          <p className="text-[9px] uppercase tracking-[.15em] text-slate-400">
-            Trace with confidence
-          </p>
-        </div>
-      )}
+      <div>
+        <p className="text-[13px] font-bold tracking-[-0.03em] text-[#1d2944]">
+          Đồng Nai <span className="text-[#E8650A]">Trace</span>
+        </p>
+        <p className="text-[9px] uppercase tracking-[.15em] text-slate-400">
+          Trace with confidence
+        </p>
+      </div>
     </div>
   );
 }
