@@ -790,8 +790,8 @@ export default function Businesses() {
 
       {/* Table */}
       {viewMode === "list" && (
-      <div className="mt-2 overflow-hidden rounded-2xl border border-[#e4e8f0] bg-white shadow-[0_2px_12px_rgba(38,55,105,.04)]">
-        <div className="overflow-x-auto">
+      <div className="mt-2 overflow-x-auto rounded-2xl border border-[#e4e8f0] bg-white shadow-[0_2px_12px_rgba(38,55,105,.04)]">
+        <div>
           <table className="min-w-full text-[12px]">
             <thead>
               <tr className="border-b border-[#e4e8f0] bg-[#f7f8fd]">
