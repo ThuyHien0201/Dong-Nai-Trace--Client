@@ -306,49 +306,6 @@ function PasswordSection() {
   );
 }
 
-// ─── Notifications section ──────────────────────────────────────────────────────
-const notifItems = [
-  { key: "approve", label: "Phê duyệt hồ sơ doanh nghiệp", desc: "Nhận thông báo khi có hồ sơ mới cần xét duyệt" },
-  { key: "product", label: "Sản phẩm mới đăng ký", desc: "Khi doanh nghiệp thêm sản phẩm chờ duyệt" },
-  { key: "sync", label: "Đồng bộ dữ liệu TXNG", desc: "Kết quả đẩy dữ liệu lên Cổng quốc gia" },
-  { key: "system", label: "Cảnh báo hệ thống", desc: "Lỗi, sao lưu thất bại, tài khoản bất thường" },
-];
-
-function NotificationsSection() {
-  const [enabled, setEnabled] = useState<Record<string, boolean>>({
-    approve: true, product: true, sync: false, system: true,
-  });
-
-  return (
-    <SectionCard title="Thông báo">
-      <div className="space-y-3">
-        {notifItems.map((item) => (
-          <div
-            key={item.key}
-            className="flex items-center justify-between rounded-xl border border-[#e4e8f0] bg-[#f9fafb] px-4 py-3"
-          >
-            <div className="flex items-center gap-3">
-              <Bell className={`h-4 w-4 shrink-0 ${enabled[item.key] ? "text-[#2740BA]" : "text-slate-300"}`} />
-              <div>
-                <p className="text-[12px] font-semibold text-[#25304b]">{item.label}</p>
-                <p className="mt-0.5 text-[11px] text-slate-400">{item.desc}</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setEnabled((prev) => ({ ...prev, [item.key]: !prev[item.key] }))}
-              className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${enabled[item.key] ? "bg-[#2740BA]" : "bg-slate-300"}`}
-            >
-              <span
-                className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${enabled[item.key] ? "translate-x-5" : "translate-x-0.5"}`}
-              />
-            </button>
-          </div>
-        ))}
-      </div>
-    </SectionCard>
-  );
-}
 
 // ─── Page ───────────────────────────────────────────────────────────────────────
 export default function Settings() {
@@ -362,10 +319,11 @@ export default function Settings() {
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_380px]">
         <div className="space-y-5">
           <ProfileSection />
-          <PasswordSection />
+       
         </div>
         <div>
-          <NotificationsSection />
+           <PasswordSection />
+          
         </div>
       </div>
     </DashboardShell>

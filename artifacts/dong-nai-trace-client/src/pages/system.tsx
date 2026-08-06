@@ -16,7 +16,6 @@ import {
 
 const TABS = [
   { id: "audit", label: "Nhật ký hệ thống", icon: ScrollText },
-  { id: "permissions", label: "Phân quyền", icon: ShieldCheck },
   { id: "config", label: "Cấu hình hệ thống", icon: Settings },
   { id: "backup", label: "Sao lưu & phục hồi", icon: HardDrive },
 ] as const;
@@ -102,88 +101,6 @@ function AuditTab() {
   );
 }
 
-// --- Permissions ---
-const roles = ["Super Admin", "Admin", "Nhân viên duyệt", "Xem báo cáo"];
-const features = [
-  "Quản lý doanh nghiệp",
-  "Phê duyệt hồ sơ",
-  "Quản lý sản phẩm",
-  "Quản lý QR",
-  "Xem báo cáo",
-  "Xuất báo cáo",
-  "Quản lý tài khoản",
-  "Cấu hình hệ thống",
-  "Sao lưu & phục hồi",
-];
-
-const defaultPermissions: Record<string, Record<string, boolean>> = {
-  "Super Admin": Object.fromEntries(features.map((f) => [f, true])),
-  "Admin": Object.fromEntries(features.map((f) => [f, !["Cấu hình hệ thống", "Sao lưu & phục hồi"].includes(f)])),
-  "Nhân viên duyệt": Object.fromEntries(features.map((f) => [f, ["Quản lý doanh nghiệp", "Phê duyệt hồ sơ", "Quản lý sản phẩm", "Xem báo cáo"].includes(f)])),
-  "Xem báo cáo": Object.fromEntries(features.map((f) => [f, ["Xem báo cáo"].includes(f)])),
-};
-
-function PermissionsTab() {
-  const [perms, setPerms] = useState(defaultPermissions);
-
-  const toggle = (role: string, feature: string) => {
-    if (role === "Super Admin") return;
-    setPerms((prev) => ({
-      ...prev,
-      [role]: { ...prev[role], [feature]: !prev[role][feature] },
-    }));
-  };
-
-  return (
-    <div>
-      <div className="mb-4 flex justify-end">
-        <button className="flex items-center gap-2 rounded-xl bg-[#2740BA] px-4 py-2.5 text-[12px] font-bold text-white hover:bg-[#1e33a0] transition-colors shadow-sm">
-          <Save className="h-4 w-4" /> Lưu phân quyền
-        </button>
-      </div>
-      <div className="overflow-hidden rounded-2xl border border-[#e4e8f0] bg-white shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-[12px]">
-            <thead>
-              <tr className="border-b border-[#e4e8f0] bg-[#f9fafb]">
-                <th className="w-48 px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">
-                  Chức năng
-                </th>
-                {roles.map((r) => (
-                  <th key={r} className="px-5 py-3 text-center text-[10px] font-bold uppercase tracking-wide text-slate-400 whitespace-nowrap">
-                    {r}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {features.map((feature) => (
-                <tr key={feature} className="border-b border-[#f0f2f8] hover:bg-[#f9fafb] transition-colors">
-                  <td className="px-5 py-3.5 font-medium text-[#25304b]">{feature}</td>
-                  {roles.map((role) => (
-                    <td key={role} className="px-5 py-3.5 text-center">
-                      <button
-                        onClick={() => toggle(role, feature)}
-                        className={`h-5 w-5 mx-auto flex items-center justify-center rounded transition-colors ${
-                          perms[role]?.[feature]
-                            ? "bg-[#2740BA] text-white"
-                            : "border-2 border-[#d1d8f0] bg-white"
-                        } ${role === "Super Admin" ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:opacity-80"}`}
-                        disabled={role === "Super Admin"}
-                      >
-                        {perms[role]?.[feature] && <Check className="h-3 w-3" />}
-                      </button>
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // --- System Config ---
 const CONFIG_TABS = ["Chung", "Email", "QR Code", "API / Tích hợp"] as const;
@@ -395,7 +312,7 @@ export default function System() {
   const [activeTab, setActiveTab] = useState<TabId>("audit");
 
   return (
-    <DashboardShell title="Hệ thống" subtitle="Nhật ký, phân quyền, cấu hình và sao lưu">
+    <DashboardShell title="Hệ thống" subtitle="Nhật ký, cấu hình và sao lưu">
       <div className="mb-5">
         <p className="font-mono text-[10px] uppercase tracking-[.18em] text-[#E8650A]">Quản trị</p>
         <h2 className="mt-1.5 text-[24px] font-bold tracking-[-.05em] text-[#1d2944]">Quản trị hệ thống</h2>
@@ -417,7 +334,7 @@ export default function System() {
       </div>
 
       {activeTab === "audit" && <AuditTab />}
-      {activeTab === "permissions" && <PermissionsTab />}
+  
       {activeTab === "config" && <ConfigTab />}
       {activeTab === "backup" && <BackupTab />}
     </DashboardShell>
