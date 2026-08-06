@@ -1181,9 +1181,7 @@ function Dashboard() {
                 <p className="font-mono text-[10px] uppercase tracking-[.18em] text-[#E8650A]">
                   Thứ Năm, 19 tháng 12, 2024
                 </p>
-                <h2 className="mt-2 text-[25px] font-bold tracking-[-.055em] text-[#1d2944] sm:text-[29px]">
-                  Chào buổi sáng, Minh Anh.
-                </h2>
+                <h2 className="mt-2 text-[25px] font-bold tracking-[-.055em] text-[#1d2944] sm:text-[29px]">Chào buổi sáng, Admin.</h2>
                 <p className="mt-2 text-[12px] text-slate-500">
                   Đây là tình hình vận hành của Đồng Nai Trace hôm nay.
                 </p>
