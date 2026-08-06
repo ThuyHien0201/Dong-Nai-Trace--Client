@@ -463,22 +463,6 @@ export default function Accounts() {
         </button>
       </div>
 
-      {/* Tabs */}
-      <div className="mb-5 flex gap-1 rounded-xl border border-[#e4e8f0] bg-[#f7f8fd] p-1 w-fit">
-        <button
-          onClick={() => setActiveTab("accounts")}
-          className={`rounded-lg px-5 py-2 text-[12px] font-semibold transition-colors ${activeTab === "accounts" ? "bg-white text-[#2740BA] shadow-sm" : "text-slate-500 hover:text-[#2740BA]"}`}
-        >
-          Danh sách tài khoản
-        </button>
-        <button
-          onClick={() => setActiveTab("permissions")}
-          className={`rounded-lg px-5 py-2 text-[12px] font-semibold transition-colors ${activeTab === "permissions" ? "bg-white text-[#2740BA] shadow-sm" : "text-slate-500 hover:text-[#2740BA]"}`}
-        >
-          <Shield className="mr-1.5 inline h-3 w-3" />
-          Phân quyền
-        </button>
-      </div>
 
       {activeTab === "permissions" ? (
         <PermissionTable />

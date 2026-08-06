@@ -34,7 +34,7 @@ import {
 } from "lucide-react";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
-type Status = "Đã duyệt" | "Chờ duyệt" | "Từ chối" | "Đã khóa";
+type Status = "Đã duyệt" | "Chờ duyệt"| "Đã khóa";
 type SortDir = "asc" | "desc" | null;
 type SortKey = keyof Business | null;
 
@@ -57,7 +57,7 @@ const initialBusinesses: Business[] = [
   { id: "DN-001", name: "Công ty TNHH Nông sản An Phú", taxCode: "3601234567", region: "Biên Hòa", sector: "Nông sản", status: "Đã duyệt", registeredAt: "12/10/2024", representative: "Nguyễn Văn An", phone: "0901 234 567", businessCode: "DNT-2024-0001", imageUrl: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400&h=220&fit=crop" },
   { id: "DN-002", name: "HTX Nông nghiệp Xuân Lộc", taxCode: "3607654321", region: "Xuân Lộc", sector: "OCOP", status: "Chờ duyệt", registeredAt: "18/12/2024", representative: "Trần Thị Bình", phone: "0912 345 678", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=220&fit=crop" },
   { id: "DN-003", name: "Công ty CP Thực phẩm Đồng Nai", taxCode: "3601112233", region: "Long Khánh", sector: "Thực phẩm CB", status: "Đã duyệt", registeredAt: "05/09/2024", representative: "Lê Hoàng Nam", phone: "0923 456 789", businessCode: "DNT-2024-0002", imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=220&fit=crop" },
-  { id: "DN-004", name: "Trại nuôi thủy sản Nhơn Trạch", taxCode: "3608889900", region: "Nhơn Trạch", sector: "Thủy sản", status: "Từ chối", registeredAt: "22/11/2024", representative: "Phạm Minh Cường", phone: "0934 567 890", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=220&fit=crop" },
+  { id: "DN-004", name: "Trại nuôi thủy sản Nhơn Trạch", taxCode: "3608889900", region: "Nhơn Trạch", sector: "Thủy sản", status: "Đã duyệt", registeredAt: "22/11/2024", representative: "Phạm Minh Cường", phone: "0934 567 890", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=220&fit=crop" },
   { id: "DN-005", name: "Trang trại hữu cơ Long Thành", taxCode: "3605556677", region: "Long Thành", sector: "Nông sản", status: "Đã khóa", registeredAt: "01/08/2024", representative: "Vũ Thị Dung", phone: "0945 678 901", businessCode: "DNT-2024-0003", imageUrl: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=400&h=220&fit=crop" },
   { id: "DN-006", name: "Cơ sở chế biến Bưởi Tân Triều", taxCode: "3602223344", region: "Vĩnh Cửu", sector: "OCOP", status: "Chờ duyệt", registeredAt: "15/12/2024", representative: "Đỗ Văn Em", phone: "0956 789 012", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1588165171080-c89acfa5ee83?w=400&h=220&fit=crop" },
   { id: "DN-007", name: "Công ty TNHH Dược liệu Định Quán", taxCode: "3609990011", region: "Định Quán", sector: "Dược liệu", status: "Đã duyệt", registeredAt: "30/07/2024", representative: "Bùi Thị Phương", phone: "0967 890 123", businessCode: "DNT-2024-0004", imageUrl: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=400&h=220&fit=crop" },
@@ -65,7 +65,7 @@ const initialBusinesses: Business[] = [
   { id: "DN-009", name: "Công ty TNHH Xuất khẩu Xoài Đồng Nai", taxCode: "3603334455", region: "Cao Lãnh", sector: "Nông sản", status: "Đã duyệt", registeredAt: "14/06/2024", representative: "Nguyễn Thị Hoa", phone: "0989 012 345", businessCode: "DNT-2024-0005", imageUrl: "https://images.unsplash.com/photo-1553279768-865429fa0078?w=400&h=220&fit=crop" },
   { id: "DN-010", name: "HTX Nông nghiệp Sạch Trảng Bom", taxCode: "3606667788", region: "Trảng Bom", sector: "Nông sản", status: "Chờ duyệt", registeredAt: "20/12/2024", representative: "Trần Văn Inh", phone: "0990 123 456", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&h=220&fit=crop" },
   { id: "DN-011", name: "Công ty CP Chế biến Cacao Việt", taxCode: "3600001122", region: "Biên Hòa", sector: "Thực phẩm CB", status: "Đã duyệt", registeredAt: "28/05/2024", representative: "Lê Thị Kim", phone: "0901 234 567", businessCode: "DNT-2024-0006", imageUrl: "https://images.unsplash.com/photo-1606312619070-d48b4c652a52?w=400&h=220&fit=crop" },
-  { id: "DN-012", name: "Trang trại hữu cơ Xuân Thành", taxCode: "3607778899", region: "Xuân Lộc", sector: "Nông sản", status: "Từ chối", registeredAt: "08/11/2024", representative: "Phạm Văn Long", phone: "0912 345 678", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400&h=220&fit=crop" },
+  { id: "DN-012", name: "Trang trại hữu cơ Xuân Thành", taxCode: "3607778899", region: "Xuân Lộc", sector: "Nông sản", status: "Đã duyệt", registeredAt: "08/11/2024", representative: "Phạm Văn Long", phone: "0912 345 678", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400&h=220&fit=crop" },
   { id: "DN-013", name: "Cơ sở nuôi trồng Đông trùng Hạ thảo", taxCode: "3608881122", region: "Định Quán", sector: "Dược liệu", status: "Đã duyệt", registeredAt: "17/04/2024", representative: "Vũ Hoàng Minh", phone: "0923 456 789", businessCode: "DNT-2024-0007", imageUrl: "https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?w=400&h=220&fit=crop" },
   { id: "DN-014", name: "HTX Thủy sản sạch Long Thành", taxCode: "3601113344", region: "Long Thành", sector: "Thủy sản", status: "Đã khóa", registeredAt: "03/03/2024", representative: "Đỗ Thị Nga", phone: "0934 567 890", businessCode: "DNT-2024-0008", imageUrl: "https://images.unsplash.com/photo-1534787238916-9ba6764efd4f?w=400&h=220&fit=crop" },
   { id: "DN-015", name: "Công ty TNHH OCOP Nhơn Trạch", taxCode: "3604445678", region: "Nhơn Trạch", sector: "OCOP", status: "Chờ duyệt", registeredAt: "21/12/2024", representative: "Bùi Văn Oanh", phone: "0945 678 901", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1471193945509-9ad0617afabf?w=400&h=220&fit=crop" },
@@ -73,7 +73,7 @@ const initialBusinesses: Business[] = [
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 const STATUS_ALL = "Tất cả";
-const statuses: Status[] = ["Đã duyệt", "Chờ duyệt", "Từ chối", "Đã khóa"];
+const statuses: Status[] = ["Đã duyệt", "Chờ duyệt", "Đã khóa"];
 const regions = ["Tất cả địa bàn", "Biên Hòa", "Long Khánh", "Xuân Lộc", "Nhơn Trạch", "Long Thành", "Trảng Bom", "Định Quán", "Tân Phú", "Vĩnh Cửu", "Cao Lãnh"];
 const sectors = ["Tất cả ngành", "Nông sản", "Thực phẩm CB", "Thủy sản", "OCOP", "Dược liệu", "Chăn nuôi"];
 const PAGE_SIZE = 8;
@@ -81,7 +81,6 @@ const PAGE_SIZE = 8;
 const statusConfig: Record<Status, { cls: string; icon: typeof Check }> = {
   "Đã duyệt": { cls: "bg-[#e8f5ed] text-[#1f7a45] border border-[#b8e2c8]", icon: Check },
   "Chờ duyệt": { cls: "bg-[#fff4ed] text-[#E8650A] border border-[#fcd9bb]", icon: Clock },
-  "Từ chối": { cls: "bg-[#fef0f0] text-[#c0392b] border border-[#f5bcbc]", icon: X },
   "Đã khóa": { cls: "bg-[#f2f3f7] text-[#6b7694] border border-[#d9dce9]", icon: Lock },
 };
 
@@ -301,8 +300,8 @@ function BusinessDetail({
     { action: "Xác minh tài liệu pháp lý", actor: "Chuyên viên · Minh Anh", time: "18/12/2024 10:30", color: "#2e9fbf", done: true },
     ...(business.status === "Đã duyệt"
       ? [{ action: "Phê duyệt & cấp mã định danh", actor: "Admin · Nguyễn Hoàng", time: "18/12/2024 11:15", color: "#1f7a45", done: true }]
-      : business.status === "Từ chối"
-      ? [{ action: "Hồ sơ bị từ chối", actor: "Admin · Nguyễn Hoàng", time: "18/12/2024 11:15", color: "#c0392b", done: true }]
+      : business.status === "Chờ duyệt"
+      ? [{ action: "Hồ sơ chờ duyệt", color: "#c0392b", done: true }]
       : [{ action: "Đang chờ xử lý", actor: "Quản trị viên", time: "18/12/2024 11:00", color: "#E8650A", done: false }]
     ),
   ];
@@ -538,7 +537,8 @@ export default function Businesses() {
   const [viewing, setViewing] = useState<Business | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [resetPwdBusiness, setResetPwdBusiness] = useState<Business | null>(null);
-
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const viewingBusiness = viewing ? (businesses.find((b) => b.id === viewing.id) ?? viewing) : null;
 
   const filtered = useMemo(() => {
@@ -631,6 +631,44 @@ export default function Businesses() {
       {resetPwdBusiness && (
         <ResetPasswordModal business={resetPwdBusiness} onClose={() => setResetPwdBusiness(null)} />
       )}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+            <h3 className="mb-2 text-lg font-semibold text-slate-800">
+              Xác nhận xóa
+            </h3>
+
+            <p className="mb-6 text-slate-600">
+              Bạn có chắc chắn muốn xóa doanh nghiệp này không?
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteId(null);
+                }}
+                className="rounded-lg border border-slate-300 px-4 py-2"
+              >
+                Hủy
+              </button>
+
+              <button
+                onClick={() => {
+                  if (deleteId) {
+                    handleDelete(deleteId);
+                  }
+                  setShowDeleteModal(false);
+                  setDeleteId(null);
+                }}
+                className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Page header */}
       <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
         <div>
@@ -640,9 +678,6 @@ export default function Businesses() {
         <div className="flex gap-2">
           <button className="flex items-center gap-1.5 rounded-xl border border-[#e4e8f0] bg-white px-3.5 py-2.5 text-[12px] font-semibold text-slate-600 transition-colors hover:border-[#2740BA] hover:text-[#2740BA]">
             <FileDown className="h-4 w-4" /> Xuất Excel
-          </button>
-          <button className="flex items-center gap-2 rounded-xl bg-[#E8650A] px-4 py-2.5 text-[12px] font-bold text-white shadow-[0_4px_14px_rgba(232,101,10,.22)] transition-colors hover:bg-[#d95c08] active:scale-95">
-            <Plus className="h-4 w-4" /> Thêm doanh nghiệp
           </button>
         </div>
       </div>
@@ -773,7 +808,10 @@ export default function Businesses() {
                     <KeyRound className="h-3.5 w-3.5" />
                   </button>
                   <button
-                    onClick={() => handleDelete(b.id)}
+                    onClick={() => {
+                      setDeleteId(b.id);
+                      setShowDeleteModal(true);
+                    }}
                     className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#fef0f0] hover:text-[#c0392b]"
                     title="Xóa"
                   >
@@ -809,6 +847,7 @@ export default function Businesses() {
                   { label: "Mã định danh", key: null },
  
                   { label: "Ngày đăng ký", key: "registeredAt" as SortKey },
+                  {label: "Trạng thái",key: "status" as SortKey},
                   { label: "Thao tác", key: null },
                 ] as { label: string; key: SortKey }[]).map(({ label, key }) => (
                   <th
@@ -869,6 +908,7 @@ export default function Businesses() {
                     )}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3.5 text-slate-500">{b.registeredAt}</td>
+                  <td className="whitespace-nowrap px-4 py-3.5 text-slate-500">{b.status}</td>
                   <td className="px-4 py-3.5">
                     <div className="flex items-center gap-1">
                       <button

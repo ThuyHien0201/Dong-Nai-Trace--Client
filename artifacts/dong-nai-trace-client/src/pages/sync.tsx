@@ -955,7 +955,8 @@ const MOCK_SOLUTION_LOTS: any[] = [
     imageUrl:
       "https://images.unsplash.com/photo-1600423115367-87ea7661688f?w=80&h=80&fit=crop",
     syncStatus: "synced",
-    portalUrl: "https://txng.gov.vn/lot/003",
+    portalUrl:
+      "https://dong-nai-trace--han640698.replit.app/portal/san-pham/sp001",
   },
   {
     id: 4,
@@ -979,7 +980,8 @@ const MOCK_SOLUTION_LOTS: any[] = [
     imageUrl:
       "https://images.unsplash.com/photo-1509358271058-acd22cc93898?w=80&h=80&fit=crop",
     syncStatus: "synced",
-    portalUrl: "https://txng.gov.vn/lot/005",
+    portalUrl:
+      "https://dong-nai-trace--han640698.replit.app/portal/san-pham/sp001",
   },
 ];
 /* eslint-enable @typescript-eslint/no-explicit-any */
@@ -1031,11 +1033,6 @@ function SolutionProviderTab() {
       {/* Search bar */}
       <div className="flex flex-wrap items-center gap-2">
         {[
-          {
-            placeholder: "Lô thương phẩm",
-            value: searchLot,
-            set: setSearchLot,
-          },
           {
             placeholder: "Tên doanh nghiệp",
             value: searchBusiness,
@@ -1211,7 +1208,7 @@ const MOCK_TXNG_LOTS: any[] = [
       "https://images.unsplash.com/photo-1588165171080-c89acfa5ee83?w=80&h=80&fit=crop",
     syncStatus: "synced",
     isComplete: true,
-    portalUrl: "https://txng.gov.vn/lot/001",
+    portalUrl: "https://dong-nai-trace--han640698.replit.app/portal/san-pham/sp001",
   },
   {
     id: 102,
@@ -1224,7 +1221,7 @@ const MOCK_TXNG_LOTS: any[] = [
       "https://images.unsplash.com/photo-1600423115367-87ea7661688f?w=80&h=80&fit=crop",
     syncStatus: "synced",
     isComplete: true,
-    portalUrl: "https://txng.gov.vn/lot/003",
+    portalUrl: "https://dong-nai-trace--han640698.replit.app/portal/san-pham/sp001",
   },
   {
     id: 103,
@@ -1237,7 +1234,7 @@ const MOCK_TXNG_LOTS: any[] = [
       "https://images.unsplash.com/photo-1509358271058-acd22cc93898?w=80&h=80&fit=crop",
     syncStatus: "synced",
     isComplete: true,
-    portalUrl: "https://txng.gov.vn/lot/005",
+    portalUrl: "https://dong-nai-trace--han640698.replit.app/portal/san-pham/sp001",
   },
   {
     id: 104,
@@ -1612,7 +1609,7 @@ function TxngPortalTab() {
                                         syncStatus: "synced",
                                         portalUrl:
                                           lot.portalUrl ??
-                                          `https://txng.gov.vn/lot/${lot.lotCode.toLowerCase().replace("lot-", "")}`,
+                                          `https://dong-nai-trace--han640698.replit.app/lot/${lot.lotCode.toLowerCase().replace("lot-", "")}`,
                                       }
                                     : lot,
                                 )

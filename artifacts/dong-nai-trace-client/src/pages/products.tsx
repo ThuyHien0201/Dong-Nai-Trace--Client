@@ -34,8 +34,7 @@ import {
 type ProductStatus =
   | "Chờ duyệt"
   | "Đã duyệt"
-  | "Đã có truy xuất nguồn gốc"
-  | "Từ chối";
+
 
 interface Product {
   id: string;
@@ -43,7 +42,6 @@ interface Product {
   company: string;
   sector: string;
   status: ProductStatus;
-  price: string;
   unit: string;
   region: string;
   certifications: string[];
@@ -61,8 +59,7 @@ const mockProducts: Product[] = [
     name: "Bưởi Tân Triều",
     company: "Cơ sở Bưởi Tân Triều",
     sector: "OCOP",
-    status: "Đã có truy xuất nguồn gốc",
-    price: "45.000",
+    status: "Đã duyệt",
     unit: "kg",
     region: "Vĩnh Cửu",
     certifications: ["OCOP 4★", "VietGAP"],
@@ -82,7 +79,6 @@ const mockProducts: Product[] = [
     company: "HTX Ong Mật Định Quán",
     sector: "Nông sản",
     status: "Chờ duyệt",
-    price: "180.000",
     unit: "lọ",
     region: "Định Quán",
     certifications: ["OCOP 3★"],
@@ -102,7 +98,6 @@ const mockProducts: Product[] = [
     company: "Trại thủy sản NT",
     sector: "Thủy sản",
     status: "Đã duyệt",
-    price: "75.000",
     unit: "kg",
     region: "Nhơn Trạch",
     certifications: ["VietGAP"],
@@ -121,8 +116,7 @@ const mockProducts: Product[] = [
     name: "Thanh long ruột đỏ",
     company: "Nông trại Long Thành",
     sector: "Nông sản",
-    status: "Từ chối",
-    price: "35.000",
+    status: "Đã duyệt",
     unit: "kg",
     region: "Long Thành",
     certifications: [],
@@ -141,8 +135,7 @@ const mockProducts: Product[] = [
     name: "Sầu riêng Xuân Lộc",
     company: "HTX Xuân Lộc",
     sector: "OCOP",
-    status: "Đã có truy xuất nguồn gốc",
-    price: "120.000",
+    status: "Đã duyệt",
     unit: "kg",
     region: "Xuân Lộc",
     certifications: ["OCOP 4★", "GlobalGAP"],
@@ -162,7 +155,6 @@ const mockProducts: Product[] = [
     company: "Trại tôm Long Khánh",
     sector: "Thủy sản",
     status: "Chờ duyệt",
-    price: "210.000",
     unit: "kg",
     region: "Long Khánh",
     certifications: ["HACCP"],
@@ -182,7 +174,6 @@ const mockProducts: Product[] = [
     company: "Công ty TNHH Cà phê DNT",
     sector: "Nông sản",
     status: "Đã duyệt",
-    price: "95.000",
     unit: "kg",
     region: "Định Quán",
     certifications: ["4C", "Rainforest Alliance"],
@@ -201,8 +192,7 @@ const mockProducts: Product[] = [
     name: "Tiêu đen Vĩnh Cửu",
     company: "HTX Tiêu Vĩnh Cửu",
     sector: "OCOP",
-    status: "Đã có truy xuất nguồn gốc",
-    price: "150.000",
+    status: "Đã duyệt",
     unit: "kg",
     region: "Vĩnh Cửu",
     certifications: ["OCOP 3★", "Organic"],
@@ -233,16 +223,7 @@ const statusConfig: Record<ProductStatus, { cls: string; dotCls: string; icon: R
     dotCls: "bg-[#1f7a45]",
     icon: <Check className="h-2.5 w-2.5" />,
   },
-  "Đã có truy xuất nguồn gốc": {
-    cls: "bg-[#e6f7f7] text-[#0e7c7c] border border-[#9edad9]",
-    dotCls: "bg-[#0e7c7c]",
-    icon: <Link2 className="h-2.5 w-2.5" />,
-  },
-  "Từ chối": {
-    cls: "bg-[#fef0f0] text-[#c0392b] border border-[#f5bcbc]",
-    dotCls: "bg-[#c0392b]",
-    icon: <X className="h-2.5 w-2.5" />,
-  },
+  
 };
 
 function StatusBadge({ status }: { status: ProductStatus }) {
@@ -322,10 +303,7 @@ function ProductCard({ product, onView }: { product: Product; onView: () => void
           ))}
         </div>
         <div className="mt-auto pt-3 flex items-center justify-between border-t border-[#f0f2f8]">
-          <div>
-            <p className="text-[13px] font-bold text-[#E8650A]">{product.price}đ</p>
-            <p className="text-[10px] text-slate-400">/{product.unit}</p>
-          </div>
+          
           <button
             onClick={onView}
             className="flex items-center gap-1.5 rounded-xl border border-[#2740BA] px-3 py-1.5 text-[10px] font-semibold text-[#2740BA] hover:bg-[#edf0ff] transition-colors"
@@ -350,11 +328,11 @@ function ProductDetail({
 }) {
   const [imgIdx, setImgIdx] = useState(0);
   const [activeTab, setActiveTab] = useState<"basic" | "trace">(
-    product.status === "Đã có truy xuất nguồn gốc" ? (initialTab ?? "trace") : "basic"
+   
   );
   const [qrOpen, setQrOpen] = useState(false);
 
-  const showTabs = product.status === "Đã có truy xuất nguồn gốc" || product.status === "Đã duyệt";
+  const showTabs = product.status === "Đã duyệt";
 
   // Timeline steps for traceability
   const traceSteps = [
@@ -369,11 +347,8 @@ function ProductDetail({
   const approvalTimeline = [
     { action: "Hồ sơ được tiếp nhận", actor: "Hệ thống", time: "12/04/2025 08:15", done: true, color: "#2740BA" },
     { action: "Xác minh thông tin doanh nghiệp", actor: "Admin · Nguyễn Hoàng", time: "12/04/2025 10:30", done: true, color: "#4f9a77" },
-    ...(product.status === "Đã duyệt" || product.status === "Đã có truy xuất nguồn gốc"
+    ...(product.status === "Đã duyệt" 
       ? [{ action: "Phê duyệt hồ sơ sản phẩm", actor: "Admin · Nguyễn Hoàng", time: "13/04/2025 09:05", done: true, color: "#1f7a45" }]
-      : []),
-    ...(product.status === "Từ chối"
-      ? [{ action: "Từ chối hồ sơ sản phẩm", actor: "Admin · Minh Anh", time: "13/04/2025 11:20", done: true, color: "#c0392b" }]
       : []),
   ];
 
@@ -478,7 +453,7 @@ function ProductDetail({
                   ["Khu vực", product.region],
                   ["Mã sản phẩm", product.id],
                   ["Doanh nghiệp", product.company],
-                  ["Giá niêm yết", `${product.price}đ/${product.unit}`],
+                  ["Giá niêm yết", `${product.unit}`],
                 ].map(([k, v]) => (
                   <div key={k}>
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{k}</p>
@@ -504,29 +479,7 @@ function ProductDetail({
               </div>
             </div>
 
-            {/* Approval history */}
-            <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-sm">
-              <p className="mb-5 text-[13px] font-bold text-[#1d2944]">Lịch sử xử lý</p>
-              <div className="space-y-0">
-                {approvalTimeline.map((item, i) => (
-                  <div key={i} className="relative flex gap-4 pb-5 last:pb-0">
-                    {i < approvalTimeline.length - 1 && (
-                      <span className="absolute left-[11px] top-6 h-full w-px bg-[#e4e8f0]" />
-                    )}
-                    <div
-                      className="relative z-10 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
-                      style={{ background: item.color, boxShadow: `0 0 0 3px ${item.color}22` }}
-                    >
-                      <Check className="h-3 w-3 text-white" strokeWidth={3} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[12px] font-semibold text-[#25304b]">{item.action}</p>
-                      <p className="mt-0.5 text-[10px] text-slate-400">{item.actor} · {item.time}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+           
           </div>
 
           {/* Right */}
@@ -537,7 +490,7 @@ function ProductDetail({
               <StatusBadge status={product.status} />
 
               {/* QR code button for approved/traced */}
-              {(product.status === "Đã duyệt" || product.status === "Đã có truy xuất nguồn gốc") && (
+              {(product.status === "Đã duyệt") && (
                 <button
                   onClick={() => setQrOpen(true)}
                   className="mt-4 mb-2 flex w-full items-center justify-center gap-2 rounded-xl border border-[#dce3ff] bg-[#f0f2ff] py-3 text-[12px] font-semibold text-[#2740BA] transition hover:bg-[#e4e8ff]"
@@ -556,18 +509,7 @@ function ProductDetail({
               </div>
             </div>
 
-            {/* Rejected status info */}
-            {product.status === "Từ chối" && (
-              <div className="rounded-2xl border border-[#f5bcbc] bg-[#fef0f0] p-5 shadow-sm">
-                <div className="flex items-center gap-2 text-[#c0392b]">
-                  <X className="h-5 w-5 shrink-0" />
-                  <p className="text-[13px] font-bold">Hồ sơ bị từ chối</p>
-                </div>
-                <p className="mt-2 text-[12px] text-[#c0392b]/70">
-                  Sản phẩm này đã bị từ chối. Doanh nghiệp cần cập nhật thông tin và đăng ký lại.
-                </p>
-              </div>
-            )}
+            
 
             {/* Traceability placeholder (approved but no trace data) */}
             {product.status === "Đã duyệt" && (
@@ -713,26 +655,7 @@ function ProductDetail({
               </div>
             </div>
 
-            {/* Request update */}
-            <button className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#e4e8f0] bg-white py-4 text-[12px] font-semibold text-slate-400 hover:border-[#E8650A] hover:text-[#E8650A] transition-colors">
-              <AlertCircle className="h-4 w-4" />
-              Yêu cầu cập nhật lại dữ liệu
-            </button>
-
-            {/* Summary card */}
-            <div className="rounded-2xl border border-[#9edad9] bg-[#e6f7f7] p-5">
-              <div className="flex items-center gap-2 text-[#0e7c7c]">
-                <Link2 className="h-4 w-4 shrink-0" />
-                <p className="text-[12px] font-bold">Truy xuất đầy đủ</p>
-              </div>
-              <p className="mt-1.5 text-[11px] text-[#0e7c7c]/70">
-                5/6 mốc quy trình đã được xác nhận. Đang chờ cập nhật bước Phân phối.
-              </p>
-              <div className="mt-3 h-1.5 rounded-full bg-[#9edad9]">
-                <div className="h-1.5 rounded-full bg-[#0e7c7c]" style={{ width: "83%" }} />
-              </div>
-              <p className="mt-1 text-right text-[10px] font-bold text-[#0e7c7c]">83%</p>
-            </div>
+            
           </div>
         </div>
       )}
@@ -760,9 +683,9 @@ export default function Products() {
     );
   }
 
-  const allStatuses = ["Tất cả", "Chờ duyệt", "Đã duyệt", "Đã có truy xuất nguồn gốc", "Từ chối"];
+  const allStatuses = ["Tất cả", "Chờ duyệt", "Đã duyệt"];
   const statusCounts: Record<string, number> = { "Tất cả": mockProducts.length };
-  (["Chờ duyệt", "Đã duyệt", "Đã có truy xuất nguồn gốc", "Từ chối"] as ProductStatus[]).forEach((s) => {
+  (["Chờ duyệt", "Đã duyệt"] as ProductStatus[]).forEach((s) => {
     statusCounts[s] = mockProducts.filter((p) => p.status === s).length;
   });
 
@@ -776,7 +699,7 @@ export default function Products() {
   });
 
   function openDetail(product: Product, tab: "basic" | "trace" = "basic") {
-    setSelectedTab(product.status === "Đã có truy xuất nguồn gốc" ? "trace" : tab);
+    setSelectedTab(product.status === "Đã duyệt" ? "trace" : tab);
     setSelected(product);
   }
 
@@ -792,9 +715,7 @@ export default function Products() {
           <button className="flex items-center gap-1.5 rounded-xl border border-[#e4e8f0] bg-white px-3.5 py-2.5 text-[12px] font-semibold text-slate-600 hover:border-[#2740BA] hover:text-[#2740BA] transition-colors">
             <FileDown className="h-4 w-4" /> Xuất dữ liệu
           </button>
-          <button className="flex items-center gap-2 rounded-xl bg-[#E8650A] px-4 py-2.5 text-[12px] font-bold text-white hover:bg-[#d95c08] transition-colors shadow-[0_4px_14px_rgba(232,101,10,.2)]">
-            <Plus className="h-4 w-4" /> Thêm sản phẩm
-          </button>
+          
         </div>
       </div>
 
@@ -871,7 +792,7 @@ export default function Products() {
             <table className="min-w-full text-[12px]">
               <thead>
                 <tr className="border-b border-[#e4e8f0] bg-[#f9fafb]">
-                  {["Sản phẩm", "Doanh nghiệp", "Ngành hàng", "Khu vực", "Giá", "Trạng thái", "Thao tác"].map((h) => (
+                  {["Sản phẩm", "Doanh nghiệp", "Ngành hàng", "Khu vực", "Đơn vị", "Trạng thái", "Thao tác"].map((h) => (
                     <th key={h} className="whitespace-nowrap px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">{h}</th>
                   ))}
                 </tr>
@@ -902,7 +823,7 @@ export default function Products() {
                     <td className="px-4 py-3.5 text-slate-500">{p.company}</td>
                     <td className="px-4 py-3.5 text-slate-500">{p.sector}</td>
                     <td className="px-4 py-3.5 text-slate-500">{p.region}</td>
-                    <td className="px-4 py-3.5 font-semibold text-[#E8650A]">{p.price}đ/{p.unit}</td>
+                    <td className="px-4 py-3.5 font-semibold text-[#E8650A]">{p.unit}</td>
                     <td className="px-4 py-3.5">
                       <StatusBadge status={p.status} />
                     </td>
