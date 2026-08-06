@@ -807,7 +807,7 @@ export default function Businesses() {
                   { label: "Địa bàn", key: "region" as SortKey },
                   { label: "Ngành hàng", key: "sector" as SortKey },
                   { label: "Mã định danh", key: null },
-                  { label: "Trạng thái", key: "status" as SortKey },
+ 
                   { label: "Ngày đăng ký", key: "registeredAt" as SortKey },
                   { label: "Thao tác", key: null },
                 ] as { label: string; key: SortKey }[]).map(({ label, key }) => (
@@ -825,7 +825,7 @@ export default function Businesses() {
             <tbody className="divide-y divide-[#f0f2f8]">
               {paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-16 text-center text-[12px] text-slate-400">
+                  <td colSpan={8} className="py-16 text-center text-[12px] text-slate-400">
                     Không tìm thấy doanh nghiệp nào phù hợp bộ lọc.
                   </td>
                 </tr>
@@ -867,9 +867,6 @@ export default function Businesses() {
                     ) : (
                       <span className="text-slate-300 select-none">—</span>
                     )}
-                  </td>
-                  <td className="px-4 py-3.5">
-                    <StatusBadge status={b.status} />
                   </td>
                   <td className="whitespace-nowrap px-4 py-3.5 text-slate-500">{b.registeredAt}</td>
                   <td className="px-4 py-3.5">
