@@ -11,19 +11,48 @@ import {
   Inter_700Bold,
   useFonts,
 } from '@expo-google-fonts/inter';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
+function AuthGate() {
+  const { isAuthenticated } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    const inAuthGroup = segments[0] === 'login';
+    if (!isAuthenticated && !inAuthGroup) {
+      router.replace('/login');
+    } else if (isAuthenticated && inAuthGroup) {
+      router.replace('/(tabs)');
+    }
+  }, [isAuthenticated, segments]);
+
+  return null;
+}
+
 function RootLayoutNav() {
   return (
-    <Stack screenOptions={{ headerBackTitle: 'Back' }}>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-    </Stack>
+    <>
+      <AuthGate />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="login" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="categories" options={{ presentation: 'card', headerShown: false }} />
+        <Stack.Screen name="cms" options={{ presentation: 'card', headerShown: false }} />
+        <Stack.Screen name="support" options={{ presentation: 'card', headerShown: false }} />
+        <Stack.Screen name="accounts" options={{ presentation: 'card', headerShown: false }} />
+        <Stack.Screen name="sync" options={{ presentation: 'card', headerShown: false }} />
+        <Stack.Screen name="settings" options={{ presentation: 'card', headerShown: false }} />
+        <Stack.Screen name="system" options={{ presentation: 'card', headerShown: false }} />
+        <Stack.Screen name="connections" options={{ presentation: 'card', headerShown: false }} />
+      </Stack>
+    </>
   );
 }
 
@@ -46,13 +75,15 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <GestureHandlerRootView>
-            <KeyboardProvider>
-              <RootLayoutNav />
-            </KeyboardProvider>
-          </GestureHandlerRootView>
-        </QueryClientProvider>
+        <AuthProvider>
+          <QueryClientProvider client={queryClient}>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <KeyboardProvider>
+                <RootLayoutNav />
+              </KeyboardProvider>
+            </GestureHandlerRootView>
+          </QueryClientProvider>
+        </AuthProvider>
       </ErrorBoundary>
     </SafeAreaProvider>
   );

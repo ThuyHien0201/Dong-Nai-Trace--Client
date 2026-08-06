@@ -1,85 +1,86 @@
-import React from 'react';
-import { Platform, StyleSheet, useColorScheme, View } from 'react-native';
-import { useColors } from '@/hooks/useColors';
-import { Feather } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur';
-import { isLiquidGlassAvailable } from 'expo-glass-effect';
 import { Tabs } from 'expo-router';
-import { Icon, Label, NativeTabs } from 'expo-router/unstable-native-tabs';
-import { SymbolView } from 'expo-symbols';
+import React from 'react';
+import { Platform, View, StyleSheet } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 
-// IMPORTANT: iOS 26 uses NativeTabs for native tabs with liquid glass support.
-// NativeTabs intentionally does NOT use custom design tokens — liquid glass
-// is a system-level appearance provided by iOS and cannot be overridden.
-// Custom brand colors are applied only on the ClassicTabLayout path (older iOS / Android / web).
-function NativeTabLayout() {
+const PRIMARY = '#2740BA';
+const INACTIVE = '#a8b2c8';
+
+function TabIcon({ name, focused }: { name: React.ComponentProps<typeof Feather>['name']; focused: boolean }) {
   return (
-    <NativeTabs>
-      <NativeTabs.Trigger name="index">
-        <Icon sf={{ default: 'house', selected: 'house.fill' }} />
-        <Label>Home</Label>
-      </NativeTabs.Trigger>
-    </NativeTabs>
+    <View style={[styles.iconWrap, focused && styles.iconActive]}>
+      <Feather name={name} size={20} color={focused ? PRIMARY : INACTIVE} />
+    </View>
   );
 }
 
-function ClassicTabLayout() {
-  const colors = useColors();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const isIOS = Platform.OS === 'ios';
-  const isWeb = Platform.OS === 'web';
-
+export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.mutedForeground,
-        headerShown: true,
+        headerShown: false,
+        tabBarActiveTintColor: PRIMARY,
+        tabBarInactiveTintColor: INACTIVE,
         tabBarStyle: {
-          position: 'absolute',
-          backgroundColor: isIOS ? 'transparent' : colors.background,
-          borderTopWidth: isWeb ? 1 : 0,
-          borderTopColor: colors.border,
-          elevation: 0,
-          ...(isWeb ? { height: 84 } : {}),
+          backgroundColor: '#fff',
+          borderTopColor: '#e4e8f0',
+          borderTopWidth: 1,
+          height: Platform.OS === 'ios' ? 84 : 62,
+          paddingBottom: Platform.OS === 'ios' ? 24 : 8,
+          paddingTop: 8,
+          elevation: 8,
+          shadowColor: '#1d2944',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.06,
+          shadowRadius: 12,
         },
-        tabBarBackground: () =>
-          isIOS ? (
-            <BlurView
-              intensity={100}
-              tint={isDark ? 'dark' : 'light'}
-              style={StyleSheet.absoluteFill}
-            />
-          ) : isWeb ? (
-            <View
-              style={[
-                StyleSheet.absoluteFill,
-                { backgroundColor: colors.background },
-              ]}
-            />
-          ) : null,
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontFamily: 'Inter_600SemiBold',
+          marginTop: 2,
+        },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="house" tintColor={color} size={24} />
-            ) : (
-              <Feather name="home" size={22} color={color} />
-            ),
+          title: 'Tổng quan',
+          tabBarIcon: ({ focused }) => <TabIcon name="home" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="businesses"
+        options={{
+          title: 'Doanh nghiệp',
+          tabBarIcon: ({ focused }) => <TabIcon name="briefcase" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="products"
+        options={{
+          title: 'Sản phẩm',
+          tabBarIcon: ({ focused }) => <TabIcon name="package" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="analytics"
+        options={{
+          title: 'Báo cáo',
+          tabBarIcon: ({ focused }) => <TabIcon name="bar-chart-2" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="more"
+        options={{
+          title: 'Thêm',
+          tabBarIcon: ({ focused }) => <TabIcon name="grid" focused={focused} />,
         }}
       />
     </Tabs>
   );
 }
 
-export default function TabLayout() {
-  if (isLiquidGlassAvailable()) {
-    return <NativeTabLayout />;
-  }
-  return <ClassicTabLayout />;
-}
+const styles = StyleSheet.create({
+  iconWrap: { padding: 4, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  iconActive: { backgroundColor: '#edf0ff' },
+});
