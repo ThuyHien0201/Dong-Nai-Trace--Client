@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
+
 import {
   LayoutDashboard,
+  Globe,
   Building2,
   Package,
   BarChart3,
@@ -39,7 +41,6 @@ function TraceMark({ compact: _compact }: { compact?: boolean }) {
     </div>
   );
 }
-
 const workspaceNav = [
   { label: "Tổng quan", icon: LayoutDashboard, href: "/dashboard" },
   { label: "Doanh nghiệp", icon: Building2, href: "/dashboard/doanh-nghiep" },
@@ -169,6 +170,8 @@ function DashboardHeader({
 }) {
   const [search, setSearch] = useState("");
   const [notifOpen, setNotifOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
+  const [language, setLanguage] = useState("Tiếng Việt");
 
   return (
     <header className="relative flex h-[78px] shrink-0 items-center justify-between gap-4 border-b border-[#e5e8f0] bg-white px-5 sm:px-8 lg:px-10">
@@ -223,6 +226,46 @@ function DashboardHeader({
                     <p className="mt-0.5 text-[10px] text-slate-400">{n.time}</p>
                   </div>
                 </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setLangOpen((v) => !v)}
+            className="flex h-9 items-center gap-2 rounded-xl border border-[#e5e8f0] bg-white px-3 text-slate-500 hover:border-[#2740BA] hover:text-[#2740BA]"
+          >
+            <Globe className="h-4 w-4" />
+            <span className="hidden text-[11px] font-medium md:block">
+              {language}
+            </span>
+            <ChevronDown className="h-3 w-3" />
+          </button>
+
+          {langOpen && (
+            <div className="absolute right-0 top-11 z-50 w-48 overflow-hidden rounded-2xl border border-[#e5e8f0] bg-white shadow-xl">
+              {[
+                "Tiếng Việt",
+                "English",
+                "한국어",
+                "日本語",
+                "中文",
+              ].map((lang) => (
+                <button
+                  key={lang}
+                  onClick={() => {
+                    setLanguage(lang);
+                    setLangOpen(false);
+                  }}
+                  className={`flex w-full items-center px-4 py-3 text-left text-[12px] hover:bg-[#f5f7ff] ${
+                    language === lang
+                      ? "bg-[#edf0ff] font-semibold text-[#2740BA]"
+                      : "text-slate-600"
+                  }`}
+                >
+                  {lang}
+                </button>
               ))}
             </div>
           )}

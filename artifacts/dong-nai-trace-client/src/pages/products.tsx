@@ -334,14 +334,67 @@ function ProductDetail({
 
   // Timeline steps for traceability
   const traceSteps = [
-    { icon: Sprout, label: "Gieo trồng / Nuôi trồng", date: "10/01/2025", desc: "Giống được kiểm định và gieo trồng tại vùng canh tác đã đăng ký.", color: "#1f7a45", done: true },
-    { icon: Leaf, label: "Chăm sóc", date: "15/02/2025", desc: "Bón phân hữu cơ, phun thuốc BVTV sinh học theo lịch khuyến cáo.", color: "#2e9fbf", done: true },
-    { icon: Package, label: "Thu hoạch", date: "20/04/2025", desc: "Thu hoạch đúng độ chín, không sử dụng chất bảo quản sau thu hoạch.", color: "#E8650A", done: true },
-    { icon: FlaskConical, label: "Sơ chế / Đóng gói", date: "22/04/2025", desc: "Phân loại, làm sạch và đóng gói tại kho sơ chế đạt chuẩn VSATTP.", color: "#7c3aed", done: true },
-    { icon: Truck, label: "Vận chuyển", date: "25/04/2025", desc: "Vận chuyển bằng xe lạnh đạt chuẩn, nhiệt độ 4–8°C, theo lộ trình đã khai báo.", color: "#2740BA", done: true },
-    { icon: Store, label: "Phân phối", date: "27/04/2025", desc: "Phân phối đến các điểm bán lẻ và siêu thị đối tác trong tỉnh.", color: "#0e7c7c", done: false },
-  ];
+    {
+      icon: Sprout,
+      label: "Gieo trồng / Nuôi trồng",
+      date: "10/01/2025",
+      desc: "Giống được kiểm định và gieo trồng tại vùng canh tác đã đăng ký.",
+      color: "#1f7a45",
+      done: true,
+      image: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=800",
 
+    },
+    {
+      icon: Leaf,
+      label: "Chăm sóc",
+      date: "08/07/2024",
+      desc: "Tưới nước, bón phân hữu cơ theo lịch, kiểm tra sâu bệnh định kỳ.",
+      color: "#2e9fbf",
+      done: true,
+      images: [
+        "https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?w=400",
+        "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=400",
+        "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400",
+        "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=400"
+      ]
+    },
+    {
+      icon: Package,
+      label: "Thu hoạch",
+      date: "20/04/2025",
+      desc: "Thu hoạch đúng độ chín, không sử dụng chất bảo quản sau thu hoạch.",
+      color: "#E8650A",
+      done: true,
+      image: "https://images.unsplash.com/photo-1588165171080-c89acfa5ee83?w=800"
+    },
+    {
+      icon: FlaskConical,
+      label: "Sơ chế / Đóng gói",
+      date: "22/04/2025",
+      desc: "Phân loại, làm sạch và đóng gói tại kho sơ chế đạt chuẩn VSATTP.",
+      color: "#7c3aed",
+      done: true,
+      image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800"
+    },
+    {
+      icon: Truck,
+      label: "Vận chuyển",
+      date: "25/04/2025",
+      desc: "Vận chuyển bằng xe lạnh đạt chuẩn.",
+      color: "#2740BA",
+      done: true,
+      image: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=800"
+    },
+    {
+      icon: Store,
+      label: "Phân phối",
+      date: "27/04/2025",
+      desc: "Phân phối đến các điểm bán lẻ.",
+      color: "#0e7c7c",
+      done: false,
+      image: "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=800"
+    }
+  ];
   const approvalTimeline = [
     { action: "Hồ sơ được tiếp nhận", actor: "Hệ thống", time: "12/04/2025 08:15", done: true, color: "#2740BA" },
     { action: "Xác minh thông tin doanh nghiệp", actor: "Admin · Nguyễn Hoàng", time: "12/04/2025 10:30", done: true, color: "#4f9a77" },
@@ -451,7 +504,7 @@ function ProductDetail({
                   ["Khu vực", product.region],
                   ["Mã sản phẩm", product.id],
                   ["Doanh nghiệp", product.company],
-                  ["Giá niêm yết", `${product.unit}`],
+                  ["Đơn vị", `${product.unit}`]
                 ].map(([k, v]) => (
                   <div key={k}>
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{k}</p>
@@ -573,9 +626,19 @@ function ProductDetail({
                               Chờ cập nhật
                             </span>
                           )}
+                         
                         </div>
                         <p className="mt-0.5 text-[10px] text-slate-400">{step.date}</p>
                         <p className="mt-1.5 rounded-xl bg-[#f7f8fd] p-3 text-[11px] leading-4.5 text-slate-500">{step.desc}</p>
+                        {step.image && (
+                            <div className="mt-3">
+                              <img
+                                src={step.image}
+                                alt={step.label}
+                                className="h-48 w-full rounded-xl border border-[#e4e8f0] object-cover"
+                              />
+                            </div>
+                        )}
                       </div>
                     </div>
                   );
