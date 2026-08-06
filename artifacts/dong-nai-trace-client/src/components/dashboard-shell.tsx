@@ -171,7 +171,7 @@ function DashboardHeader({
   const [search, setSearch] = useState("");
   const [notifOpen, setNotifOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
-  const [language, setLanguage] = useState("Tiếng Việt");
+  const [language, setLanguage] = useState();
 
   return (
     <header className="relative flex h-[78px] shrink-0 items-center justify-between gap-4 border-b border-[#e5e8f0] bg-white px-5 sm:px-8 lg:px-10">
