@@ -863,8 +863,7 @@ export default function Businesses() {
                   <td className="px-4 py-3.5 text-slate-500">{b.sector}</td>
                   <td className="whitespace-nowrap px-4 py-3.5">
                     {b.businessCode ? (
-                      <span className="flex items-center gap-1.5 font-mono text-[11px] font-semibold text-[#2740BA]">
-                        <QrCode className="h-3 w-3 shrink-0" />
+                      <span className="font-mono text-[11px] font-semibold text-[#2740BA]">
                         {b.businessCode}
                       </span>
                     ) : (
