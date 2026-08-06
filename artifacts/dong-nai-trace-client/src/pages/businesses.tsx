@@ -939,7 +939,10 @@ export default function Businesses() {
                         {b.status === "Đã khóa" ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
                       </button>
                       <button
-                        onClick={() => handleDelete(b.id)}
+                        onClick={() => {
+                          setDeleteId(b.id);
+                          setShowDeleteModal(true);
+                        }}
                         className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#fef0f0] hover:text-[#c0392b]"
                         title="Xóa"
                       >

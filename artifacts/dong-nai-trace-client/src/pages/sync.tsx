@@ -1567,11 +1567,11 @@ function TxngPortalTab() {
                       GTIN: {lot.gtin}
                     </p>
                   </td>
-                  <td className="px-4 py-3.5 font-mono font-semibold text-[#2740BA]">
-                    {lot.lotCode}
-                  </td>
                   <td className="px-4 py-3.5 text-slate-500">
                     {lot.businessName}
+                  </td>
+                  <td className="px-4 py-3.5 font-mono font-semibold text-[#2740BA]">
+                    {lot.lotCode}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3.5 text-slate-400">
                     {fmtDate(lot.activatedAt)}

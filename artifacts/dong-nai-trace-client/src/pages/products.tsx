@@ -327,9 +327,7 @@ function ProductDetail({
   initialTab?: "basic" | "trace";
 }) {
   const [imgIdx, setImgIdx] = useState(0);
-  const [activeTab, setActiveTab] = useState<"basic" | "trace">(
-   
-  );
+  const [activeTab, setActiveTab] = useState<"basic" | "trace">(initialTab ?? "basic");
   const [qrOpen, setQrOpen] = useState(false);
 
   const showTabs = product.status === "Đã duyệt";
@@ -665,6 +663,7 @@ function ProductDetail({
 
 // ─── Main export: Products list ──────────────────────────────────────────────
 export default function Products() {
+  // ── All hooks at the top ──────────────────────────────────────────────────
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("Tất cả");
@@ -672,7 +671,11 @@ export default function Products() {
   const [sectorFilter, setSectorFilter] = useState("Tất cả ngành");
   const [selected, setSelected] = useState<Product | null>(null);
   const [selectedTab, setSelectedTab] = useState<"basic" | "trace">("basic");
+  const [products, setProducts] = useState<Product[]>(mockProducts);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  // ── Early return (after all hooks) ───────────────────────────────────────
   if (selected) {
     return (
       <ProductDetail
@@ -689,7 +692,11 @@ export default function Products() {
     statusCounts[s] = mockProducts.filter((p) => p.status === s).length;
   });
 
-  const filtered = mockProducts.filter((p) => {
+  const handleDelete = (id: string) => {
+    setProducts((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const filtered = products.filter((p) => {
     const q = search.toLowerCase();
     const matchSearch = p.name.toLowerCase().includes(q) || p.company.toLowerCase().includes(q) || p.id.toLowerCase().includes(q);
     const matchStatus = statusFilter === "Tất cả" || p.status === statusFilter;
@@ -706,6 +713,44 @@ export default function Products() {
   return (
     <DashboardShell title="Quản lý sản phẩm" subtitle="Danh sách sản phẩm">
       {/* Header */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+            <h3 className="mb-2 text-lg font-semibold text-slate-800">
+              Xác nhận xóa
+            </h3>
+
+            <p className="mb-6 text-slate-600">
+              Bạn có chắc chắn muốn xóa sản phẩm này không?
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteId(null);
+                }}
+                className="rounded-lg border border-slate-300 px-4 py-2"
+              >
+                Hủy
+              </button>
+
+              <button
+                onClick={() => {
+                  if (deleteId) {
+                    handleDelete(deleteId);
+                  }
+                  setShowDeleteModal(false);
+                  setDeleteId(null);
+                }}
+                className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-[.18em] text-[#E8650A]">Quản lý</p>
@@ -843,11 +888,16 @@ export default function Products() {
                           <Pencil className="h-3.5 w-3.5" />
                         </button>
                         <button
+                          onClick={() => {
+                            setDeleteId(p.id);
+                            setShowDeleteModal(true);
+                          }}
                           className="rounded-lg p-1.5 text-slate-400 hover:bg-[#fef0f0] hover:text-[#c0392b] transition-colors"
                           title="Xóa"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
+                          
                       </div>
                     </td>
                   </tr>
