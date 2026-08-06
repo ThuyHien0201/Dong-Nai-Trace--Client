@@ -145,11 +145,9 @@ function ResetPasswordModal({ business, onClose }: { business: Business; onClose
   const [error, setError] = useState("");
 
   function generateRandom() {
-    const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$";
-    let pw = "";
-    for (let i = 0; i < 12; i++) pw += chars[Math.floor(Math.random() * chars.length)];
-    setNewPwd(pw);
-    setConfirmPwd(pw);
+    const DEFAULT_PASSWORD = "Aa@123456";
+    setNewPwd(DEFAULT_PASSWORD);
+    setConfirmPwd(DEFAULT_PASSWORD);
     setShowNew(true);
     setError("");
   }
@@ -207,7 +205,7 @@ function ResetPasswordModal({ business, onClose }: { business: Business; onClose
               onClick={generateRandom}
               className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#c5cef9] bg-[#f0f3ff] py-2.5 text-[12px] font-semibold text-[#2740BA] hover:bg-[#e4e8ff] transition-colors"
             >
-              <RefreshCw className="h-3.5 w-3.5" /> Tạo mật khẩu ngẫu nhiên
+              <RefreshCw className="h-3.5 w-3.5" /> Đặt mật khẩu mặc định (Aa@123456)
             </button>
 
             {/* New password */}
