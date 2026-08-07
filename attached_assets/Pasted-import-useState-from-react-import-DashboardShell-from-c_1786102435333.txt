@@ -1,0 +1,322 @@
+import { useState } from "react";
+import { DashboardShell } from "@/components/dashboard-shell";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Eye,
+  X,
+  ImageIcon,
+  ToggleLeft,
+  ToggleRight,
+  GripVertical,
+  Bold,
+  Italic,
+  Link,
+  List,
+  AlignLeft,
+  FileDown,
+  Newspaper,
+  LayoutTemplate,
+} from "lucide-react";
+
+const TABS = [
+  { id: "news", label: "Tin tức", icon: Newspaper },
+  { id: "banner", label: "Banner", icon: LayoutTemplate },
+] as const;
+type TabId = "news" | "banner";
+
+interface Article {
+  id: string;
+  title: string;
+  category: string;
+  publishedAt: string;
+  status: "Đã đăng" | "Nháp";
+  emoji: string;
+}
+
+const articles: Article[] = [
+  { id: "TT-001", title: "Đồng Nai Trace đạt mốc 1 triệu lượt truy xuất", category: "Thông báo", publishedAt: "15/12/2024", status: "Đã đăng", emoji: "📣" },
+  { id: "TT-002", title: "Hướng dẫn đăng ký doanh nghiệp trên hệ thống", category: "Hướng dẫn", publishedAt: "10/12/2024", status: "Đã đăng", emoji: "📘" },
+  { id: "TT-003", title: "Cập nhật tính năng quản lý mã QR mới", category: "Cập nhật", publishedAt: "08/12/2024", status: "Đã đăng", emoji: "⚡" },
+  { id: "TT-004", title: "Lịch bảo trì hệ thống tháng 1/2025", category: "Thông báo", publishedAt: "19/12/2024", status: "Nháp", emoji: "🔧" },
+  { id: "TT-005", title: "Chương trình hỗ trợ OCOP 2025", category: "Sự kiện", publishedAt: "01/01/2025", status: "Nháp", emoji: "🌟" },
+];
+
+interface Banner {
+  id: string;
+  title: string;
+  link: string;
+  active: boolean;
+  emoji: string;
+  bg: string;
+}
+
+const initialBanners: Banner[] = [
+  { id: "BN-001", title: "Chào mừng đến Đồng Nai Trace", link: "https://dongnaitrace.vn", active: true, emoji: "🎉", bg: "bg-[#edf0ff]" },
+  { id: "BN-002", title: "Đăng ký doanh nghiệp ngay hôm nay", link: "/register", active: true, emoji: "🏢", bg: "bg-[#fff4ed]" },
+  { id: "BN-003", title: "Tra cứu nguồn gốc sản phẩm OCOP", link: "/trace", active: false, emoji: "🔍", bg: "bg-[#e8f5ed]" },
+];
+
+function ArticleEditor({ onClose }: { onClose: () => void }) {
+  const [title, setTitle] = useState("");
+  return (
+    <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-sm">
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-[14px] font-bold text-[#1d2944]">Soạn thảo bài viết</p>
+        <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-[#f1f3fa]">
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+      <div className="space-y-4">
+        <div>
+          <label className="mb-1 block text-[11px] font-medium text-slate-600">Tiêu đề bài viết</label>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Nhập tiêu đề..."
+            className="h-10 w-full rounded-xl border border-[#e4e8f0] bg-[#f9fafb] px-3 text-[13px] font-semibold outline-none focus:border-[#2740BA] focus:bg-white focus:ring-2 focus:ring-[#2740BA]/15"
+          />
+        </div>
+        <div className="flex gap-3">
+          <div className="flex-1">
+            <label className="mb-1 block text-[11px] font-medium text-slate-600">Chuyên mục</label>
+            <select className="h-10 w-full rounded-xl border border-[#e4e8f0] bg-[#f9fafb] px-3 text-[12px] outline-none focus:border-[#2740BA]">
+              {["Thông báo", "Hướng dẫn", "Cập nhật", "Sự kiện"].map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex-1">
+            <label className="mb-1 block text-[11px] font-medium text-slate-600">Ảnh đại diện</label>
+            <div className="flex h-10 items-center gap-2 rounded-xl border border-dashed border-[#c4cbdf] bg-[#f9fafb] px-3 cursor-pointer hover:border-[#2740BA] transition-colors">
+              <ImageIcon className="h-3.5 w-3.5 text-slate-400" />
+              <span className="text-[11px] text-slate-400">Tải ảnh lên...</span>
+            </div>
+          </div>
+        </div>
+        {/* Rich text toolbar */}
+        <div>
+          <label className="mb-1 block text-[11px] font-medium text-slate-600">Nội dung</label>
+          <div className="rounded-xl border border-[#e4e8f0] overflow-hidden">
+            <div className="flex items-center gap-1 border-b border-[#e4e8f0] bg-[#f9fafb] px-3 py-2">
+              {[Bold, Italic, Link, List, AlignLeft].map((Icon, i) => (
+                <button key={i} className="rounded-md p-1.5 text-slate-400 hover:bg-white hover:text-[#2740BA] transition-colors">
+                  <Icon className="h-3.5 w-3.5" />
+                </button>
+              ))}
+            </div>
+            <textarea
+              rows={8}
+              placeholder="Nhập nội dung bài viết..."
+              className="w-full resize-none bg-white p-4 text-[12px] leading-6 text-[#25304b] outline-none"
+            />
+          </div>
+        </div>
+        <div className="flex items-center gap-3 pt-2">
+          <button className="rounded-xl border border-[#c4cbdf] px-5 py-2.5 text-[12px] font-semibold text-slate-500 hover:bg-[#f9fafb] transition-colors">
+            Lưu nháp
+          </button>
+          <button className="rounded-xl bg-[#E8650A] px-5 py-2.5 text-[12px] font-bold text-white hover:bg-[#d95c08] transition-colors shadow-[0_4px_14px_rgba(232,101,10,.2)]">
+            Đăng bài
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NewsTab() {
+  const [showEditor, setShowEditor] = useState(false);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-[13px] font-bold text-[#1d2944]">Danh sách bài viết ({articles.length})</p>
+        <div className="flex gap-2">
+          <button className="flex items-center gap-1.5 rounded-xl border border-[#e4e8f0] bg-white px-3.5 py-2 text-[11px] font-semibold text-slate-600 hover:border-[#2740BA] hover:text-[#2740BA] transition-colors">
+            <FileDown className="h-3.5 w-3.5" /> Xuất
+          </button>
+          <button
+            onClick={() => setShowEditor(true)}
+            className="flex items-center gap-2 rounded-xl bg-[#E8650A] px-4 py-2 text-[12px] font-bold text-white hover:bg-[#d95c08] transition-colors shadow-[0_4px_14px_rgba(232,101,10,.2)]"
+          >
+            <Plus className="h-4 w-4" /> Thêm bài viết
+          </button>
+        </div>
+      </div>
+
+      {showEditor && <ArticleEditor onClose={() => setShowEditor(false)} />}
+
+      <div className="overflow-hidden rounded-2xl border border-[#e4e8f0] bg-white shadow-sm">
+        <table className="min-w-full text-[12px]">
+          <thead>
+            <tr className="border-b border-[#e4e8f0] bg-[#f9fafb]">
+              {["Ảnh", "Tiêu đề", "Chuyên mục", "Ngày đăng", "Trạng thái", "Thao tác"].map((h) => (
+                <th key={h} className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {articles.map((a) => (
+              <tr key={a.id} className="border-b border-[#f0f2f8] hover:bg-[#f9fafb] transition-colors">
+                <td className="px-4 py-3.5">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#f7f8fd] text-xl">
+                    {a.emoji}
+                  </div>
+                </td>
+                <td className="px-4 py-3.5">
+                  <p className="font-semibold text-[#25304b]">{a.title}</p>
+                  <p className="text-[10px] text-slate-400">{a.id}</p>
+                </td>
+                <td className="px-4 py-3.5">
+                  <span className="rounded-md bg-[#edf0ff] px-2 py-0.5 text-[10px] font-semibold text-[#2740BA]">
+                    {a.category}
+                  </span>
+                </td>
+                <td className="px-4 py-3.5 text-slate-500">{a.publishedAt}</td>
+                <td className="px-4 py-3.5">
+                  <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-semibold ${a.status === "Đã đăng" ? "bg-[#e8f5ed] text-[#1f7a45] border border-[#b8e2c8]" : "bg-[#f2f3f7] text-[#6b7694] border border-[#d9dce9]"}`}>
+                    {a.status}
+                  </span>
+                </td>
+                <td className="px-4 py-3.5">
+                  <div className="flex gap-1">
+                    <button className="rounded-lg p-1.5 text-slate-400 hover:bg-[#edf0ff] hover:text-[#2740BA] transition-colors"><Eye className="h-3.5 w-3.5" /></button>
+                    <button className="rounded-lg p-1.5 text-slate-400 hover:bg-[#fff4ed] hover:text-[#E8650A] transition-colors"><Pencil className="h-3.5 w-3.5" /></button>
+                    <button className="rounded-lg p-1.5 text-slate-400 hover:bg-[#fef0f0] hover:text-[#c0392b] transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function BannerTab() {
+  const [banners, setBanners] = useState(initialBanners);
+  const [showModal, setShowModal] = useState(false);
+
+  const toggleBanner = (id: string) => {
+    setBanners((prev) => prev.map((b) => b.id === id ? { ...b, active: !b.active } : b));
+  };
+
+  return (
+    <div>
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-[13px] font-bold text-[#1d2944]">Banner hiện có ({banners.length})</p>
+        <button
+          onClick={() => setShowModal(true)}
+          className="flex items-center gap-2 rounded-xl bg-[#E8650A] px-4 py-2 text-[12px] font-bold text-white hover:bg-[#d95c08] transition-colors shadow-[0_4px_14px_rgba(232,101,10,.2)]"
+        >
+          <Plus className="h-4 w-4" /> Thêm banner mới
+        </button>
+      </div>
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#16234f]/30 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-[14px] font-bold text-[#1d2944]">Thêm banner mới</p>
+              <button onClick={() => setShowModal(false)} className="rounded-lg p-1.5 text-slate-400 hover:bg-[#f1f3fa]"><X className="h-4 w-4" /></button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1 block text-[11px] font-medium text-slate-600">Tên banner</label>
+                <input className="h-10 w-full rounded-xl border border-[#e4e8f0] bg-[#f9fafb] px-3 text-[12px] outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15" placeholder="Nhập tên banner..." />
+              </div>
+              <div>
+                <label className="mb-1 block text-[11px] font-medium text-slate-600">Hình ảnh</label>
+                <div className="flex h-24 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#c4cbdf] bg-[#f9fafb] hover:border-[#2740BA] transition-colors">
+                  <ImageIcon className="h-5 w-5 text-slate-400" />
+                  <span className="text-[12px] text-slate-400">Kéo thả hoặc nhấn để tải ảnh</span>
+                </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-[11px] font-medium text-slate-600">Link liên kết</label>
+                <input className="h-10 w-full rounded-xl border border-[#e4e8f0] bg-[#f9fafb] px-3 text-[12px] outline-none focus:border-[#2740BA] focus:ring-2 focus:ring-[#2740BA]/15" placeholder="https://..." />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-[11px] font-medium text-slate-600">Ngày bắt đầu</label>
+                  <input type="date" className="h-10 w-full rounded-xl border border-[#e4e8f0] bg-[#f9fafb] px-3 text-[12px] outline-none focus:border-[#2740BA]" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-[11px] font-medium text-slate-600">Ngày kết thúc</label>
+                  <input type="date" className="h-10 w-full rounded-xl border border-[#e4e8f0] bg-[#f9fafb] px-3 text-[12px] outline-none focus:border-[#2740BA]" />
+                </div>
+              </div>
+            </div>
+            <div className="mt-5 flex gap-3">
+              <button onClick={() => setShowModal(false)} className="flex-1 rounded-xl border border-[#e4e8f0] py-2.5 text-[12px] font-semibold text-slate-500 hover:bg-[#f9fafb] transition-colors">Hủy</button>
+              <button onClick={() => setShowModal(false)} className="flex-1 rounded-xl bg-[#E8650A] py-2.5 text-[12px] font-bold text-white hover:bg-[#d95c08] transition-colors">Thêm banner</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {banners.map((banner) => (
+          <div key={banner.id} className={`group relative rounded-2xl border border-[#e4e8f0] ${banner.bg} p-5 shadow-sm`}>
+            <div className="mb-3 flex items-center justify-between">
+              <GripVertical className="h-4 w-4 cursor-grab text-slate-400" />
+              <button
+                onClick={() => toggleBanner(banner.id)}
+                className={`flex items-center gap-1.5 rounded-lg px-2 py-1 text-[10px] font-semibold transition-colors ${banner.active ? "bg-[#e8f5ed] text-[#1f7a45]" : "bg-[#f2f3f7] text-[#6b7694]"}`}
+              >
+                {banner.active ? <ToggleRight className="h-3.5 w-3.5" /> : <ToggleLeft className="h-3.5 w-3.5" />}
+                {banner.active ? "Đang hiển thị" : "Tắt"}
+              </button>
+            </div>
+            <div className="mb-4 flex h-24 items-center justify-center text-5xl">
+              {banner.emoji}
+            </div>
+            <p className="text-[13px] font-bold text-[#1d2944]">{banner.title}</p>
+            <p className="mt-1 truncate text-[10px] text-slate-400">{banner.link}</p>
+            <div className="mt-3 flex gap-2">
+              <button className="flex-1 rounded-lg border border-[#e4e8f0] bg-white py-1.5 text-[10px] font-semibold text-slate-500 hover:text-[#E8650A] transition-colors">
+                <Pencil className="mx-auto h-3.5 w-3.5" />
+              </button>
+              <button className="flex-1 rounded-lg border border-[#e4e8f0] bg-white py-1.5 text-[10px] font-semibold text-slate-500 hover:text-[#c0392b] transition-colors">
+                <Trash2 className="mx-auto h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function CMS() {
+  const [activeTab, setActiveTab] = useState<TabId>("news");
+
+  return (
+    <DashboardShell title="Tin tức & banner" subtitle="Quản lý nội dung và truyền thông">
+      <div className="mb-5">
+        <p className="font-mono text-[10px] uppercase tracking-[.18em] text-[#E8650A]">Quản lý</p>
+        <h2 className="mt-1.5 text-[24px] font-bold tracking-[-.05em] text-[#1d2944]">Tin tức & banner</h2>
+      </div>
+
+      <div className="flex gap-1 rounded-2xl border border-[#e4e8f0] bg-white p-1.5 shadow-sm w-fit mb-6">
+        {TABS.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            onClick={() => setActiveTab(id)}
+            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-[12px] font-semibold transition-colors ${
+              activeTab === id ? "bg-[#2740BA] text-white shadow-sm" : "text-slate-500 hover:text-[#2740BA]"
+            }`}
+          >
+            <Icon className="h-3.5 w-3.5" />
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === "news" ? <NewsTab /> : <BannerTab />}
+    </DashboardShell>
+  );
+}

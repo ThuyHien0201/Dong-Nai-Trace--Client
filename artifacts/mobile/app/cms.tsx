@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput, Alert, Switch,
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput, Alert, Switch, Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
+import { useColors } from '@/hooks/useColors';
 
 /* ─── Mock Data ─────────────────────────────────────────────── */
 interface Article {
@@ -21,14 +24,21 @@ const ARTICLES: Article[] = [
 ];
 
 interface Banner {
-  id: string; title: string; subtitle: string; active: boolean; order: number; type: string;
+  id: string;
+  title: string;
+  link: string;
+  active: boolean;
+  emoji: string;
+  bg: string;
+  imageUri?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 const INITIAL_BANNERS: Banner[] = [
-  { id: 'BN1', title: 'Truy xuất nguồn gốc — Minh bạch từ trang trại đến bàn ăn', subtitle: 'Đồng Nai Trace 2024', active: true, order: 1, type: 'Trang chủ' },
-  { id: 'BN2', title: 'Đăng ký doanh nghiệp nhận ưu đãi tháng 8/2024', subtitle: 'Miễn phí đăng ký đến 31/8', active: true, order: 2, type: 'Khuyến mãi' },
-  { id: 'BN3', title: 'Sản phẩm OCOP Đồng Nai — Chất lượng đã được kiểm chứng', subtitle: 'Chương trình OCOP 2024', active: false, order: 3, type: 'Sự kiện' },
-  { id: 'BN4', title: 'Hội thảo kỹ thuật số hóa chuỗi cung ứng nông sản', subtitle: 'Biên Hòa, 15/9/2024', active: true, order: 4, type: 'Sự kiện' },
+  { id: 'BN-001', title: 'Chào mừng đến Đồng Nai Trace', link: 'https://dongnaitrace.vn', active: true, emoji: '🎉', bg: '#edf0ff' },
+  { id: 'BN-002', title: 'Đăng ký doanh nghiệp ngay hôm nay', link: '/register', active: true, emoji: '🏢', bg: '#fff4ed' },
+  { id: 'BN-003', title: 'Tra cứu nguồn gốc sản phẩm OCOP', link: '/trace', active: false, emoji: '🔍', bg: '#e8f5ed' },
 ];
 
 const CAT_COLOR: Record<string, { bg: string; text: string }> = {
@@ -44,6 +54,7 @@ type Tab = typeof TABS[number];
 
 export default function CMSScreen() {
   const router = useRouter();
+  const colors = useColors();
   const [activeTab, setActiveTab] = useState<Tab>('Tin tức');
   const [banners, setBanners] = useState<Banner[]>(INITIAL_BANNERS);
   const [showEditor, setShowEditor] = useState(false);
@@ -51,9 +62,99 @@ export default function CMSScreen() {
   const [editExcerpt, setEditExcerpt] = useState('');
   const [editCat, setEditCat] = useState('Tin tức');
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [showBannerEditor, setShowBannerEditor] = useState(false);
+  const [selectedBanner, setSelectedBanner] = useState<Banner | null>(null);
+  const [bannerTitle, setBannerTitle] = useState('');
+  const [bannerLink, setBannerLink] = useState('');
+  const [bannerImageUri, setBannerImageUri] = useState<string | undefined>();
+  const [bannerStartDate, setBannerStartDate] = useState('');
+  const [bannerEndDate, setBannerEndDate] = useState('');
 
   const toggleBanner = (id: string) => {
     setBanners(prev => prev.map(b => b.id === id ? { ...b, active: !b.active } : b));
+  };
+
+  const openBannerEditor = (banner?: Banner) => {
+    setSelectedBanner(banner ?? null);
+    setBannerTitle(banner?.title ?? '');
+    setBannerLink(banner?.link ?? '');
+    setBannerImageUri(banner?.imageUri);
+    setBannerStartDate(banner?.startDate ?? '');
+    setBannerEndDate(banner?.endDate ?? '');
+    setShowBannerEditor(true);
+  };
+
+  const pickBannerImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Cần quyền truy cập', 'Cho phép Đồng Nai Trace truy cập thư viện ảnh để chọn hình banner.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [16, 7],
+      quality: 0.9,
+    });
+    if (!result.canceled) {
+      setBannerImageUri(result.assets[0]?.uri);
+    }
+  };
+
+  const handleSaveBanner = () => {
+    if (!bannerTitle.trim()) {
+      Alert.alert('Thiếu thông tin', 'Vui lòng nhập tên banner.');
+      return;
+    }
+
+    if (selectedBanner) {
+      setBanners(prev => prev.map(b => b.id === selectedBanner.id ? {
+        ...b,
+        title: bannerTitle.trim(),
+        link: bannerLink.trim(),
+        imageUri: bannerImageUri,
+        startDate: bannerStartDate.trim(),
+        endDate: bannerEndDate.trim(),
+      } : b));
+      Alert.alert('Đã cập nhật', 'Banner đã được cập nhật.');
+    } else {
+      const nextNumber = banners.reduce((max, banner) => {
+        const number = Number(banner.id.replace('BN-', ''));
+        return Number.isFinite(number) ? Math.max(max, number) : max;
+      }, 0) + 1;
+      setBanners(prev => [...prev, {
+        id: `BN-${String(nextNumber).padStart(3, '0')}`,
+        title: bannerTitle.trim(),
+        link: bannerLink.trim(),
+        active: true,
+        emoji: '▧',
+        bg: '#edf0ff',
+        imageUri: bannerImageUri,
+        startDate: bannerStartDate.trim(),
+        endDate: bannerEndDate.trim(),
+      }]);
+      Alert.alert('Đã thêm', 'Banner mới đã được thêm và đang hiển thị.');
+    }
+    setShowBannerEditor(false);
+  };
+
+  const handleDeleteBanner = (banner: Banner) => {
+    Alert.alert(
+      'Xóa banner',
+      `Bạn có chắc muốn xóa "${banner.title}"?`,
+      [
+        { text: 'Hủy', style: 'cancel' },
+        {
+          text: 'Xóa',
+          style: 'destructive',
+          onPress: () => {
+            setBanners(prev => prev.filter(item => item.id !== banner.id));
+            Alert.alert('Đã xóa', 'Banner đã được xóa khỏi danh sách.');
+          },
+        },
+      ],
+    );
   };
 
   const handleNewArticle = () => {
@@ -81,8 +182,12 @@ export default function CMSScreen() {
           <Text style={s.title}>Tin tức & Banner</Text>
           <Text style={s.subtitle}>Quản lý nội dung hiển thị</Text>
         </View>
-        {activeTab === 'Tin tức' && (
+        {activeTab === 'Tin tức' ? (
           <TouchableOpacity style={s.addBtn} onPress={handleNewArticle}>
+            <Feather name="plus" size={16} color="#fff" />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={s.addBtn} onPress={() => openBannerEditor()}>
             <Feather name="plus" size={16} color="#fff" />
           </TouchableOpacity>
         )}
@@ -150,22 +255,33 @@ export default function CMSScreen() {
           <View style={s.bannerInfo}>
             <Feather name="info" size={13} color="#2740BA" />
             <Text style={s.bannerInfoText}>
-              Kéo để sắp xếp thứ tự hiển thị. Bật/tắt để ẩn banner khỏi cổng thông tin.
+              Bật/tắt để ẩn banner khỏi cổng thông tin. Chạm Sửa để cập nhật nội dung, link hoặc hình ảnh.
             </Text>
           </View>
-          {banners.map((banner, i) => (
+          <View style={s.bannerCountRow}>
+            <Text style={s.bannerCount}>Banner hiện có ({banners.length})</Text>
+            <Text style={s.bannerCountHint}>{banners.filter(b => b.active).length} đang hiển thị</Text>
+          </View>
+          {banners.map((banner) => (
             <View key={banner.id} style={[s.bannerCard, !banner.active && s.bannerInactive]}>
-              <View style={s.bannerOrder}>
-                <Text style={s.bannerOrderText}>{banner.order}</Text>
-              </View>
               <View style={{ flex: 1 }}>
-                <View style={s.bannerHead}>
-                  <View style={[s.bannerType, { backgroundColor: banner.active ? '#edf0ff' : '#f0f2f8' }]}>
-                    <Text style={[s.bannerTypeText, { color: banner.active ? '#2740BA' : '#a8b2c8' }]}>{banner.type}</Text>
+                <View style={s.bannerPreview}>
+                  {banner.imageUri ? (
+                    <Image source={{ uri: banner.imageUri }} style={s.bannerImage} resizeMode="cover" />
+                  ) : (
+                    <Feather name="image" size={22} color={banner.active ? '#2740BA' : '#a8b2c8'} />
+                  )}
+                  <View style={s.bannerPreviewOverlay}>
+                    <Text style={s.bannerPreviewId}>{banner.id}</Text>
                   </View>
                 </View>
                 <Text style={[s.bannerTitle, !banner.active && { color: '#a8b2c8' }]}>{banner.title}</Text>
-                <Text style={s.bannerSub}>{banner.subtitle}</Text>
+                <Text style={s.bannerSub} numberOfLines={1}>{banner.link || 'Chưa có link liên kết'}</Text>
+                {(banner.startDate || banner.endDate) && (
+                  <Text style={s.bannerDates}>
+                    {banner.startDate || 'Không giới hạn'} → {banner.endDate || 'Không giới hạn'}
+                  </Text>
+                )}
               </View>
               <View style={s.bannerRight}>
                 <Switch
@@ -175,13 +291,16 @@ export default function CMSScreen() {
                   thumbColor="#fff"
                   style={{ transform: [{ scale: 0.8 }] }}
                 />
-                <TouchableOpacity style={s.bannerEdit}>
+                <TouchableOpacity style={s.bannerEdit} onPress={() => openBannerEditor(banner)} accessibilityLabel={`Sửa ${banner.title}`}>
                   <Feather name="edit-2" size={12} color="#6b7694" />
+                </TouchableOpacity>
+                <TouchableOpacity style={s.bannerDelete} onPress={() => handleDeleteBanner(banner)} accessibilityLabel={`Xóa ${banner.title}`}>
+                  <Feather name="trash-2" size={12} color="#c0392b" />
                 </TouchableOpacity>
               </View>
             </View>
           ))}
-          <TouchableOpacity style={s.addBannerBtn} onPress={() => Alert.alert('Thêm banner', 'Chức năng thêm banner mới.')}>
+          <TouchableOpacity style={s.addBannerBtn} onPress={() => openBannerEditor()}>
             <Feather name="plus" size={16} color="#2740BA" />
             <Text style={s.addBannerText}>Thêm banner mới</Text>
           </TouchableOpacity>
@@ -240,6 +359,105 @@ export default function CMSScreen() {
           </ScrollView>
         </SafeAreaView>
       </Modal>
+
+      {/* Banner Editor Modal */}
+      <Modal visible={showBannerEditor} animationType="slide" onRequestClose={() => setShowBannerEditor(false)}>
+        <SafeAreaView style={[s.bannerEditorSafe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
+          <View style={s.editorHeader}>
+            <TouchableOpacity onPress={() => setShowBannerEditor(false)} style={s.iconButton} accessibilityLabel="Đóng">
+              <Feather name="x" size={22} color={colors.textPrimary} />
+            </TouchableOpacity>
+            <Text style={s.editorTitle}>{selectedBanner ? 'Chỉnh sửa banner' : 'Thêm banner mới'}</Text>
+            <TouchableOpacity style={s.saveBtn} onPress={handleSaveBanner}>
+              <Text style={s.saveBtnText}>Lưu</Text>
+            </TouchableOpacity>
+          </View>
+          <KeyboardAwareScrollViewCompat
+            contentContainerStyle={s.bannerEditorContent}
+            bottomOffset={80}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <Text style={s.fieldLabel}>Tên banner *</Text>
+            <TextInput
+              style={s.fieldInput}
+              value={bannerTitle}
+              onChangeText={setBannerTitle}
+              placeholder="Nhập tên banner..."
+              placeholderTextColor={colors.textPlaceholder}
+              returnKeyType="next"
+            />
+
+            <Text style={s.fieldLabel}>Hình ảnh</Text>
+            <TouchableOpacity style={s.imagePicker} onPress={pickBannerImage} activeOpacity={0.8}>
+              {bannerImageUri ? (
+                <>
+                  <Image source={{ uri: bannerImageUri }} style={s.selectedBannerImage} resizeMode="cover" />
+                  <View style={s.changeImageBadge}>
+                    <Feather name="camera" size={13} color="#fff" />
+                    <Text style={s.changeImageText}>Đổi ảnh</Text>
+                  </View>
+                </>
+              ) : (
+                <>
+                  <Feather name="image" size={24} color={colors.textPlaceholder} />
+                  <Text style={s.imagePickerText}>Chạm để chọn ảnh từ thư viện</Text>
+                  <Text style={s.imagePickerHint}>Tỉ lệ đề xuất 16:7</Text>
+                </>
+              )}
+            </TouchableOpacity>
+
+            <Text style={s.fieldLabel}>Link liên kết</Text>
+            <TextInput
+              style={s.fieldInput}
+              value={bannerLink}
+              onChangeText={setBannerLink}
+              placeholder="https://... hoặc /duong-dan"
+              placeholderTextColor={colors.textPlaceholder}
+              autoCapitalize="none"
+              keyboardType="url"
+              returnKeyType="next"
+            />
+
+            <Text style={s.fieldLabel}>Thời gian hiển thị <Text style={s.optionalLabel}>(không bắt buộc)</Text></Text>
+            <View style={s.dateRow}>
+              <View style={s.dateField}>
+                <Text style={s.dateLabel}>Ngày bắt đầu</Text>
+                <TextInput
+                  style={s.dateInput}
+                  value={bannerStartDate}
+                  onChangeText={setBannerStartDate}
+                  placeholder="DD/MM/YYYY"
+                  placeholderTextColor={colors.textPlaceholder}
+                  keyboardType="numbers-and-punctuation"
+                />
+              </View>
+              <View style={s.dateField}>
+                <Text style={s.dateLabel}>Ngày kết thúc</Text>
+                <TextInput
+                  style={s.dateInput}
+                  value={bannerEndDate}
+                  onChangeText={setBannerEndDate}
+                  placeholder="DD/MM/YYYY"
+                  placeholderTextColor={colors.textPlaceholder}
+                  keyboardType="numbers-and-punctuation"
+                />
+              </View>
+            </View>
+
+            <View style={s.bannerFormNote}>
+              <Feather name="check-circle" size={15} color={colors.success} />
+              <Text style={s.bannerFormNoteText}>
+                Banner mới sẽ được bật hiển thị ngay sau khi lưu. Bạn có thể tắt banner bất cứ lúc nào từ danh sách.
+              </Text>
+            </View>
+            <TouchableOpacity style={s.bannerSaveButton} onPress={handleSaveBanner}>
+              <Feather name="save" size={15} color="#fff" />
+              <Text style={s.bannerSaveButtonText}>{selectedBanner ? 'Lưu thay đổi' : 'Thêm banner'}</Text>
+            </TouchableOpacity>
+          </KeyboardAwareScrollViewCompat>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -279,6 +497,9 @@ const s = StyleSheet.create({
 
   bannerInfo: { flexDirection: 'row', gap: 8, backgroundColor: '#f3f8ff', borderRadius: 10, padding: 10, marginBottom: 12, borderWidth: 1, borderColor: '#c9ddf4' },
   bannerInfoText: { flex: 1, fontSize: 11, color: '#2740BA', lineHeight: 16 },
+  bannerCountRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  bannerCount: { fontSize: 13, fontWeight: '700', color: '#1d2944' },
+  bannerCountHint: { fontSize: 10, color: '#1f7a45', fontWeight: '600' },
   bannerCard: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     backgroundColor: '#fff', borderRadius: 14, padding: 14, marginBottom: 10,
@@ -286,17 +507,37 @@ const s = StyleSheet.create({
     shadowColor: '#1d2944', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
   bannerInactive: { opacity: 0.6 },
-  bannerOrder: { width: 28, height: 28, borderRadius: 8, backgroundColor: '#f0f2f8', alignItems: 'center', justifyContent: 'center' },
-  bannerOrderText: { fontSize: 12, fontWeight: '700', color: '#6b7694' },
-  bannerHead: { flexDirection: 'row', marginBottom: 4 },
-  bannerType: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 20 },
-  bannerTypeText: { fontSize: 9, fontWeight: '700' },
+  bannerPreview: { height: 76, borderRadius: 10, backgroundColor: '#edf0ff', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: 10 },
+  bannerImage: { width: '100%', height: '100%' },
+  bannerPreviewOverlay: { position: 'absolute', right: 7, top: 6, backgroundColor: 'rgba(29,41,68,.68)', borderRadius: 5, paddingHorizontal: 5, paddingVertical: 2 },
+  bannerPreviewId: { color: '#fff', fontSize: 9, fontWeight: '700' },
   bannerTitle: { fontSize: 12, fontWeight: '600', color: '#1d2944', lineHeight: 16 },
   bannerSub: { fontSize: 10, color: '#6b7694', marginTop: 2 },
+  bannerDates: { fontSize: 9, color: '#a8b2c8', marginTop: 4 },
   bannerRight: { alignItems: 'center', gap: 6 },
-  bannerEdit: { padding: 4 },
+  bannerEdit: { padding: 7, borderRadius: 8, backgroundColor: '#edf0ff' },
+  bannerDelete: { padding: 7, borderRadius: 8, backgroundColor: '#fef0f0' },
   addBannerBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, height: 48, borderRadius: 14, borderWidth: 2, borderStyle: 'dashed', borderColor: '#c9ddf4', backgroundColor: '#f3f8ff' },
   addBannerText: { fontSize: 13, fontWeight: '600', color: '#2740BA' },
+
+  bannerEditorSafe: { flex: 1 },
+  bannerEditorContent: { padding: 16, paddingBottom: 32 },
+  iconButton: { padding: 4 },
+  optionalLabel: { color: '#a8b2c8', fontWeight: '400' },
+  imagePicker: { height: 142, borderRadius: 14, borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#c9ddf4', backgroundColor: '#f3f8ff', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: 16 },
+  selectedBannerImage: { width: '100%', height: '100%' },
+  changeImageBadge: { position: 'absolute', flexDirection: 'row', alignItems: 'center', gap: 5, bottom: 10, backgroundColor: 'rgba(29,41,68,.78)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
+  changeImageText: { color: '#fff', fontSize: 11, fontWeight: '600' },
+  imagePickerText: { color: '#6b7694', fontSize: 12, fontWeight: '600', marginTop: 8 },
+  imagePickerHint: { color: '#a8b2c8', fontSize: 10, marginTop: 4 },
+  dateRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
+  dateField: { flex: 1 },
+  dateLabel: { fontSize: 10, color: '#6b7694', marginBottom: 6 },
+  dateInput: { height: 46, backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: '#e4e8f0', paddingHorizontal: 12, fontSize: 12, color: '#1d2944' },
+  bannerFormNote: { flexDirection: 'row', gap: 8, alignItems: 'flex-start', backgroundColor: '#e8f5ed', borderRadius: 12, padding: 12, marginTop: 4, marginBottom: 18 },
+  bannerFormNoteText: { flex: 1, color: '#1f7a45', fontSize: 11, lineHeight: 16 },
+  bannerSaveButton: { height: 48, borderRadius: 12, backgroundColor: '#E8650A', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  bannerSaveButtonText: { color: '#fff', fontSize: 13, fontWeight: '700' },
 
   editorHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#e4e8f0', backgroundColor: '#fff' },
   editorTitle: { fontSize: 15, fontWeight: '700', color: '#1d2944' },
