@@ -14,7 +14,7 @@ interface Product {
   business: string;
   category: string;
   unit: string;
-  status: 'active' | 'pending' | 'rejected';
+  status: 'active' | 'pending';
   images: string[];
   description: string;
   origin: string;
@@ -36,7 +36,7 @@ interface TraceStep {
 }
 
 const CATEGORIES = ['Tất cả', 'Nông sản', 'Thủy sản', 'Đồ uống', 'Chế biến', 'Dược liệu'];
-const STATUSES_LABEL: Record<string, string> = { active: 'Hoạt động', pending: 'Chờ xét duyệt', rejected: 'Từ chối' };
+const STATUSES_LABEL: Record<string, string> = { active: 'Đã duyệt', pending: 'Chờ duyệt', };
 const STATUS_COLOR: Record<string, { bg: string; text: string }> = {
   active: { bg: '#e8f5ed', text: '#1f7a45' },
   pending: { bg: '#fff4d4', text: '#9a6116' },
@@ -58,7 +58,7 @@ const PRODUCTS: Product[] = [
   { id: 'P003', name: 'Cá tra phi lê đông lạnh', code: 'CTPL-2024-001', business: 'Trại nuôi thủy sản Bình Sơn', category: 'Thủy sản', unit: 'Kg', status: 'active', images: [], description: 'Cá tra nuôi ao sạch theo tiêu chuẩn ASC, phi lê tươi đông lạnh IQF. Không tồn dư kháng sinh, đạt tiêu chuẩn xuất khẩu.', origin: 'Nhơn Trạch, Đồng Nai', certifications: ['ASC'], harvestDate: '2024-07-20', expiryDate: '2025-01-20', traceSteps: TRACE_TEMPLATE, qrScans: 890 },
   { id: 'P004', name: 'Tinh bột sắn biến tính', code: 'TBSB-2024-001', business: 'Công ty CP Chế biến Đồng Nai', category: 'Chế biến', unit: 'Tấn', status: 'active', images: [], description: 'Tinh bột sắn biến tính dùng trong công nghiệp thực phẩm và giấy. Độ ẩm < 13%, độ trắng > 90%.', origin: 'KCN Tam Phước, Biên Hòa', certifications: ['ISO 22000', 'BRC'], harvestDate: '2024-08-05', expiryDate: '2025-08-05', traceSteps: TRACE_TEMPLATE, qrScans: 231 },
   { id: 'P005', name: 'Sầu riêng Ri6 nguyên trái', code: 'SRRI6-2024-001', business: 'HTX Nông nghiệp Tân Triều', category: 'Nông sản', unit: 'Kg', status: 'pending', images: [], description: 'Sầu riêng Ri6 trồng tại vùng đặc sản Xuân Lộc, cơm vàng, hạt lép, mùi thơm đặc trưng.', origin: 'Xuân Lộc, Đồng Nai', certifications: [], harvestDate: '2024-08-10', expiryDate: '2024-08-17', traceSteps: TRACE_TEMPLATE, qrScans: 0 },
-  { id: 'P006', name: 'Trà dược liệu Hà thủ ô', code: 'TDLHTO-2024-001', business: 'HTX Dược liệu Xuân Lộc', category: 'Dược liệu', unit: 'Gói', status: 'rejected', images: [], description: 'Trà thảo dược từ Hà thủ ô đỏ, hỗ trợ bổ huyết, đen tóc, tăng cường sức khỏe.', origin: 'Xuân Lộc, Đồng Nai', certifications: ['GACP'], harvestDate: '2024-05-01', expiryDate: '2025-05-01', traceSteps: TRACE_TEMPLATE, qrScans: 0 },
+  { id: 'P006', name: 'Trà dược liệu Hà thủ ô', code: 'TDLHTO-2024-001', business: 'HTX Dược liệu Xuân Lộc', category: 'Dược liệu', unit: 'Gói', status: 'pending', images: [], description: 'Trà thảo dược từ Hà thủ ô đỏ, hỗ trợ bổ huyết, đen tóc, tăng cường sức khỏe.', origin: 'Xuân Lộc, Đồng Nai', certifications: ['GACP'], harvestDate: '2024-05-01', expiryDate: '2025-05-01', traceSteps: TRACE_TEMPLATE, qrScans: 0 },
 ];
 
 /* ─── Product Card ─────────────────────────────────────────── */
@@ -234,7 +234,7 @@ function ProductDetail({ product, onBack }: { product: Product; onBack: () => vo
 export default function ProductsScreen() {
   const [search, setSearch] = useState('');
   const [selectedCat, setSelectedCat] = useState('Tất cả');
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
+  const viewMode = 'list';
   const [selected, setSelected] = useState<Product | null>(null);
 
   const filtered = useMemo(() => {
@@ -261,14 +261,7 @@ export default function ProductsScreen() {
           <Text style={s.title}>Sản phẩm</Text>
           <Text style={s.subtitle}>{PRODUCTS.length} sản phẩm đã đăng ký</Text>
         </View>
-        <View style={{ flexDirection: 'row', gap: 4 }}>
-          {(['list', 'grid'] as const).map(m => (
-            <TouchableOpacity key={m} style={[s.modeBtn, viewMode === m && s.modeBtnActive]} onPress={() => setViewMode(m)}>
-              <Feather name={m === 'list' ? 'list' : 'grid'} size={15} color={viewMode === m ? '#2740BA' : '#6b7694'} />
-            </TouchableOpacity>
-          ))}
         </View>
-      </View>
 
       <View style={s.searchRow}>
         <Feather name="search" size={15} color="#a8b2c8" style={{ marginRight: 8 }} />
@@ -276,7 +269,11 @@ export default function ProductsScreen() {
         {!!search && <TouchableOpacity onPress={() => setSearch('')}><Feather name="x" size={15} color="#a8b2c8" /></TouchableOpacity>}
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.chips} style={{ maxHeight: 44, flexGrow: 0 }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={s.chips}
+        >
         {CATEGORIES.map(cat => (
           <TouchableOpacity key={cat} style={[s.chip, selectedCat === cat && s.chipActive]} onPress={() => setSelectedCat(cat)}>
             <Text style={[s.chipText, selectedCat === cat && s.chipTextActive]}>{cat}</Text>
@@ -287,18 +284,18 @@ export default function ProductsScreen() {
       <View style={s.resultsRow}>
         <Text style={s.resultsText}>{filtered.length} kết quả</Text>
       </View>
-
+       
       <FlatList
         data={filtered}
         keyExtractor={p => p.id}
-        numColumns={viewMode === 'grid' ? 2 : 1}
+        numColumns={1}
         key={viewMode}
         renderItem={({ item }) => (
-          <View style={viewMode === 'grid' ? { flex: 1, margin: 4, marginHorizontal: 4 } : { marginHorizontal: 12, marginBottom: 10 }}>
+          <View style={viewMode === 'list' ? { flex: 1, margin: 4, marginHorizontal: 4 } : { marginHorizontal: 12, marginBottom: 10 }}>
             <ProductCard product={item} onPress={() => setSelected(item)} />
           </View>
         )}
-        contentContainerStyle={{ paddingHorizontal: viewMode === 'grid' ? 8 : 0, paddingBottom: 16, paddingTop: 4 }}
+        contentContainerStyle={{ paddingHorizontal: viewMode === 'list' ? 8 : 0, paddingBottom: 16, paddingTop: 4 }}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={{ alignItems: 'center', paddingVertical: 48 }}>
@@ -324,7 +321,12 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: '#e4e8f0', marginHorizontal: 12, marginBottom: 8, paddingHorizontal: 12, height: 42,
   },
   searchInput: { flex: 1, fontSize: 13, color: '#1d2944' },
-  chips: { paddingHorizontal: 12, paddingVertical: 4, gap: 6 },
+  chips: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 8,
+    alignItems: 'center',
+  },
   chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, backgroundColor: '#fff', borderWidth: 1, borderColor: '#e4e8f0' },
   chipActive: { backgroundColor: '#edf0ff', borderColor: '#2740BA' },
   chipText: { fontSize: 11, color: '#6b7694', fontWeight: '500' },

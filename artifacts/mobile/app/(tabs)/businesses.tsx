@@ -1,7 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput,
-  Modal, ScrollView, Image, Alert,
+  Modal, ScrollView, Image, Alert, 
+   
+   
+    Pressable,
+ 
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -16,6 +20,7 @@ interface Business {
   taxId: string;
   sector: string;
   address: string;
+  businessType: string;
   district: string;
   phone: string;
   email: string;
@@ -34,6 +39,7 @@ const BUSINESSES: Business[] = [
     id: 'B001',
     name: 'Công ty CP Thực phẩm Vĩnh Hảo',
     code: 'VH-2024-001',
+    businessType: 'Công ty TNHH',
     image: 'https://picsum.photos/seed/vinhhao/600/400',
     images: [
       'https://picsum.photos/seed/vinhhao1/800/600',
@@ -61,6 +67,7 @@ const BUSINESSES: Business[] = [
     id: 'B002',
     name: 'HTX Nông nghiệp Tân Triều',
     code: 'TT-2024-002',
+     businessType: 'HTX',
     image: 'https://picsum.photos/seed/tantrieu/600/400',
     images: [
       'https://picsum.photos/seed/tantrieu1/800/600',
@@ -87,6 +94,7 @@ const BUSINESSES: Business[] = [
     id: 'B003',
     name: 'Công ty TNHH An Phú Foods',
     code: 'AP-2024-003',
+     businessType: 'HTX',
     image: 'https://picsum.photos/seed/anphu/600/400',
     images: [
       'https://picsum.photos/seed/anphu1/800/600',
@@ -113,6 +121,7 @@ const BUSINESSES: Business[] = [
     id: 'B004',
     name: 'Trại nuôi thủy sản Bình Sơn',
     code: 'BS-2024-004',
+     businessType: 'HTX',
     image: 'https://picsum.photos/seed/binhson/600/400',
     images: [
       'https://picsum.photos/seed/binhson1/800/600',
@@ -139,6 +148,7 @@ const BUSINESSES: Business[] = [
     id: 'B005',
     name: 'HTX Dược liệu Xuân Lộc',
     code: 'XL-2024-005',
+     businessType: 'HTX',
     image: 'https://picsum.photos/seed/xuanloc/600/400',
     images: [
       'https://picsum.photos/seed/xuanloc1/800/600',
@@ -165,6 +175,7 @@ const BUSINESSES: Business[] = [
     id: 'B006',
     name: 'Công ty CP Chế biến Đồng Nai',
     code: 'DN-2024-006',
+     businessType: 'HTX',
     image: 'https://picsum.photos/seed/dongnai/600/400',
     images: [
       'https://picsum.photos/seed/dongnai1/800/600',
@@ -192,6 +203,7 @@ const BUSINESSES: Business[] = [
     id: 'B007',
     name: 'Trang trại hữu cơ Green Valley',
     code: 'GV-2024-007',
+     businessType: 'HTX',
     image: 'https://picsum.photos/seed/greenvalley/600/400',
     images: [
       'https://picsum.photos/seed/greenvalley1/800/600',
@@ -308,24 +320,21 @@ function BizCard({
 
 /* ─── Business Detail ───────────────────────────────────────── */
 function BusinessDetail({ biz, onBack }: { biz: Business; onBack: () => void }) {
-  const [tab, setTab] = useState<'info' | 'docs' | 'timeline'>('info');
+  const [tab, setTab] = useState<'info' | 'docs' | 'status_action'>('info');
   const [showQR, setShowQR] = useState(false);
   const [showReset, setShowReset] = useState(false);
 
   const tabs = [
     { key: 'info', label: 'Thông tin' },
-    { key: 'docs', label: 'Hồ sơ' },
-    { key: 'timeline', label: 'Lịch sử' },
+    { key: 'docs', label: 'Tài liệu đăng ký' },
+    { key: 'status_action', label: 'Trạng thái và thao tác' },
   ] as const;
 
-  const TIMELINE = [
-    { date: '2024-08-01', event: 'Cập nhật thông tin doanh nghiệp', user: 'Nguyễn Admin' },
-    { date: '2024-07-15', event: 'Cập nhật chứng nhận ISO 22000', user: 'Hệ thống' },
-    { date: '2024-05-20', event: 'Thêm sản phẩm mới vào danh mục', user: biz.representative },
-    { date: '2024-03-10', event: 'Phê duyệt hồ sơ đăng ký', user: 'Trần Duyệt Viên' },
-    { date: biz.joinDate, event: 'Doanh nghiệp đăng ký tham gia hệ thống', user: biz.representative },
-  ];
-
+  const STATUS_ACTIONS = {
+    status: biz.status ?? 'Đã duyệt',
+    phone: biz.phone,
+    address: biz.address,
+  };
   return (
     <View style={{ flex: 1, backgroundColor: '#f5f7fb' }}>
       {/* Cover */}
@@ -375,9 +384,10 @@ function BusinessDetail({ biz, onBack }: { biz: Business; onBack: () => void }) 
               { label: 'Địa chỉ', value: biz.address, icon: 'map-pin' },
               { label: 'Quận/Huyện', value: biz.district, icon: 'map' },
               { label: 'Người đại diện', value: biz.representative, icon: 'user' },
+            { label: 'Loại hình', value: biz.businessType, icon: 'briefcase' },
               { label: 'Điện thoại', value: biz.phone, icon: 'phone' },
               { label: 'Email', value: biz.email, icon: 'mail' },
-              { label: 'Ngày gia nhập', value: biz.joinDate, icon: 'calendar' },
+              { label: 'Ngày đăng ký', value: biz.joinDate, icon: 'calendar' },
               { label: 'Số sản phẩm', value: `${biz.productCount} sản phẩm`, icon: 'package' },
             ].map(row => (
               <View key={row.label} style={sd.infoRow}>
@@ -411,36 +421,134 @@ function BusinessDetail({ biz, onBack }: { biz: Business; onBack: () => void }) 
             {biz.documents.length === 0 ? (
               <View style={sd.empty}>
                 <Feather name="folder" size={36} color="#d9dce9" />
-                <Text style={sd.emptyText}>Chưa có hồ sơ nào được tải lên</Text>
+                <Text style={sd.emptyText}>
+                  Chưa có hồ sơ nào được tải lên
+                </Text>
               </View>
             ) : (
               biz.documents.map((doc, i) => (
                 <View key={i} style={sd.docRow}>
-                  <View style={sd.docIcon}><Feather name="file-text" size={18} color="#2740BA" /></View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={sd.docName}>{doc.name}</Text>
-                    <Text style={sd.docDate}>Ngày tải: {doc.date}</Text>
+                  <View style={sd.docIcon}>
+                    <Feather
+                      name="file-text"
+                      size={18}
+                      color="#2740BA"
+                    />
                   </View>
-                  <TouchableOpacity><Feather name="download" size={16} color="#6b7694" /></TouchableOpacity>
+
+                  <View style={{ flex: 1 }}>
+                    <Text style={sd.docName}>
+                      {doc.name}
+                    </Text>
+
+                    <Text style={sd.docDate}>
+                      Ngày tải: {doc.date}
+                    </Text>
+                  </View>
+
+                  <TouchableOpacity>
+                    <Feather
+                      name="download"
+                      size={16}
+                      color="#6b7694"
+                    />
+                  </TouchableOpacity>
                 </View>
               ))
             )}
           </View>
         )}
 
-        {tab === 'timeline' && (
-          <View>
-            {TIMELINE.map((t, i) => (
-              <View key={i} style={sd.timelineRow}>
-                <View style={sd.timelineDot} />
-                {i < TIMELINE.length - 1 && <View style={sd.timelineLine} />}
-                <View style={sd.timelineContent}>
-                  <Text style={sd.timelineDate}>{t.date}</Text>
-                  <Text style={sd.timelineEvent}>{t.event}</Text>
-                  <Text style={sd.timelineUser}>{t.user}</Text>
-                </View>
+        {tab === 'status_action' && (
+          <View style={sd.actionCard}>
+            <Text style={sd.actionTitle}>
+              Trạng thái & Thao tác
+            </Text>
+
+            <View style={sd.statusBadge}>
+              <Feather
+                name="check-circle"
+                size={14}
+                color="#16A34A"
+              />
+
+              <Text style={sd.statusText}>
+                Đã duyệt
+              </Text>
+            </View>
+
+            <View style={sd.contactCard}>
+              <View style={sd.contactRow}>
+                <Feather
+                  name="phone"
+                  size={18}
+                  color="#2F54EB"
+                />
+
+                <Text style={sd.contactText}>
+                  {biz.phone}
+                </Text>
               </View>
-            ))}
+
+              <View style={sd.contactRow}>
+                <Feather
+                  name="map-pin"
+                  size={18}
+                  color="#F97316"
+                />
+
+                <Text style={sd.contactText}>
+                  {biz.address}
+                </Text>
+              </View>
+            </View>
+
+            <View style={sd.actionRow}>
+              <TouchableOpacity
+                style={sd.actionButton}
+                onPress={() => {}}
+              >
+                <Feather
+                  name="edit-2"
+                  size={18}
+                  color="#475569"
+                />
+
+                <Text style={sd.actionButtonText}>
+                  Chỉnh sửa
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={sd.actionButton}
+                onPress={() => {}}
+              >
+                <Feather
+                  name="lock"
+                  size={18}
+                  color="#475569"
+                />
+
+                <Text style={sd.actionButtonText}>
+                  Khóa
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={sd.resetButton}
+              onPress={() => {}}
+            >
+              <Feather
+                name="key"
+                size={18}
+                color="#475569"
+              />
+
+              <Text style={sd.actionButtonText}>
+                Đặt lại mật khẩu
+              </Text>
+            </TouchableOpacity>
           </View>
         )}
       </ScrollView>
@@ -725,6 +833,7 @@ const s = StyleSheet.create({
 });
 
 const sd = StyleSheet.create({
+  
   coverImage: {
     width: 120,
     height: 120,
@@ -810,5 +919,110 @@ const sd = StyleSheet.create({
   resetConfirmText: { fontSize: 13, color: '#fff', fontWeight: '700' },
 
   empty: { alignItems: 'center', paddingVertical: 32 },
+  actionCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+  },
+
+  actionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1d2944',
+    marginBottom: 16,
+  },
+
+  statusBadge: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#DCFCE7',
+    borderColor: '#86EFAC',
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginBottom: 16,
+  },
+
+  statusText: {
+    color: '#16A34A',
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+
+  qrButton: {
+    height: 54,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#C7D2FE',
+    backgroundColor: '#EEF2FF',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+
+  qrText: {
+    marginLeft: 8,
+    color: '#2740BA',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  contactCard: {
+    borderWidth: 1,
+    borderColor: '#e4e8f0',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 16,
+  },
+
+  contactRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+
+  contactText: {
+    marginLeft: 10,
+    fontSize: 13,
+    color: '#6b7694',
+  },
+
+  actionButton: {
+    flex: 1,
+    height: 52,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e4e8f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+
+  actionButtonText: {
+    marginLeft: 6,
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#475569',
+  },
+
+  resetButton: {
+    height: 52,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e4e8f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+
+
   emptyText: { fontSize: 12, color: '#a8b2c8', marginTop: 8, textAlign: 'center' },
 });
