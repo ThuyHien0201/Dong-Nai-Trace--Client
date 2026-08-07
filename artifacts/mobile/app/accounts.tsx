@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 
 type Role = "Quản trị viên" | "Biên tập viên" | "Người xem";
@@ -254,6 +254,8 @@ function AccountModal({
   ) => void;
 }) {
   const isEdit = !!account;
+  const insets = useSafeAreaInsets();
+  const topInset = Platform.OS === "web" ? 67 : insets.top;
   const [name, setName] = useState(account?.name ?? "");
   const [username, setUsername] = useState(account?.username ?? "");
   const [email, setEmail] = useState(account?.email ?? "");
@@ -309,7 +311,7 @@ function AccountModal({
     <Modal visible animationType="slide" onRequestClose={onClose}>
       <SafeAreaView
         style={[styles.modalSafe, { backgroundColor: colors.background }]}
-        edges={["top", "bottom"]}
+        edges={["bottom"]}
       >
         <KeyboardAvoidingView
           style={styles.flex}
@@ -321,6 +323,7 @@ function AccountModal({
               {
                 backgroundColor: colors.card,
                 borderBottomColor: colors.border,
+                paddingTop: topInset + 10,
               },
             ]}
           >
@@ -328,6 +331,8 @@ function AccountModal({
               onPress={onClose}
               style={styles.modalHeaderAction}
               accessibilityLabel="Đóng"
+              accessibilityRole="button"
+              hitSlop={8}
             >
               <Feather name="x" size={21} color={colors.textPrimary} />
             </TouchableOpacity>
@@ -341,6 +346,9 @@ function AccountModal({
             <TouchableOpacity
               onPress={submit}
               style={[styles.modalHeaderSave, { backgroundColor: colors.primary }]}
+              accessibilityLabel={isEdit ? "Lưu tài khoản" : "Tạo tài khoản"}
+              accessibilityRole="button"
+              hitSlop={8}
             >
               <Text style={styles.modalSaveText}>{isEdit ? "Lưu" : "Tạo"}</Text>
             </TouchableOpacity>
@@ -391,59 +399,76 @@ function AccountModal({
               />
             )}
 
-            <View style={styles.field}>
-              <Text
-                style={[styles.fieldLabel, { color: colors.textSecondary }]}
-              >
-                Vai trò <Text style={{ color: colors.error }}>*</Text>
-              </Text>
-              <View style={styles.roleOptions}>
-                {roles.map((item) => {
-                  const meta = roleMeta[item];
-                  const selected = role === item;
-                  return (
-                    <TouchableOpacity
-                      key={item}
-                      onPress={() => {
-                        setRole(item);
-                        setErrors((current) => ({ ...current, role: "" }));
-                      }}
-                      style={[
-                        styles.roleOption,
-                        {
-                          borderColor: selected ? meta.color : colors.border,
-                          backgroundColor: selected
-                            ? meta.background
-                            : colors.card,
-                        },
-                      ]}
-                    >
-                      <Feather
-                        name={meta.icon}
-                        size={14}
-                        color={selected ? meta.color : colors.textMuted}
-                      />
-                      <Text
+            {!isEdit ? (
+              <Field
+                label="Vai trò"
+                value={role}
+                onChangeText={(value) => {
+                  setRole(value);
+                  if (errors.role) {
+                    setErrors((current) => ({ ...current, role: "" }));
+                  }
+                }}
+                placeholder="Nhập vai trò"
+                icon="shield"
+                error={errors.role}
+                colors={colors}
+              />
+            ) : (
+              <View style={styles.field}>
+                <Text
+                  style={[styles.fieldLabel, { color: colors.textSecondary }]}
+                >
+                  Vai trò <Text style={{ color: colors.error }}>*</Text>
+                </Text>
+                <View style={styles.roleOptions}>
+                  {roles.map((item) => {
+                    const meta = roleMeta[item];
+                    const selected = role === item;
+                    return (
+                      <TouchableOpacity
+                        key={item}
+                        onPress={() => {
+                          setRole(item);
+                          setErrors((current) => ({ ...current, role: "" }));
+                        }}
                         style={[
-                          styles.roleOptionText,
+                          styles.roleOption,
                           {
-                            color: selected ? meta.color : colors.textMuted,
-                            fontWeight: selected ? "700" : "500",
+                            borderColor: selected ? meta.color : colors.border,
+                            backgroundColor: selected
+                              ? meta.background
+                              : colors.card,
                           },
                         ]}
                       >
-                        {item}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
+                        <Feather
+                          name={meta.icon}
+                          size={14}
+                          color={selected ? meta.color : colors.textMuted}
+                        />
+                        <Text
+                          style={[
+                            styles.roleOptionText,
+                            {
+                              color: selected ? meta.color : colors.textMuted,
+                              fontWeight: selected ? "700" : "500",
+                            },
+                          ]}
+                        >
+                          {item}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+                {!!errors.role && (
+                  <Text style={[styles.errorText, { color: colors.error }]}>
+                    {errors.role}
+                  </Text>
+                )}
               </View>
-              {!!errors.role && (
-                <Text style={[styles.errorText, { color: colors.error }]}>
-                  {errors.role}
-                </Text>
-              )}
-            </View>
+            )}
 
             <View style={styles.field}>
               <Text
