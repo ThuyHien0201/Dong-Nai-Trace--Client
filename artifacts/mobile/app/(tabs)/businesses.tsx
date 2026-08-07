@@ -849,6 +849,7 @@ export default function BusinessesScreen() {
         contentContainerStyle={s.chips}
         style={{
           flexGrow: 0,
+          maxHeight: 48,
           marginBottom: 10,
         }}>
         {STATUSES.map(st => (
@@ -935,8 +936,9 @@ const s = StyleSheet.create({
   chips: {
     paddingHorizontal: 12,
     paddingTop: 4,
-    paddingBottom: 29,
+    paddingBottom: 4,
     gap: 6,
+    alignItems: 'center',
   },
   resultsRow: {
     marginTop: 8,

@@ -261,7 +261,7 @@ const s = StyleSheet.create({
   roleBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 4 },
   roleText: { fontSize: 11, color: '#2740BA', fontWeight: '600' },
   tabsScroll: { flexGrow: 0, maxHeight: 49, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e4e8f0' },
-  tabs: { flexGrow: 1, minWidth: '100%', flexDirection: 'row' },
+  tabs: { flexGrow: 1, minWidth: '100%', flexDirection: 'row', alignItems: 'center' },
   tab: { flex: 1, minWidth: 170, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12 },
   tabActive: { borderBottomWidth: 2, borderBottomColor: '#2740BA' },
   tabText: { fontSize: 12, color: '#6b7694', fontWeight: '500' },

@@ -644,7 +644,7 @@ const styles = StyleSheet.create({
   sheetSubtitle: { color: '#6b7694', fontSize: 11, marginTop: 3 },
   filterLabel: { color: '#25304b', fontSize: 12, fontWeight: '700', marginTop: 6, marginBottom: 8 },
   optionWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 10 },
-  horizontalOptions: { gap: 8, paddingBottom: 10 },
+  horizontalOptions: { gap: 8, paddingBottom: 10, alignItems: 'center' },
   option: { borderWidth: 1, borderRadius: 10, paddingHorizontal: 11, paddingVertical: 8 },
   optionText: { fontSize: 11, fontWeight: '600' },
   sheetActions: { flexDirection: 'row', gap: 9, paddingTop: 10 },

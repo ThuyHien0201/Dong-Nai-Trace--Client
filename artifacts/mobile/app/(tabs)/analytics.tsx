@@ -87,7 +87,7 @@ export default function AnalyticsScreen() {
         </View>
 
         {/* Period filter */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.filterRow} style={{ maxHeight: 44, flexGrow: 0 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.filterRow} style={{ height: 44, flexGrow: 0 }}>
           {PERIODS.map(p => (
             <TouchableOpacity key={p} style={[s.chip, period === p && s.chipActive]} onPress={() => setPeriod(p)}>
               <Text style={[s.chipText, period === p && s.chipTextActive]}>{p}</Text>
@@ -224,7 +224,7 @@ const s = StyleSheet.create({
   subtitle: { fontSize: 11, color: '#6b7694', marginTop: 2 },
   exportBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#edf0ff', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10 },
   exportText: { fontSize: 12, color: '#2740BA', fontWeight: '600' },
-  filterRow: { paddingHorizontal: 12, paddingVertical: 4, gap: 6 },
+  filterRow: { paddingHorizontal: 12, paddingVertical: 4, gap: 6, alignItems: 'center' },
   chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, backgroundColor: '#fff', borderWidth: 1, borderColor: '#e4e8f0' },
   chipActive: { backgroundColor: '#edf0ff', borderColor: '#2740BA' },
   regionChip: {},

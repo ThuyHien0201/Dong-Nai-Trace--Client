@@ -1192,7 +1192,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   searchInput: { flex: 1, fontSize: 12, paddingVertical: 0 },
-  filterRow: { gap: 6, paddingHorizontal: 12, paddingVertical: 10 },
+  filterRow: { gap: 6, paddingHorizontal: 12, paddingVertical: 10, alignItems: "center" },
   filterChip: {
     flexDirection: "row",
     alignItems: "center",
@@ -1204,7 +1204,7 @@ const styles = StyleSheet.create({
   },
   filterText: { fontSize: 10, fontWeight: "600" },
   countText: { fontSize: 9, fontWeight: "700" },
-  statusRow: { gap: 6, paddingHorizontal: 12, paddingBottom: 6 },
+  statusRow: { gap: 6, paddingHorizontal: 12, paddingBottom: 6, alignItems: "center" },
   statusChip: {
     borderWidth: 1,
     borderRadius: 9,

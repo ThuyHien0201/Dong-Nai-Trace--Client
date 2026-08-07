@@ -393,7 +393,7 @@ export default function CMSScreen() {
             showsVerticalScrollIndicator={false}
           >
             <Text style={s.fieldLabel}>Danh mục</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, marginBottom: 16 }} style={{ maxHeight: 40, flexGrow: 0 }}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, marginBottom: 16, alignItems: 'center' }} style={{ maxHeight: 40, flexGrow: 0 }}>
               {Object.keys(CAT_COLOR).map(cat => (
                 <TouchableOpacity key={cat} style={[s.catChip, editCat === cat && s.catChipActive]} onPress={() => setEditCat(cat)}>
                   <Text style={[s.catChipText, editCat === cat && { color: '#2740BA', fontWeight: '700' }]}>{cat}</Text>
@@ -572,7 +572,7 @@ const s = StyleSheet.create({
   },
   sectionLabel: { fontSize: 10, fontWeight: '700', color: '#6b7694', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 7 },
   horizontalFilter: { flexGrow: 0, maxHeight: 42, marginBottom: 12 },
-  categoryFilterRow: { gap: 7 },
+  categoryFilterRow: { gap: 7, alignItems: 'center' },
   categoryFilter: { paddingHorizontal: 11, paddingVertical: 7, borderRadius: 18, backgroundColor: '#fff', borderWidth: 1, borderColor: '#e4e8f0' },
   categoryFilterActive: { backgroundColor: '#2740BA', borderColor: '#2740BA' },
   categoryFilterText: { fontSize: 10, fontWeight: '600', color: '#6b7694' },

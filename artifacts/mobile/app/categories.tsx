@@ -560,6 +560,7 @@ export default function CategoriesScreen() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={s.tabsScroll}
         contentContainerStyle={s.tabsRow}
       >
         {tabs.map((tab) => (
@@ -663,7 +664,8 @@ const s = StyleSheet.create({
   title: { fontSize: 18, fontWeight: "700", letterSpacing: -0.5 },
   subtitle: { fontSize: 10, marginTop: 2 },
   headerAdd: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
-  tabsRow: { gap: 7, paddingHorizontal: 16, paddingVertical: 8 },
+  tabsScroll: { flexGrow: 0, maxHeight: 52 },
+  tabsRow: { gap: 7, paddingHorizontal: 16, paddingVertical: 8, alignItems: "center" },
   tab: { flexDirection: "row", alignItems: "center", gap: 6, borderWidth: 1, borderRadius: 10, paddingHorizontal: 11, paddingVertical: 8 },
   tabText: { fontSize: 10, fontWeight: "700" },
   contentHeading: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingTop: 11, paddingBottom: 5 },

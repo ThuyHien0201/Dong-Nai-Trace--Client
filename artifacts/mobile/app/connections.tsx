@@ -246,7 +246,7 @@ const s = StyleSheet.create({
   subtitle: { fontSize: 10, color: '#6b7694', marginTop: 2 },
   headerButton: { width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: '#edf0ff' },
   tabScroll: { flexGrow: 0, maxHeight: 52, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e4e8f0' },
-  tabRow: { paddingHorizontal: 12, gap: 6 },
+  tabRow: { paddingHorizontal: 12, gap: 6, alignItems: 'center' },
   tab: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 14, borderBottomWidth: 2, borderBottomColor: 'transparent' },
   tabActive: { borderBottomColor: '#2740BA' },
   tabText: { fontSize: 10, color: '#6b7694', fontWeight: '600' },

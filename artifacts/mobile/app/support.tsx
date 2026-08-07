@@ -206,7 +206,7 @@ export default function SupportScreen() {
           </View>
 
           <Text style={s.fieldLabel}>Loại thông báo</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, marginBottom: 16 }} style={{ maxHeight: 40, flexGrow: 0 }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, marginBottom: 16, alignItems: 'center' }} style={{ maxHeight: 40, flexGrow: 0 }}>
             {NOTIF_TYPES.map(nt => (
               <TouchableOpacity key={nt} style={[s.typeChip, notifType === nt && s.typeChipActive]} onPress={() => setNotifType(nt)}>
                 <Text style={[s.typeChipText, notifType === nt && { color: '#2740BA', fontWeight: '700' }]}>{nt}</Text>

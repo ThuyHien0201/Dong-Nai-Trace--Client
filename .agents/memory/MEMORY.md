@@ -2,3 +2,4 @@
 - [Expo Feather icons](expo-feather-icons.md) — the Feather set does not support every web icon name; validate names and prefer compatible equivalents.
 - [Mobile admin actions](mobile-admin-actions.md) — destructive and account actions must update the local list state, not only show a confirmation alert.
 - [Mobile banner verification](mobile-banner-verification.md) — validate the CMS banner screen with Expo platform bundles when unrelated workspace type errors remain.
+- [Mobile horizontal controls](mobile-horizontal-controls.md) — horizontal tab/filter rows need explicit cross-axis alignment and bounded height on narrow screens.

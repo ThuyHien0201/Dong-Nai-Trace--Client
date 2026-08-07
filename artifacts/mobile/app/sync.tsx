@@ -679,17 +679,17 @@ export default function SyncScreen() {
       </View>
 
       {tab === "portal" && (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.filterRow}>
+        <View style={s.filterRow}>
           {[
             ["all", "Tất cả", allSourceLots.length],
             ["not_synced", "Chưa đồng bộ", allSourceLots.filter((lot) => lot.syncStatus !== "synced" && !sessionSynced.has(lot.id)).length],
             ["synced", "Đã đồng bộ", syncedCount],
           ].map(([id, label, count]) => (
             <TouchableOpacity key={String(id)} onPress={() => setFilterStatus(id as FilterStatus)} style={[s.filterChip, filterStatus === id && s.filterChipActive]}>
-              <Text style={[s.filterChipText, filterStatus === id && s.filterChipTextActive]}>{label} ({count})</Text>
+              <Text numberOfLines={1} style={[s.filterChipText, filterStatus === id && s.filterChipTextActive]}>{label} ({count})</Text>
             </TouchableOpacity>
           ))}
-        </ScrollView>
+        </View>
       )}
       <View style={s.searchRow}>
         <SearchField placeholder="Lô, doanh nghiệp, thương phẩm hoặc GTIN" value={search} onChangeText={setSearch} />
@@ -729,14 +729,14 @@ const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "#f5f7fb" },
   header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingTop: 10, paddingBottom: 8, gap: 9 },
   backButton: { padding: 4 },
-  headerText: { flex: 1 },
-  title: { fontSize: 18, fontWeight: "700", color: "#1d2944", letterSpacing: -0.5 },
-  subtitle: { fontSize: 10, color: "#6b7694", marginTop: 2 },
+  headerText: { flex: 1, minWidth: 0 },
+  title: { fontSize: 18, fontWeight: "700", color: "#1d2944", letterSpacing: -0.5, flexShrink: 1 },
+  subtitle: { fontSize: 10, color: "#6b7694", marginTop: 2, flexShrink: 1 },
   syncAllButton: { flexShrink: 0, flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: "#2740BA", paddingHorizontal: 10, paddingVertical: 8, borderRadius: 10 },
   syncAllText: { fontSize: 10, fontWeight: "700", color: "#fff" },
   tabScroll: { flexGrow: 0, maxHeight: 52, borderBottomWidth: 1, borderBottomColor: "#e4e8f0" },
   tabs: { paddingHorizontal: 16, gap: 8, alignItems: "center" },
-  tab: { minHeight: 36, paddingHorizontal: 13, paddingVertical: 9, borderRadius: 9, backgroundColor: "#fff", borderWidth: 1, borderColor: "#e4e8f0" },
+  tab: { minHeight: 36, paddingHorizontal: 13, paddingVertical: 9, borderRadius: 9, backgroundColor: "#fff", borderWidth: 1, borderColor: "#e4e8f0", flexShrink: 0 },
   activeTab: { backgroundColor: "#2740BA", borderColor: "#2740BA" },
   tabText: { fontSize: 11, fontWeight: "700", color: "#6b7694" },
   activeTabText: { color: "#fff" },
@@ -746,10 +746,10 @@ const s = StyleSheet.create({
   pageHint: { fontSize: 10, color: "#6b7694", lineHeight: 15, marginTop: 3 },
   apiStatus: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 16, paddingVertical: 6 },
   apiStatusText: { fontSize: 10, flex: 1 },
-  filterRow: { paddingHorizontal: 16, paddingVertical: 5, gap: 7 },
-  filterChip: { paddingHorizontal: 11, paddingVertical: 7, borderRadius: 18, borderWidth: 1, borderColor: "#d9dce9", backgroundColor: "#fff" },
+  filterRow: { flexDirection: "row", paddingHorizontal: 16, paddingVertical: 5, gap: 7 },
+  filterChip: { flex: 1, minWidth: 0, alignItems: "center", justifyContent: "center", paddingHorizontal: 5, paddingVertical: 7, borderRadius: 18, borderWidth: 1, borderColor: "#d9dce9", backgroundColor: "#fff" },
   filterChipActive: { backgroundColor: "#2740BA", borderColor: "#2740BA" },
-  filterChipText: { fontSize: 10, fontWeight: "700", color: "#6b7694" },
+  filterChipText: { fontSize: 10, fontWeight: "700", color: "#6b7694", textAlign: "center", flexShrink: 1 },
   filterChipTextActive: { color: "#fff" },
   searchRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, gap: 7, marginTop: 3 },
   searchField: { flex: 1, height: 38, flexDirection: "row", alignItems: "center", gap: 7, paddingHorizontal: 11, borderWidth: 1, borderColor: "#e4e8f0", borderRadius: 10, backgroundColor: "#fff" },
