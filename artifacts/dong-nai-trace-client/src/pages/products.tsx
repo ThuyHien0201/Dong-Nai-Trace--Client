@@ -351,12 +351,7 @@ function ProductDetail({
       desc: "Tưới nước, bón phân hữu cơ theo lịch, kiểm tra sâu bệnh định kỳ.",
       color: "#2e9fbf",
       done: true,
-      images: [
-        "https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?w=400",
-        "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=400",
-        "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400",
-        "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=400"
-      ]
+      image: "https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?w=800",
     },
     {
       icon: Package,

@@ -25,6 +25,7 @@ type TraceStep = {
   title: string;
   date: string;
   description: string;
+  image: string;
   icon: React.ComponentProps<typeof Feather>['name'];
   color: string;
   done: boolean;
@@ -88,6 +89,7 @@ const TRACE_STEPS: TraceStep[] = [
     title: 'Gieo trồng / Nuôi trồng',
     date: '10/01/2025',
     description: 'Giống được kiểm định và gieo trồng tại vùng canh tác đã đăng ký.',
+    image: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=800&h=500&fit=crop',
     icon: 'sun',
     color: '#1f7a45',
     done: true,
@@ -96,6 +98,7 @@ const TRACE_STEPS: TraceStep[] = [
     title: 'Chăm sóc',
     date: '08/07/2024',
     description: 'Tưới nước, bón phân hữu cơ theo lịch, kiểm tra sâu bệnh định kỳ.',
+    image: 'https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?w=800&h=500&fit=crop',
     icon: 'sunrise',
     color: '#2e9fbf',
     done: true,
@@ -104,6 +107,7 @@ const TRACE_STEPS: TraceStep[] = [
     title: 'Thu hoạch',
     date: '20/04/2025',
     description: 'Thu hoạch đúng độ chín, không sử dụng chất bảo quản sau thu hoạch.',
+    image: 'https://images.unsplash.com/photo-1588165171080-c89acfa5ee83?w=800&h=500&fit=crop',
     icon: 'package',
     color: '#E8650A',
     done: true,
@@ -112,6 +116,7 @@ const TRACE_STEPS: TraceStep[] = [
     title: 'Sơ chế / Đóng gói',
     date: '22/04/2025',
     description: 'Phân loại, làm sạch và đóng gói tại kho sơ chế đạt chuẩn VSATTP.',
+    image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=500&fit=crop',
     icon: 'box',
     color: '#7c3aed',
     done: true,
@@ -120,6 +125,7 @@ const TRACE_STEPS: TraceStep[] = [
     title: 'Vận chuyển',
     date: '25/04/2025',
     description: 'Vận chuyển bằng xe lạnh đạt chuẩn.',
+    image: 'https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=800&h=500&fit=crop',
     icon: 'truck',
     color: '#2740BA',
     done: true,
@@ -128,6 +134,7 @@ const TRACE_STEPS: TraceStep[] = [
     title: 'Phân phối',
     date: '27/04/2025',
     description: 'Phân phối đến các điểm bán lẻ.',
+    image: 'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=800&h=500&fit=crop',
     icon: 'shopping-bag',
     color: '#0e7c7c',
     done: false,
@@ -480,7 +487,7 @@ function ProductDetail({ product, onBack, onDelete, onUpdate }: { product: Produ
             {approved && tab === 'trace' && (
               <View>
                 <View style={styles.providerCard}><View><Text style={styles.infoLabel}>ĐƠN VỊ GIẢI PHÁP</Text><Text style={styles.providerName}>iTrace Việt Nam</Text><Text style={styles.providerUpdated}>Cập nhật lần cuối: 27/04/2025 · 14:32</Text></View><Image source={{ uri: product.imageUrl }} style={styles.providerImage} /></View>
-                <View style={styles.traceCard}><Text style={styles.sectionTitle}>Quy trình truy xuất</Text>{product.traceSteps.map((step, index) => <View key={step.title} style={styles.traceRow}><View style={styles.traceRail}><View style={[styles.traceCircle, { backgroundColor: step.done ? step.color : colors.lockedLight, borderColor: step.done ? step.color : colors.lockedBorder }]}><Feather name={step.icon} size={15} color={step.done ? '#fff' : colors.textMuted} /></View>{index < product.traceSteps.length - 1 && <View style={[styles.traceLine, { backgroundColor: step.done ? `${step.color}40` : colors.cardBorder }]} />}</View><View style={styles.traceCopy}><View style={styles.traceTitleRow}><Text style={styles.traceTitle}>{step.title}</Text>{!step.done && <Text style={styles.waitingPill}>Chờ cập nhật</Text>}</View><Text style={styles.traceDate}>{step.date}</Text><Text style={styles.traceDescription}>{step.description}</Text></View></View>)}</View>
+                 <View style={styles.traceCard}><Text style={styles.sectionTitle}>Quy trình truy xuất</Text>{product.traceSteps.map((step, index) => <View key={step.title} style={styles.traceRow}><View style={styles.traceRail}><View style={[styles.traceCircle, { backgroundColor: step.done ? step.color : colors.lockedLight, borderColor: step.done ? step.color : colors.lockedBorder }]}><Feather name={step.icon} size={15} color={step.done ? '#fff' : colors.textMuted} /></View>{index < product.traceSteps.length - 1 && <View style={[styles.traceLine, { backgroundColor: step.done ? `${step.color}40` : colors.cardBorder }]} />}</View><View style={styles.traceCopy}><View style={styles.traceTitleRow}><Text style={styles.traceTitle}>{step.title}</Text>{!step.done && <Text style={styles.waitingPill}>Chờ cập nhật</Text>}</View><Text style={styles.traceDate}>{step.date}</Text><Text style={styles.traceDescription}>{step.description}</Text><Image source={{ uri: step.image }} style={styles.traceImage} /></View></View>)}</View>
                 <View style={styles.docsCard}><View style={styles.docsHeader}><Text style={styles.sectionTitle}>Chứng nhận lô hàng</Text><Text style={styles.docsCount}>3 file</Text></View>{['Kết quả kiểm nghiệm lô hàng tháng 4/2025', 'Chứng nhận VietGAP – lô xuất tháng 4', 'Biên bản kiểm tra vùng trồng'].map(document => <View key={document} style={styles.docRow}><View style={styles.pdfBadge}><Text style={styles.pdfText}>PDF</Text></View><Text style={styles.docName} numberOfLines={1}>{document}</Text><TouchableOpacity hitSlop={8} onPress={() => Alert.alert('Tài liệu', 'Tài liệu sẽ được tải xuống khi kết nối kho lưu trữ được bật.')}><Feather name="download" size={16} color={colors.primary} /></TouchableOpacity></View>)}</View>
                 <View style={styles.actionCard}><Text style={styles.sectionTitle}>Mã định danh sản phẩm</Text><View style={styles.identifierBox}><Feather name="maximize" size={15} color={colors.primary} /><Text style={styles.identifierText}>{product.id}-DNT-2025</Text></View><TouchableOpacity style={[styles.primaryButton, { marginTop: 12 }]} onPress={() => setShowQR(true)}><Feather name="maximize" size={15} color={colors.primaryForeground} /><Text style={styles.primaryButtonText}>Mở mã QR truy xuất</Text></TouchableOpacity></View>
               </View>
@@ -705,6 +712,7 @@ const styles = StyleSheet.create({
   waitingPill: { color: '#6b7694', backgroundColor: '#f0f2f8', borderRadius: 8, paddingHorizontal: 6, paddingVertical: 3, fontSize: 8, fontWeight: '700' },
   traceDate: { color: '#6b7694', fontSize: 9, marginTop: 4 },
   traceDescription: { color: '#6b7694', backgroundColor: '#f9fafb', borderRadius: 9, padding: 9, fontSize: 10, lineHeight: 15, marginTop: 6 },
+  traceImage: { width: '100%', height: 145, borderRadius: 10, marginTop: 8, backgroundColor: '#f0f2f8' },
   docsCard: { backgroundColor: '#fff', marginHorizontal: 12, marginBottom: 12, padding: 15, borderRadius: 16, borderWidth: 1, borderColor: '#e4e8f0' },
   docsHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
   docsCount: { color: '#2740BA', backgroundColor: '#edf0ff', borderRadius: 10, paddingHorizontal: 7, paddingVertical: 4, fontSize: 9, fontWeight: '700' },
