@@ -132,43 +132,6 @@ const statusOptions: Array<"Tất cả" | AccountStatus> = [
   "Đang hoạt động",
   "Tạm khóa",
 ];
-const permissionMatrix = [
-  {
-    feature: "Xem doanh nghiệp & sản phẩm",
-    admin: true,
-    editor: true,
-    viewer: true,
-  },
-  {
-    feature: "Thêm / Sửa doanh nghiệp",
-    admin: true,
-    editor: true,
-    viewer: false,
-  },
-  { feature: "Thêm / Sửa sản phẩm", admin: true, editor: true, viewer: false },
-  {
-    feature: "Xóa doanh nghiệp / sản phẩm",
-    admin: true,
-    editor: false,
-    viewer: false,
-  },
-  { feature: "Đồng bộ dữ liệu", admin: true, editor: true, viewer: false },
-  {
-    feature: "Xem báo cáo & thống kê",
-    admin: true,
-    editor: true,
-    viewer: true,
-  },
-  {
-    feature: "Quản lý danh mục & CMS",
-    admin: true,
-    editor: true,
-    viewer: false,
-  },
-  { feature: "Quản lý tài khoản", admin: true, editor: false, viewer: false },
-  { feature: "Cài đặt hệ thống", admin: true, editor: false, viewer: false },
-];
-
 const roleMeta: Record<
   Role,
   {
@@ -654,94 +617,6 @@ function DeleteConfirm({
   );
 }
 
-function PermissionMatrix({ colors }: { colors: Palette }) {
-  const roleKeys: Array<{
-    label: string;
-    key: "admin" | "editor" | "viewer";
-    role: Role;
-  }> = [
-    { label: "QT", key: "admin", role: "Quản trị viên" },
-    { label: "BT", key: "editor", role: "Biên tập viên" },
-    { label: "Xem", key: "viewer", role: "Người xem" },
-  ];
-  return (
-    <ScrollView
-      contentContainerStyle={styles.matrixContent}
-      showsVerticalScrollIndicator={false}
-    >
-      <View
-        style={[styles.matrixIntro, { backgroundColor: colors.primaryLight }]}
-      >
-        <Feather name="shield" size={20} color={colors.primary} />
-        <View style={styles.flex}>
-          <Text style={[styles.matrixTitle, { color: colors.textPrimary }]}>
-            Phân quyền theo vai trò
-          </Text>
-          <Text style={[styles.matrixSubtitle, { color: colors.textMuted }]}>
-            Quyền hạn của từng vai trò trong hệ thống
-          </Text>
-        </View>
-      </View>
-      <View
-        style={[
-          styles.matrixCard,
-          { backgroundColor: colors.card, borderColor: colors.border },
-        ]}
-      >
-        {permissionMatrix.map((row, index) => (
-          <View
-            key={row.feature}
-            style={[
-              styles.matrixRow,
-              {
-                borderBottomColor: colors.separator,
-                backgroundColor: index % 2 === 0 ? colors.card : colors.input,
-              },
-            ]}
-          >
-            <Text
-              style={[styles.matrixFeature, { color: colors.textSecondary }]}
-            >
-              {row.feature}
-            </Text>
-            <View style={styles.matrixChecks}>
-              {roleKeys.map((item) => {
-                const allowed = row[item.key];
-                const meta = roleMeta[item.role];
-                return (
-                  <View key={item.key} style={styles.matrixCheck}>
-                    <Text style={[styles.matrixRole, { color: meta.color }]}>
-                      {item.label}
-                    </Text>
-                    <View
-                      style={[
-                        styles.matrixCircle,
-                        {
-                          backgroundColor: allowed
-                            ? colors.successLight
-                            : colors.lockedLight,
-                        },
-                      ]}
-                    >
-                      <Feather
-                        name={allowed ? "check" : "x"}
-                        size={11}
-                        color={
-                          allowed ? colors.success : colors.textPlaceholder
-                        }
-                      />
-                    </View>
-                  </View>
-                );
-              })}
-            </View>
-          </View>
-        ))}
-      </View>
-    </ScrollView>
-  );
-}
-
 export default function AccountsScreen() {
   const router = useRouter();
   const colors = useColors();
@@ -750,9 +625,6 @@ export default function AccountsScreen() {
   const [roleFilter, setRoleFilter] = useState("Tất cả");
   const [statusFilter, setStatusFilter] = useState<"Tất cả" | AccountStatus>(
     "Tất cả",
-  );
-  const [activeTab, setActiveTab] = useState<"accounts" | "permissions">(
-    "accounts",
   );
   const [modal, setModal] = useState<"add" | "edit" | null>(null);
   const [editing, setEditing] = useState<Account | null>(null);
@@ -909,72 +781,7 @@ export default function AccountsScreen() {
         </TouchableOpacity>
       </View>
 
-      <View
-        style={[
-          styles.tabs,
-          { backgroundColor: colors.card, borderBottomColor: colors.border },
-        ]}
-      >
-        <TouchableOpacity
-          onPress={() => setActiveTab("accounts")}
-          style={[
-            styles.tab,
-            activeTab === "accounts" && { borderBottomColor: colors.primary },
-          ]}
-        >
-          <Feather
-            name="users"
-            size={14}
-            color={activeTab === "accounts" ? colors.primary : colors.textMuted}
-          />
-          <Text
-            style={[
-              styles.tabText,
-              {
-                color:
-                  activeTab === "accounts" ? colors.primary : colors.textMuted,
-              },
-            ]}
-          >
-            Tài khoản
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => setActiveTab("permissions")}
-          style={[
-            styles.tab,
-            activeTab === "permissions" && {
-              borderBottomColor: colors.primary,
-            },
-          ]}
-        >
-          <Feather
-            name="shield"
-            size={14}
-            color={
-              activeTab === "permissions" ? colors.primary : colors.textMuted
-            }
-          />
-          <Text
-            style={[
-              styles.tabText,
-              {
-                color:
-                  activeTab === "permissions"
-                    ? colors.primary
-                    : colors.textMuted,
-              },
-            ]}
-          >
-            Ma trận quyền
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {activeTab === "permissions" ? (
-        <PermissionMatrix colors={colors} />
-      ) : (
-        <>
+      <>
           <View
             style={[
               styles.searchRow,
@@ -1305,8 +1112,7 @@ export default function AccountsScreen() {
               Hiển thị {filtered.length} / {filtered.length} tài khoản
             </Text>
           </ScrollView>
-        </>
-      )}
+      </>
 
       {modal && (
         <AccountModal

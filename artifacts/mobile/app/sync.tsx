@@ -1,350 +1,836 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from "react";
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput,
-  ActivityIndicator, Alert,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Feather } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useListPortalLots } from '@workspace/api-client-react';
+  ActivityIndicator,
+  Alert,
+  Image,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import {
+  useListPortalLots,
+  type ListPortalLotsSyncStatus,
+} from "@workspace/api-client-react";
 
-/* ─── Mock Lots when API unavailable ───────────────────────── */
-const MOCK_LOTS = [
-  { id: 'LOT001', name: 'Lô bưởi Tân Triều T8/2024', business: 'HTX Nông nghiệp Tân Triều', product: 'Bưởi Tân Triều', quantity: '500 kg', date: '2024-08-01', status: 'pending', txngSteps: ['Sản xuất', 'Thu hoạch', 'Đóng gói', 'Vận chuyển'] },
-  { id: 'LOT002', name: 'Lô cá tra phi lê tháng 7', business: 'Trại nuôi thủy sản Bình Sơn', product: 'Cá tra phi lê', quantity: '2 tấn', date: '2024-07-28', status: 'synced', txngSteps: ['Nuôi trồng', 'Thu hoạch', 'Sơ chế', 'Cấp đông', 'Xuất kho'] },
-  { id: 'LOT003', name: 'Lô nước khoáng Vĩnh Hảo Q3', business: 'Công ty CP Thực phẩm Vĩnh Hảo', product: 'Nước khoáng 500ml', quantity: '10.000 chai', date: '2024-07-25', status: 'pending', txngSteps: ['Khai thác', 'Lọc', 'Đóng chai', 'KCS', 'Xuất kho'] },
-  { id: 'LOT004', name: 'Lô tinh bột sắn biến tính T7', business: 'Công ty CP Chế biến Đồng Nai', product: 'Tinh bột sắn', quantity: '5 tấn', date: '2024-07-20', status: 'failed', txngSteps: ['Sản xuất', 'Kiểm định', 'Đóng gói'] },
-  { id: 'LOT005', name: 'Lô sầu riêng Ri6 T8/2024', business: 'HTX Nông nghiệp Tân Triều', product: 'Sầu riêng Ri6', quantity: '300 kg', date: '2024-08-05', status: 'pending', txngSteps: ['Canh tác', 'Thu hoạch', 'Phân loại', 'Đóng gói'] },
-];
+type FeatherName = React.ComponentProps<typeof Feather>["name"];
+type PageTab = "solution" | "portal";
+type FilterStatus = "all" | "not_synced" | "synced";
 
-const STATUS_META: Record<string, { label: string; color: string; bg: string; icon: string }> = {
-  pending: { label: 'Chờ đồng bộ', color: '#E8650A', bg: '#fff4ed', icon: 'clock' },
-  synced: { label: 'Đã đồng bộ', color: '#1f7a45', bg: '#e8f5ed', icon: 'check-circle' },
-  failed: { label: 'Thất bại', color: '#c0392b', bg: '#fef0f0', icon: 'alert-circle' },
+type Lot = {
+  id: number;
+  productName: string;
+  gtin: string;
+  lotCode: string;
+  businessName: string;
+  activatedAt: string;
+  imageUrl?: string | null;
+  syncStatus: "synced" | "not_synced";
+  isComplete: boolean;
+  portalUrl?: string | null;
 };
 
-interface Lot { id: string; name: string; business: string; product: string; quantity: string; date: string; status: string; txngSteps: string[] }
+type TxngStep = {
+  stepType: string;
+  stepName: string;
+  startTime: string;
+  endTime: string;
+  executor: string;
+  locationCode: string;
+  description: string;
+  evidenceUrl: string;
+};
 
-type ModalStep = 'basic' | 'txng' | null;
+const MOCK_LOTS: Lot[] = [
+  {
+    id: 101,
+    productName: "Bưởi Tân Triều",
+    gtin: "8936001234561",
+    lotCode: "LOT-2025-001",
+    businessName: "Cơ sở Bưởi Tân Triều",
+    activatedAt: "2025-04-20T08:00:00.000Z",
+    imageUrl:
+      "https://images.unsplash.com/photo-1588165171080-c89acfa5ee83?w=160&h=160&fit=crop",
+    syncStatus: "synced",
+    isComplete: true,
+    portalUrl: "https://dong-nai-trace--han640698.replit.app/portal/san-pham/sp001",
+  },
+  {
+    id: 102,
+    productName: "Sầu riêng Monthong",
+    gtin: "8936001234563",
+    lotCode: "LOT-2025-003",
+    businessName: "Cty TNHH Nông sản Đồng Nai",
+    activatedAt: "2025-04-15T10:00:00.000Z",
+    imageUrl:
+      "https://images.unsplash.com/photo-1600423115367-87ea7661688f?w=160&h=160&fit=crop",
+    syncStatus: "synced",
+    isComplete: true,
+    portalUrl: "https://dong-nai-trace--han640698.replit.app/portal/san-pham/sp001",
+  },
+  {
+    id: 103,
+    productName: "Điều rang muối",
+    gtin: "8936001234565",
+    lotCode: "LOT-2025-005",
+    businessName: "Cty CP Điều Đồng Nai",
+    activatedAt: "2025-04-10T13:00:00.000Z",
+    imageUrl:
+      "https://images.unsplash.com/photo-1509358271058-acd22cc93898?w=160&h=160&fit=crop",
+    syncStatus: "synced",
+    isComplete: true,
+    portalUrl: "https://dong-nai-trace--han640698.replit.app/portal/san-pham/sp001",
+  },
+  {
+    id: 104,
+    productName: "Xoài cát Hòa Lộc",
+    gtin: "8936001234562",
+    lotCode: "LOT-2025-002",
+    businessName: "HTX Xoài Hòa Lộc",
+    activatedAt: "2025-04-18T09:30:00.000Z",
+    imageUrl:
+      "https://images.unsplash.com/photo-1553279768-865429fa0078?w=160&h=160&fit=crop",
+    syncStatus: "not_synced",
+    isComplete: true,
+    portalUrl: null,
+  },
+  {
+    id: 105,
+    productName: "Tiêu đen Xuân Lộc",
+    gtin: "8936001234564",
+    lotCode: "LOT-2025-004",
+    businessName: "HTX Tiêu Xuân Lộc",
+    activatedAt: "2025-04-12T07:45:00.000Z",
+    imageUrl:
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=160&h=160&fit=crop",
+    syncStatus: "not_synced",
+    isComplete: true,
+    portalUrl: null,
+  },
+  {
+    id: 106,
+    productName: "Cà phê Robusta Định Quán",
+    gtin: "8936001234566",
+    lotCode: "LOT-2025-006",
+    businessName: "Cty TNHH Cà phê DNT",
+    activatedAt: "2025-04-08T11:00:00.000Z",
+    imageUrl:
+      "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=160&h=160&fit=crop",
+    syncStatus: "not_synced",
+    isComplete: false,
+    portalUrl: null,
+  },
+  {
+    id: 107,
+    productName: "Mật ong rừng Định Quán",
+    gtin: "8936001234567",
+    lotCode: "LOT-2025-007",
+    businessName: "HTX Ong Mật Định Quán",
+    activatedAt: "2025-04-05T08:20:00.000Z",
+    imageUrl:
+      "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=160&h=160&fit=crop",
+    syncStatus: "not_synced",
+    isComplete: false,
+    portalUrl: null,
+  },
+];
+
+const MOCK_STEPS: TxngStep[] = [
+  {
+    stepType: "planting",
+    stepName: "Gieo trồng / Nuôi trồng",
+    startTime: "2025-01-10T07:00",
+    endTime: "2025-01-10T17:00",
+    executor: "Đơn vị sản xuất",
+    locationCode: "LOC-VT-001",
+    description: "Ghi nhận công đoạn sản xuất ban đầu.",
+    evidenceUrl: "",
+  },
+  {
+    stepType: "care",
+    stepName: "Chăm sóc",
+    startTime: "2025-01-15T07:00",
+    endTime: "2025-03-20T17:00",
+    executor: "Đơn vị sản xuất",
+    locationCode: "LOC-VT-001",
+    description: "Theo dõi quá trình chăm sóc và kiểm soát chất lượng.",
+    evidenceUrl: "",
+  },
+  {
+    stepType: "harvest",
+    stepName: "Thu hoạch",
+    startTime: "2025-04-18T06:00",
+    endTime: "2025-04-18T14:00",
+    executor: "Đội thu hoạch",
+    locationCode: "LOC-VT-001",
+    description: "Ghi nhận thời điểm và đơn vị thực hiện thu hoạch.",
+    evidenceUrl: "",
+  },
+  {
+    stepType: "processing",
+    stepName: "Sơ chế / Đóng gói",
+    startTime: "2025-04-18T15:00",
+    endTime: "2025-04-18T20:00",
+    executor: "Xưởng sơ chế",
+    locationCode: "LOC-SC-002",
+    description: "Ghi nhận sơ chế, phân loại và đóng gói.",
+    evidenceUrl: "",
+  },
+  {
+    stepType: "transport",
+    stepName: "Vận chuyển",
+    startTime: "2025-04-19T05:00",
+    endTime: "2025-04-19T10:00",
+    executor: "Đơn vị vận tải",
+    locationCode: "LOC-VT-003",
+    description: "Theo dõi hành trình vận chuyển của lô hàng.",
+    evidenceUrl: "",
+  },
+  {
+    stepType: "distribution",
+    stepName: "Phân phối",
+    startTime: "2025-04-19T11:00",
+    endTime: "2025-04-19T16:00",
+    executor: "Đơn vị phân phối",
+    locationCode: "LOC-PP-004",
+    description: "Ghi nhận điểm và đơn vị tiếp nhận phân phối.",
+    evidenceUrl: "",
+  },
+];
+
+function formatDate(value: string | null | undefined) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+function mockStepsForLot(lot: Lot) {
+  return MOCK_STEPS.map((step) => ({
+    ...step,
+    executor: step.executor === "Đơn vị sản xuất" ? lot.businessName : step.executor,
+  }));
+}
+
+function IconButton({
+  icon,
+  label,
+  color = "#2740BA",
+  onPress,
+  disabled,
+}: {
+  icon: FeatherName;
+  label: string;
+  color?: string;
+  onPress: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <TouchableOpacity
+      accessibilityLabel={label}
+      onPress={onPress}
+      disabled={disabled}
+      style={[s.iconButton, { borderColor: color }, disabled && s.disabled]}
+    >
+      <Feather name={icon} size={15} color={disabled ? "#c8cfdd" : color} />
+    </TouchableOpacity>
+  );
+}
+
+function StatusBadge({
+  lot,
+  sessionSynced,
+}: {
+  lot: Lot;
+  sessionSynced: boolean;
+}) {
+  const synced = lot.syncStatus === "synced" || sessionSynced;
+  const color = synced ? "#1f7a45" : lot.isComplete ? "#E8650A" : "#6b7694";
+  const bg = synced ? "#e8f5ed" : lot.isComplete ? "#fff4ed" : "#f2f3f7";
+  return (
+    <View style={[s.statusBadge, { backgroundColor: bg }]}>
+      <Feather
+        name={synced ? "check-circle" : lot.isComplete ? "upload" : "clock"}
+        size={11}
+        color={color}
+      />
+      <Text style={[s.statusText, { color }]}>
+        {synced ? "Đã đồng bộ" : lot.isComplete ? "Chưa đồng bộ" : "Thiếu dữ liệu TXNG"}
+      </Text>
+    </View>
+  );
+}
+
+function SearchField({
+  placeholder,
+  value,
+  onChangeText,
+}: {
+  placeholder: string;
+  value: string;
+  onChangeText: (value: string) => void;
+}) {
+  return (
+    <View style={s.searchField}>
+      <Feather name="search" size={14} color="#a8b2c8" />
+      <TextInput
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor="#a8b2c8"
+        style={s.searchInput}
+        autoCapitalize="none"
+      />
+      {!!value && (
+        <TouchableOpacity onPress={() => onChangeText("")} accessibilityLabel={`Xóa ${placeholder}`}>
+          <Feather name="x" size={14} color="#6b7694" />
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+}
+
+function QrModal({ lot, onClose }: { lot: Lot; onClose: () => void }) {
+  const url =
+    lot.portalUrl ??
+    `https://txng.gov.vn/lot/${lot.lotCode.toLowerCase().replace("lot-", "")}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(url)}&color=2a9d6e&bgcolor=ffffff&margin=10`;
+  return (
+    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
+      <View style={s.overlay}>
+        <View style={s.qrCard}>
+          <View style={s.modalTitleRow}>
+            <Text style={s.modalTitle}>Mã QR cổng TXNG</Text>
+            <TouchableOpacity onPress={onClose} accessibilityLabel="Đóng mã QR">
+              <Feather name="x" size={20} color="#6b7694" />
+            </TouchableOpacity>
+          </View>
+          <Image source={{ uri: qrUrl }} style={s.qrImage} />
+          <Text style={s.qrLot}>{lot.lotCode}</Text>
+          <Text style={s.qrProduct}>{lot.productName}</Text>
+          <Text style={s.qrBusiness}>{lot.businessName}</Text>
+          {lot.syncStatus === "synced" && lot.portalUrl ? (
+            <TouchableOpacity
+              style={s.portalLink}
+              onPress={() => Alert.alert("Liên kết cổng TXNG", lot.portalUrl ?? "")}
+            >
+              <Feather name="external-link" size={14} color="#2a9d6e" />
+              <Text style={s.portalLinkText}>Xem trên cổng TXNG</Text>
+            </TouchableOpacity>
+          ) : (
+            <Text style={s.qrHint}>QR sẽ hoạt động sau khi đồng bộ lên cổng.</Text>
+          )}
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+function SyncModal({
+  lot,
+  onClose,
+  onSuccess,
+}: {
+  lot: Lot;
+  onClose: () => void;
+  onSuccess: (id: number) => void;
+}) {
+  const [step, setStep] = useState<"basic" | "txng">("basic");
+  const [pushed, setPushed] = useState(false);
+  const [pushing, setPushing] = useState(false);
+  const [province, setProvince] = useState("Đồng Nai");
+  const [productionZone, setProductionZone] = useState("Vùng sản xuất Đồng Nai");
+  const [steps, setSteps] = useState<TxngStep[]>(() => mockStepsForLot(lot));
+
+  const setStepField = (index: number, field: keyof TxngStep, value: string) => {
+    setSteps((current) =>
+      current.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
+    );
+  };
+
+  const pushToPortal = () => {
+    setPushing(true);
+    setTimeout(() => {
+      setPushing(false);
+      setPushed(true);
+      onSuccess(lot.id);
+    }, 1000);
+  };
+
+  return (
+    <Modal visible animationType="slide" onRequestClose={onClose}>
+      <SafeAreaView style={s.modalSafe}>
+        <View style={s.modalHeader}>
+          <View style={s.modalHeaderText}>
+            <Text style={s.eyebrow}>CỔNG TXNG QUỐC GIA</Text>
+            <Text style={s.modalProduct} numberOfLines={1}>{lot.productName}</Text>
+          </View>
+          <TouchableOpacity onPress={onClose} accessibilityLabel="Đóng đồng bộ">
+            <Feather name="x" size={22} color="#1d2944" />
+          </TouchableOpacity>
+        </View>
+        {!pushed && (
+          <View style={s.wizardBar}>
+            {(["basic", "txng"] as const).map((item, index) => (
+              <React.Fragment key={item}>
+                <View style={s.wizardStep}>
+                  <View style={[s.wizardDot, (step === item || (item === "basic" && step === "txng")) && s.wizardDotActive]}>
+                    {item === "basic" && step === "txng" ? (
+                      <Feather name="check" size={12} color="#fff" />
+                    ) : (
+                      <Text style={[s.wizardNumber, step === item && s.wizardNumberActive]}>{index + 1}</Text>
+                    )}
+                  </View>
+                  <Text style={[s.wizardLabel, step === item && s.wizardLabelActive]}>
+                    {item === "basic" ? "Thông tin cơ bản" : "Thông tin TXNG"}
+                  </Text>
+                </View>
+                {index === 0 && <View style={s.wizardLine} />}
+              </React.Fragment>
+            ))}
+          </View>
+        )}
+        <ScrollView contentContainerStyle={s.modalContent} keyboardShouldPersistTaps="handled">
+          {pushed ? (
+            <View style={s.successState}>
+              <View style={s.successIcon}><Feather name="check" size={34} color="#2a9d6e" /></View>
+              <Text style={s.successTitle}>Đồng bộ thành công!</Text>
+              <Text style={s.successText}>Hồ sơ đã được đẩy lên Cổng thông tin TXNG quốc gia.</Text>
+              <View style={s.successUrl}>
+                <Feather name="external-link" size={14} color="#2a9d6e" />
+                <Text style={s.successUrlText}>txng.gov.vn/lot/{lot.lotCode.replace("LOT-", "")}</Text>
+              </View>
+            </View>
+          ) : step === "basic" ? (
+            <View>
+              <View style={s.productPreview}>
+                {lot.imageUrl ? <Image source={{ uri: lot.imageUrl }} style={s.previewImage} /> : <View style={s.previewImageFallback}><Feather name="package" size={22} color="#a8b2c8" /></View>}
+                <View style={s.previewText}>
+                  <Text style={s.previewName}>{lot.productName}</Text>
+                  <Text style={s.previewBusiness}>{lot.businessName}</Text>
+                  <Text style={s.previewMeta}>GTIN: {lot.gtin}  ·  {lot.lotCode}</Text>
+                </View>
+              </View>
+              <Text style={s.sectionLabel}>THÔNG TIN HỒ SƠ</Text>
+              {[
+                ["Doanh nghiệp", lot.businessName],
+                ["Mã GTIN", lot.gtin],
+                ["Số lô/mẻ", lot.lotCode],
+                ["Ngày kích hoạt", formatDate(lot.activatedAt)],
+              ].map(([label, value]) => (
+                <View key={label} style={s.readonlyRow}>
+                  <Text style={s.fieldLabel}>{label}</Text>
+                  <Text style={s.readonlyValue}>{value}</Text>
+                </View>
+              ))}
+              <Text style={s.sectionLabel}>THÔNG TIN CẦN BỔ SUNG</Text>
+              <Text style={s.fieldLabel}>Tỉnh thành *</Text>
+              <TextInput value={province} onChangeText={setProvince} style={s.input} />
+              <Text style={s.fieldLabel}>Vùng trồng / sản xuất *</Text>
+              <TextInput value={productionZone} onChangeText={setProductionZone} style={s.input} />
+            </View>
+          ) : (
+            <View>
+              <Text style={s.sectionTitle}>Các bước TXNG</Text>
+              <Text style={s.sectionHint}>Điều chỉnh đầy đủ thông tin quá trình truy xuất nguồn gốc.</Text>
+              {steps.map((item, index) => (
+                <View key={item.stepType} style={s.txngCard}>
+                  <View style={s.txngCardHeader}>
+                    <View style={s.txngNumber}><Text style={s.txngNumberText}>{index + 1}</Text></View>
+                    <Text style={s.txngName}>{item.stepName}</Text>
+                  </View>
+                  <View style={s.fieldPair}>
+                    <View style={s.halfField}>
+                      <Text style={s.fieldLabel}>Bắt đầu</Text>
+                      <TextInput value={item.startTime} onChangeText={(v) => setStepField(index, "startTime", v)} style={s.smallInput} />
+                    </View>
+                    <View style={s.halfField}>
+                      <Text style={s.fieldLabel}>Kết thúc</Text>
+                      <TextInput value={item.endTime} onChangeText={(v) => setStepField(index, "endTime", v)} style={s.smallInput} />
+                    </View>
+                  </View>
+                  <Text style={s.fieldLabel}>Người thực hiện</Text>
+                  <TextInput value={item.executor} onChangeText={(v) => setStepField(index, "executor", v)} style={s.input} />
+                  <Text style={s.fieldLabel}>Mã truy vết địa điểm *</Text>
+                  <TextInput value={item.locationCode} onChangeText={(v) => setStepField(index, "locationCode", v)} style={[s.input, s.monoInput]} />
+                  <Text style={s.fieldLabel}>Mô tả</Text>
+                  <TextInput value={item.description} onChangeText={(v) => setStepField(index, "description", v)} style={[s.input, s.textarea]} multiline />
+                  <Text style={s.fieldLabel}>URL ảnh minh chứng</Text>
+                  <TextInput value={item.evidenceUrl} onChangeText={(v) => setStepField(index, "evidenceUrl", v)} placeholder="https://..." placeholderTextColor="#a8b2c8" style={[s.input, s.monoInput]} />
+                </View>
+              ))}
+            </View>
+          )}
+        </ScrollView>
+        <View style={s.modalFooter}>
+          {pushed ? (
+            <TouchableOpacity onPress={onClose} style={s.primaryButton}><Text style={s.primaryButtonText}>Đóng</Text></TouchableOpacity>
+          ) : step === "basic" ? (
+            <>
+              <TouchableOpacity onPress={onClose} style={s.secondaryButton}><Text style={s.secondaryButtonText}>Hủy</Text></TouchableOpacity>
+              <TouchableOpacity onPress={() => setStep("txng")} style={s.primaryButton}><Text style={s.primaryButtonText}>Tiếp tục</Text><Feather name="arrow-right" size={15} color="#fff" /></TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <TouchableOpacity onPress={() => setStep("basic")} style={s.secondaryButton}><Feather name="arrow-left" size={15} color="#6b7694" /><Text style={s.secondaryButtonText}>Quay lại</Text></TouchableOpacity>
+              <TouchableOpacity onPress={pushToPortal} disabled={pushing} style={[s.successButton, pushing && s.disabled]}>
+                {pushing ? <ActivityIndicator size="small" color="#fff" /> : <Feather name="upload" size={15} color="#fff" />}
+                <Text style={s.primaryButtonText}>{pushing ? "Đang đẩy lên..." : "Xác nhận đẩy lên Cổng"}</Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+      </SafeAreaView>
+    </Modal>
+  );
+}
+
+function LotCard({
+  lot,
+  sessionSynced,
+  solutionSent,
+  onSync,
+  onQr,
+  onSend,
+  sending,
+  solution,
+}: {
+  lot: Lot;
+  sessionSynced: boolean;
+  solutionSent: boolean;
+  onSync: () => void;
+  onQr: () => void;
+  onSend: () => void;
+  sending: boolean;
+  solution?: boolean;
+}) {
+  const synced = solution ? solutionSent : lot.syncStatus === "synced" || sessionSynced;
+  return (
+    <View style={s.lotCard}>
+      <View style={s.lotHeader}>
+        {lot.imageUrl ? <Image source={{ uri: lot.imageUrl }} style={s.lotImage} /> : <View style={s.lotImageFallback}><Feather name="package" size={20} color="#a8b2c8" /></View>}
+        <View style={s.lotTitleBlock}>
+          <Text style={s.lotName}>{lot.productName}</Text>
+          <Text style={s.lotBusiness}>{lot.businessName}</Text>
+          <Text style={s.lotCode}>GTIN: {lot.gtin}</Text>
+        </View>
+        {solution ? (
+          <View style={[s.compactBadge, { backgroundColor: synced ? "#e8f5ed" : "#f2f3f7" }]}>
+            <Text style={[s.compactBadgeText, { color: synced ? "#1f7a45" : "#6b7694" }]}>{synced ? "Đã gửi" : "Chưa gửi"}</Text>
+          </View>
+        ) : <StatusBadge lot={lot} sessionSynced={sessionSynced} />}
+      </View>
+      <View style={s.lotInfoRow}>
+        <View style={s.lotInfo}><Feather name="hash" size={12} color="#6b7694" /><Text style={s.lotInfoText}>{lot.lotCode}</Text></View>
+        <View style={s.lotInfo}><Feather name="calendar" size={12} color="#6b7694" /><Text style={s.lotInfoText}>{formatDate(lot.activatedAt)}</Text></View>
+      </View>
+      <View style={s.cardActions}>
+        {!solution && <IconButton icon="grid" label="Xem mã QR" color={synced ? "#2a9d6e" : "#6b7694"} onPress={onQr} />}
+        {solution ? (
+          <TouchableOpacity style={s.cardPrimaryButton} onPress={onSend} disabled={sending}>
+            {sending ? <ActivityIndicator size="small" color="#fff" /> : <Feather name={synced ? "refresh-cw" : "send"} size={14} color="#fff" />}
+            <Text style={s.cardPrimaryText}>{sending ? "Đang gửi..." : synced ? "Đồng bộ lại" : "Đồng bộ"}</Text>
+          </TouchableOpacity>
+        ) : !synced ? (
+          <TouchableOpacity style={[s.cardPrimaryButton, !lot.isComplete && s.inactiveButton]} onPress={onSync} disabled={!lot.isComplete}>
+            <Feather name="refresh-cw" size={14} color={!lot.isComplete ? "#a8b2c8" : "#fff"} />
+            <Text style={[s.cardPrimaryText, !lot.isComplete && s.inactiveButtonText]}>{lot.isComplete ? "Đồng bộ" : "Thiếu TXNG"}</Text>
+          </TouchableOpacity>
+        ) : (
+          <View style={s.syncedAction}><Feather name="check-circle" size={14} color="#2a9d6e" /><Text style={s.syncedActionText}>Đã sẵn sàng trên cổng</Text></View>
+        )}
+      </View>
+    </View>
+  );
+}
 
 export default function SyncScreen() {
   const router = useRouter();
-  const { data: apiLots, isLoading, error } = useListPortalLots();
-  const lots: Lot[] = apiLots?.data?.length
-    ? apiLots.data.map((lot) => ({
-        id: String(lot.id),
-        name: lot.lotCode,
-        business: lot.businessName,
-        product: lot.productName,
-        quantity: '—',
-        date: lot.activatedAt?.slice(0, 10) ?? '—',
-        status: lot.syncStatus === 'synced' ? 'synced' : 'pending',
-        txngSteps: [],
-      }))
-    : MOCK_LOTS;
-
-  const [selectedLot, setSelectedLot] = useState<Lot | null>(null);
-  const [modalStep, setModalStep] = useState<ModalStep>(null);
-  const [syncing, setSyncing] = useState<string | null>(null);
+  const [tab, setTab] = useState<PageTab>("solution");
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
+  const [search, setSearch] = useState("");
+  const [syncLot, setSyncLot] = useState<Lot | null>(null);
+  const [qrLot, setQrLot] = useState<Lot | null>(null);
+  const [sessionSynced, setSessionSynced] = useState<Set<number>>(new Set());
+  const [sentLots, setSentLots] = useState<Set<number>>(new Set());
+  const [sendingLot, setSendingLot] = useState<number | null>(null);
   const [syncingAll, setSyncingAll] = useState(false);
 
-  // Step 1: Basic info editing
-  const [editName, setEditName] = useState('');
-  const [editQty, setEditQty] = useState('');
-  // Step 2: TXNG steps
-  const [txngSteps, setTxngSteps] = useState<string[]>([]);
-  const [newStep, setNewStep] = useState('');
+  const { data, isLoading, error, refetch } = useListPortalLots({
+    syncStatus: filterStatus === "all" ? undefined : (filterStatus as ListPortalLotsSyncStatus),
+    gtin: undefined,
+    lotCode: undefined,
+    businessName: undefined,
+    productName: undefined,
+    pageSize: 50,
+  });
 
-  const openModal = (lot: Lot) => {
-    setSelectedLot(lot);
-    setEditName(lot.name);
-    setEditQty(lot.quantity);
-    setTxngSteps([...lot.txngSteps]);
-    setModalStep('basic');
-  };
+  const apiLots: Lot[] = (data?.data ?? []).map((lot) => ({
+    id: lot.id,
+    productName: lot.productName,
+    gtin: lot.gtin,
+    lotCode: lot.lotCode,
+    businessName: lot.businessName,
+    activatedAt: lot.activatedAt ?? "",
+    imageUrl: lot.imageUrl,
+    syncStatus: lot.syncStatus === "synced" ? "synced" : "not_synced",
+    isComplete: lot.isComplete ?? true,
+    portalUrl: lot.portalUrl,
+  }));
+  const sourceLots = apiLots.length > 0 ? apiLots : !isLoading ? MOCK_LOTS : [];
+  const lots = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return sourceLots.filter((lot) => {
+      const matchesSearch =
+        !query ||
+        lot.lotCode.toLowerCase().includes(query) ||
+        lot.businessName.toLowerCase().includes(query) ||
+        lot.productName.toLowerCase().includes(query) ||
+        lot.gtin.toLowerCase().includes(query);
+      const synced = lot.syncStatus === "synced" || sessionSynced.has(lot.id);
+      const matchesStatus =
+        filterStatus === "all" ||
+        (filterStatus === "synced" ? synced : !synced);
+      return matchesSearch && matchesStatus;
+    });
+  }, [filterStatus, search, sessionSynced, sourceLots]);
 
-  const handleSync = (lot: Lot) => {
-    setSyncing(lot.id);
+  const allSourceLots = apiLots.length > 0 ? apiLots : MOCK_LOTS;
+  const pendingLots = allSourceLots.filter((lot) => lot.syncStatus !== "synced" && !sessionSynced.has(lot.id));
+  const syncedCount = allSourceLots.filter((lot) => lot.syncStatus === "synced" || sessionSynced.has(lot.id)).length;
+  const sendLot = (id: number) => {
+    setSendingLot(id);
     setTimeout(() => {
-      setSyncing(null);
-      Alert.alert('Đồng bộ thành công', `Lô "${lot.name}" đã được đẩy lên Cổng truy xuất quốc gia.`);
-    }, 1800);
+      setSentLots((current) => new Set(current).add(id));
+      setSendingLot(null);
+    }, 900);
   };
-
-  const handleSyncAll = () => {
-    const pending = lots.filter(l => l.status === 'pending');
-    if (!pending.length) { Alert.alert('Thông báo', 'Không có lô hàng nào cần đồng bộ.'); return; }
+  const syncAll = () => {
+    if (!pendingLots.length) {
+      Alert.alert("Thông báo", "Không có lô hàng nào cần đồng bộ.");
+      return;
+    }
     setSyncingAll(true);
     setTimeout(() => {
+      setSessionSynced((current) => new Set([...current, ...pendingLots.map((lot) => lot.id)]));
       setSyncingAll(false);
-      Alert.alert('Hoàn tất', `Đã đồng bộ ${pending.length} lô hàng lên cổng quốc gia.`);
-    }, 2400);
+      Alert.alert("Hoàn tất", `Đã đồng bộ ${pendingLots.length} lô hàng lên cổng quốc gia.`);
+    }, 1400);
   };
 
-  const pendingCount = lots.filter(l => l.status === 'pending').length;
-  const syncedCount = lots.filter(l => l.status === 'synced').length;
-  const failedCount = lots.filter(l => l.status === 'failed').length;
-
   return (
-    <SafeAreaView style={s.safe} edges={['top']}>
-      {/* Header */}
+    <SafeAreaView style={s.safe}>
       <View style={s.header}>
-        <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
+        <TouchableOpacity onPress={() => router.back()} style={s.backButton} accessibilityLabel="Quay lại">
           <Feather name="arrow-left" size={20} color="#1d2944" />
         </TouchableOpacity>
-        <View style={{ flex: 1 }}>
+        <View style={s.headerText}>
           <Text style={s.title}>Đồng bộ dữ liệu</Text>
-          <Text style={s.subtitle}>Cổng truy xuất nguồn gốc quốc gia</Text>
+          <Text style={s.subtitle}>Hồ sơ giải pháp & cổng truy xuất nguồn gốc</Text>
         </View>
-        <TouchableOpacity style={s.syncAllBtn} onPress={handleSyncAll} disabled={syncingAll}>
-          {syncingAll ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <>
-              <Feather name="refresh-cw" size={14} color="#fff" />
-              <Text style={s.syncAllText}>Đồng bộ tất cả</Text>
-            </>
-          )}
+        {tab === "portal" && (
+          <TouchableOpacity style={s.syncAllButton} onPress={syncAll} disabled={syncingAll}>
+            {syncingAll ? <ActivityIndicator size="small" color="#fff" /> : <><Feather name="refresh-cw" size={14} color="#fff" /><Text style={s.syncAllText}>Đồng bộ tất cả</Text></>}
+          </TouchableOpacity>
+        )}
+      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.tabs}>
+        <TouchableOpacity onPress={() => setTab("solution")} style={[s.tab, tab === "solution" && s.activeTab]}>
+          <Text style={[s.tabText, tab === "solution" && s.activeTabText]}>Đơn vị giải pháp</Text>
         </TouchableOpacity>
-      </View>
-
-      {/* Status summary */}
-      <View style={s.summaryRow}>
-        {[
-          { label: 'Chờ đồng bộ', count: pendingCount, color: '#E8650A', bg: '#fff4ed' },
-          { label: 'Đã đồng bộ', count: syncedCount, color: '#1f7a45', bg: '#e8f5ed' },
-          { label: 'Thất bại', count: failedCount, color: '#c0392b', bg: '#fef0f0' },
-        ].map((stat, i) => (
-          <View key={i} style={[s.statCard, { backgroundColor: stat.bg }]}>
-            <Text style={[s.statCount, { color: stat.color }]}>{stat.count}</Text>
-            <Text style={[s.statLabel, { color: stat.color }]}>{stat.label}</Text>
-          </View>
-        ))}
-      </View>
-
-      {/* API status */}
-      <View style={s.apiStatus}>
-        <Feather name={error ? 'wifi-off' : 'wifi'} size={12} color={error ? '#a8b2c8' : '#1f7a45'} />
-        <Text style={[s.apiStatusText, { color: error ? '#a8b2c8' : '#1f7a45' }]}>
-          {error ? 'API không kết nối được — hiển thị dữ liệu mẫu' : isLoading ? 'Đang tải từ API...' : 'Kết nối API: Bình thường'}
-        </Text>
-        {isLoading && <ActivityIndicator size="small" color="#2740BA" style={{ marginLeft: 4 }} />}
-      </View>
-
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
-        {lots.map((lot) => {
-          const sm = STATUS_META[lot.status] || STATUS_META.pending;
-          const isSyncing = syncing === lot.id;
-          return (
-            <View key={lot.id} style={s.lotCard}>
-              <View style={s.lotHeader}>
-                <View style={{ flex: 1 }}>
-                  <Text style={s.lotName}>{lot.name}</Text>
-                  <Text style={s.lotBiz}>{lot.business}</Text>
-                </View>
-                <View style={[s.statusBadge, { backgroundColor: sm.bg }]}>
-                  <Feather name={sm.icon as any} size={10} color={sm.color} />
-                  <Text style={[s.statusText, { color: sm.color }]}>{sm.label}</Text>
-                </View>
-              </View>
-              <View style={s.lotMeta}>
-                {[
-                  { icon: 'package', text: lot.product },
-                  { icon: 'hash', text: lot.quantity },
-                  { icon: 'calendar', text: lot.date },
-                ].map((m, i) => (
-                  <View key={i} style={s.metaItem}>
-                    <Feather name={m.icon as any} size={11} color="#6b7694" />
-                    <Text style={s.metaText}>{m.text}</Text>
-                  </View>
-                ))}
-              </View>
-              {/* TXNG steps mini */}
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.stepRow}>
-                {lot.txngSteps.map((step, i) => (
-                  <React.Fragment key={i}>
-                    <View style={s.step}>
-                      <View style={s.stepNum}><Text style={s.stepNumText}>{i + 1}</Text></View>
-                      <Text style={s.stepText}>{step}</Text>
-                    </View>
-                    {i < lot.txngSteps.length - 1 && <Feather name="chevron-right" size={12} color="#c8cfdd" />}
-                  </React.Fragment>
-                ))}
-              </ScrollView>
-              <View style={s.lotActions}>
-                <TouchableOpacity style={s.editBtn} onPress={() => openModal(lot)}>
-                  <Feather name="edit-2" size={13} color="#2740BA" />
-                  <Text style={s.editBtnText}>Chỉnh sửa</Text>
-                </TouchableOpacity>
-                {lot.status !== 'synced' && (
-                  <TouchableOpacity
-                    style={[s.syncBtn, (isSyncing || syncingAll) && { opacity: 0.7 }]}
-                    onPress={() => handleSync(lot)}
-                    disabled={isSyncing || syncingAll}
-                  >
-                    {isSyncing ? <ActivityIndicator size="small" color="#fff" /> : <Feather name="upload-cloud" size={13} color="#fff" />}
-                    <Text style={s.syncBtnText}>{isSyncing ? 'Đang đẩy...' : 'Đẩy lên cổng'}</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            </View>
-          );
-        })}
+        <TouchableOpacity onPress={() => setTab("portal")} style={[s.tab, tab === "portal" && s.activeTab]}>
+          <Text style={[s.tabText, tab === "portal" && s.activeTabText]}>Cổng TXNG Đồng Nai</Text>
+        </TouchableOpacity>
       </ScrollView>
 
-      {/* Sync Modal — 2 step wizard */}
-      <Modal visible={modalStep !== null} animationType="slide">
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f7fb' }} edges={['top']}>
-          {/* Wizard header */}
-          <View style={wz.header}>
-            <TouchableOpacity onPress={() => setModalStep(null)}>
-              <Feather name="x" size={22} color="#1d2944" />
-            </TouchableOpacity>
-            <View style={{ flex: 1, alignItems: 'center' }}>
-              <Text style={wz.title}>Chỉnh sửa lô hàng</Text>
-              <View style={wz.steps}>
-                {[1, 2].map(n => (
-                  <View key={n} style={[wz.stepDot, (modalStep === 'basic' && n === 1) || (modalStep === 'txng' && n === 2) ? wz.stepDotActive : {}]}>
-                    <Text style={[(modalStep === 'basic' && n === 1) || (modalStep === 'txng' && n === 2) ? wz.stepNumActive : wz.stepNum]}>{n}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-            <TouchableOpacity
-              style={wz.nextBtn}
-              onPress={() => {
-                if (modalStep === 'basic') setModalStep('txng');
-                else { setModalStep(null); Alert.alert('Đã lưu', 'Thông tin lô hàng đã được cập nhật.'); }
-              }}
-            >
-              <Text style={wz.nextText}>{modalStep === 'basic' ? 'Tiếp' : 'Lưu'}</Text>
-            </TouchableOpacity>
-          </View>
+      <View style={s.pageIntro}>
+        <Text style={s.eyebrow}>HỆ THỐNG</Text>
+        <Text style={s.pageTitle}>{tab === "solution" ? "Đồng bộ sang đơn vị giải pháp" : "Cổng truy xuất nguồn gốc"}</Text>
+        <Text style={s.pageHint}>
+          {tab === "solution"
+            ? "Gửi thông tin doanh nghiệp và sản phẩm để bổ sung dữ liệu TXNG qua API."
+            : "Xem xét hồ sơ hoàn thiện và đẩy lên cổng truy xuất nguồn gốc quốc gia."}
+        </Text>
+      </View>
+      <View style={s.apiStatus}>
+        <Feather name={error ? "wifi-off" : "wifi"} size={12} color={error ? "#a8b2c8" : "#1f7a45"} />
+        <Text style={[s.apiStatusText, { color: error ? "#a8b2c8" : "#1f7a45" }]}>
+          {error ? "API không kết nối — đang hiển thị dữ liệu mẫu" : isLoading ? "Đang tải từ API..." : "Kết nối API: Bình thường"}
+        </Text>
+        {isLoading && <ActivityIndicator size="small" color="#2740BA" />}
+      </View>
 
-          <ScrollView contentContainerStyle={{ padding: 20 }}>
-            {modalStep === 'basic' ? (
-              <View>
-                <Text style={wz.stepTitle}>Bước 1: Thông tin cơ bản</Text>
-                <Text style={wz.fieldLabel}>Tên lô hàng</Text>
-                <TextInput style={wz.fieldInput} value={editName} onChangeText={setEditName} placeholderTextColor="#a8b2c8" />
-                <Text style={wz.fieldLabel}>Số lượng</Text>
-                <TextInput style={wz.fieldInput} value={editQty} onChangeText={setEditQty} placeholderTextColor="#a8b2c8" />
-                {selectedLot && (
-                  <>
-                    <Text style={wz.fieldLabel}>Doanh nghiệp</Text>
-                    <View style={wz.readonlyField}><Text style={wz.readonlyText}>{selectedLot.business}</Text></View>
-                    <Text style={wz.fieldLabel}>Sản phẩm</Text>
-                    <View style={wz.readonlyField}><Text style={wz.readonlyText}>{selectedLot.product}</Text></View>
-                    <Text style={wz.fieldLabel}>Ngày tạo</Text>
-                    <View style={wz.readonlyField}><Text style={wz.readonlyText}>{selectedLot.date}</Text></View>
-                  </>
-                )}
-              </View>
-            ) : (
-              <View>
-                <Text style={wz.stepTitle}>Bước 2: Các bước TXNG</Text>
-                <Text style={wz.stepSub}>Điều chỉnh quy trình truy xuất nguồn gốc của lô hàng</Text>
-                {txngSteps.map((step, i) => (
-                  <View key={i} style={wz.txngRow}>
-                    <View style={wz.txngNum}><Text style={wz.txngNumText}>{i + 1}</Text></View>
-                    <TextInput
-                      style={wz.txngInput}
-                      value={step}
-                      onChangeText={v => { const next = [...txngSteps]; next[i] = v; setTxngSteps(next); }}
-                    />
-                    <TouchableOpacity onPress={() => setTxngSteps(txngSteps.filter((_, j) => j !== i))}>
-                      <Feather name="trash-2" size={15} color="#c0392b" />
-                    </TouchableOpacity>
-                  </View>
-                ))}
-                <View style={wz.addStepRow}>
-                  <TextInput
-                    style={wz.addStepInput}
-                    value={newStep}
-                    onChangeText={setNewStep}
-                    placeholder="Thêm bước mới..."
-                    placeholderTextColor="#a8b2c8"
-                  />
-                  <TouchableOpacity
-                    style={wz.addStepBtn}
-                    onPress={() => { if (newStep.trim()) { setTxngSteps([...txngSteps, newStep.trim()]); setNewStep(''); } }}
-                  >
-                    <Feather name="plus" size={16} color="#fff" />
-                  </TouchableOpacity>
-                </View>
-                <View style={wz.syncPreview}>
-                  <Feather name="upload-cloud" size={14} color="#2740BA" />
-                  <Text style={wz.syncPreviewText}>
-                    Sau khi lưu, nhấn "Đẩy lên cổng" để đồng bộ lô hàng này với {txngSteps.length} bước TXNG lên Cổng truy xuất quốc gia.
-                  </Text>
-                </View>
-              </View>
-            )}
-          </ScrollView>
-        </SafeAreaView>
-      </Modal>
+      {tab === "portal" && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.filterRow}>
+          {[
+            ["all", "Tất cả", allSourceLots.length],
+            ["not_synced", "Chưa đồng bộ", allSourceLots.filter((lot) => lot.syncStatus !== "synced" && !sessionSynced.has(lot.id)).length],
+            ["synced", "Đã đồng bộ", syncedCount],
+          ].map(([id, label, count]) => (
+            <TouchableOpacity key={String(id)} onPress={() => setFilterStatus(id as FilterStatus)} style={[s.filterChip, filterStatus === id && s.filterChipActive]}>
+              <Text style={[s.filterChipText, filterStatus === id && s.filterChipTextActive]}>{label} ({count})</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      )}
+      <View style={s.searchRow}>
+        <SearchField placeholder="Lô, doanh nghiệp, thương phẩm hoặc GTIN" value={search} onChangeText={setSearch} />
+        <IconButton icon="refresh-cw" label="Làm mới dữ liệu" color="#6b7694" onPress={() => void refetch()} />
+      </View>
+      <ScrollView contentContainerStyle={s.listContent} showsVerticalScrollIndicator={false}>
+        {lots.map((lot) => (
+          <LotCard
+            key={lot.id}
+            lot={lot}
+            sessionSynced={sessionSynced.has(lot.id)}
+            solutionSent={sentLots.has(lot.id)}
+            onQr={() => setQrLot(lot)}
+            onSync={() => setSyncLot(lot)}
+            onSend={() => sendLot(lot.id)}
+            sending={sendingLot === lot.id}
+            solution={tab === "solution"}
+          />
+        ))}
+        {!isLoading && lots.length === 0 && (
+          <View style={s.emptyState}><Feather name="package" size={34} color="#c8cfdd" /><Text style={s.emptyText}>Không có dữ liệu phù hợp</Text></View>
+        )}
+      </ScrollView>
+      {qrLot && <QrModal lot={qrLot} onClose={() => setQrLot(null)} />}
+      {syncLot && (
+        <SyncModal
+          lot={syncLot}
+          onClose={() => setSyncLot(null)}
+          onSuccess={(id) => setSessionSynced((current) => new Set(current).add(id))}
+        />
+      )}
     </SafeAreaView>
   );
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#f5f7fb' },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8 },
-  backBtn: { padding: 4 },
-  title: { fontSize: 18, fontWeight: '700', color: '#1d2944', letterSpacing: -0.5 },
-  subtitle: { fontSize: 11, color: '#6b7694', marginTop: 1 },
-  syncAllBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: '#2740BA', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, height: 36 },
-  syncAllText: { fontSize: 12, fontWeight: '700', color: '#fff' },
-  summaryRow: { flexDirection: 'row', paddingHorizontal: 12, gap: 8, marginBottom: 6 },
-  statCard: { flex: 1, borderRadius: 12, padding: 12, alignItems: 'center' },
-  statCount: { fontSize: 20, fontWeight: '700' },
-  statLabel: { fontSize: 9, fontWeight: '600', textAlign: 'center', marginTop: 2 },
-  apiStatus: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, marginBottom: 8 },
-  apiStatusText: { fontSize: 11 },
-  lotCard: { backgroundColor: '#fff', borderRadius: 14, padding: 14, marginBottom: 12, borderWidth: 1, borderColor: '#e4e8f0', shadowColor: '#1d2944', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 },
-  lotHeader: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 10 },
-  lotName: { fontSize: 13, fontWeight: '700', color: '#1d2944', lineHeight: 18 },
-  lotBiz: { fontSize: 10, color: '#6b7694', marginTop: 2 },
-  statusBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20, marginLeft: 8 },
-  statusText: { fontSize: 10, fontWeight: '600' },
-  lotMeta: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 10 },
-  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  metaText: { fontSize: 11, color: '#6b7694' },
-  stepRow: { gap: 4, paddingBottom: 10, alignItems: 'center' },
-  step: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  stepNum: { width: 18, height: 18, borderRadius: 9, backgroundColor: '#2740BA', alignItems: 'center', justifyContent: 'center' },
-  stepNumText: { fontSize: 9, fontWeight: '700', color: '#fff' },
-  stepText: { fontSize: 10, color: '#34405a', maxWidth: 80 },
-  lotActions: { flexDirection: 'row', gap: 8, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#f0f2f8' },
-  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: '#edf0ff' },
-  editBtnText: { fontSize: 12, fontWeight: '600', color: '#2740BA' },
-  syncBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 8, borderRadius: 8, backgroundColor: '#E8650A' },
-  syncBtnText: { fontSize: 12, fontWeight: '700', color: '#fff' },
-});
-
-const wz = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#e4e8f0', backgroundColor: '#fff' },
-  title: { fontSize: 14, fontWeight: '700', color: '#1d2944', marginBottom: 6 },
-  steps: { flexDirection: 'row', gap: 8 },
-  stepDot: { width: 22, height: 22, borderRadius: 11, backgroundColor: '#f0f2f8', alignItems: 'center', justifyContent: 'center' },
-  stepDotActive: { backgroundColor: '#2740BA' },
-  stepNum: { fontSize: 11, fontWeight: '700', color: '#a8b2c8' },
-  stepNumActive: { fontSize: 11, fontWeight: '700', color: '#fff' },
-  nextBtn: { backgroundColor: '#2740BA', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8 },
-  nextText: { fontSize: 13, fontWeight: '700', color: '#fff' },
-  stepTitle: { fontSize: 14, fontWeight: '700', color: '#1d2944', marginBottom: 4 },
-  stepSub: { fontSize: 11, color: '#6b7694', marginBottom: 16, lineHeight: 16 },
-  fieldLabel: { fontSize: 11, fontWeight: '700', color: '#34405a', marginBottom: 8 },
-  fieldInput: { backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: '#e4e8f0', paddingHorizontal: 14, paddingVertical: 12, fontSize: 13, color: '#1d2944', marginBottom: 16 },
-  readonlyField: { backgroundColor: '#f5f7fb', borderRadius: 12, borderWidth: 1, borderColor: '#e4e8f0', paddingHorizontal: 14, paddingVertical: 12, marginBottom: 16 },
-  readonlyText: { fontSize: 13, color: '#6b7694' },
-  txngRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
-  txngNum: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#2740BA', alignItems: 'center', justifyContent: 'center' },
-  txngNumText: { fontSize: 11, fontWeight: '700', color: '#fff' },
-  txngInput: { flex: 1, backgroundColor: '#fff', borderRadius: 10, borderWidth: 1, borderColor: '#e4e8f0', paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, color: '#1d2944' },
-  addStepRow: { flexDirection: 'row', gap: 8, marginTop: 4, marginBottom: 16 },
-  addStepInput: { flex: 1, backgroundColor: '#fff', borderRadius: 10, borderWidth: 1, borderColor: '#e4e8f0', paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, color: '#1d2944' },
-  addStepBtn: { width: 44, height: 44, borderRadius: 10, backgroundColor: '#2740BA', alignItems: 'center', justifyContent: 'center' },
-  syncPreview: { flexDirection: 'row', gap: 8, backgroundColor: '#f3f8ff', borderRadius: 12, padding: 12, borderWidth: 1, borderColor: '#c9ddf4' },
-  syncPreviewText: { flex: 1, fontSize: 11, color: '#2740BA', lineHeight: 16 },
+  safe: { flex: 1, backgroundColor: "#f5f7fb" },
+  header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingTop: 10, paddingBottom: 8, gap: 9 },
+  backButton: { padding: 4 },
+  headerText: { flex: 1 },
+  title: { fontSize: 18, fontWeight: "700", color: "#1d2944", letterSpacing: -0.5 },
+  subtitle: { fontSize: 10, color: "#6b7694", marginTop: 2 },
+  syncAllButton: { flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: "#2740BA", paddingHorizontal: 10, paddingVertical: 8, borderRadius: 10 },
+  syncAllText: { fontSize: 10, fontWeight: "700", color: "#fff" },
+  tabs: { paddingHorizontal: 16, gap: 8, borderBottomWidth: 1, borderBottomColor: "#e4e8f0" },
+  tab: { paddingHorizontal: 13, paddingVertical: 10, borderRadius: 9, marginBottom: 8, backgroundColor: "#fff", borderWidth: 1, borderColor: "#e4e8f0" },
+  activeTab: { backgroundColor: "#2740BA", borderColor: "#2740BA" },
+  tabText: { fontSize: 11, fontWeight: "700", color: "#6b7694" },
+  activeTabText: { color: "#fff" },
+  pageIntro: { paddingHorizontal: 16, paddingTop: 15, paddingBottom: 5 },
+  eyebrow: { fontSize: 9, fontWeight: "800", letterSpacing: 1.3, color: "#E8650A" },
+  pageTitle: { fontSize: 16, fontWeight: "700", color: "#1d2944", marginTop: 4 },
+  pageHint: { fontSize: 10, color: "#6b7694", lineHeight: 15, marginTop: 3 },
+  apiStatus: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 16, paddingVertical: 6 },
+  apiStatusText: { fontSize: 10, flex: 1 },
+  filterRow: { paddingHorizontal: 16, paddingVertical: 5, gap: 7 },
+  filterChip: { paddingHorizontal: 11, paddingVertical: 7, borderRadius: 18, borderWidth: 1, borderColor: "#d9dce9", backgroundColor: "#fff" },
+  filterChipActive: { backgroundColor: "#2740BA", borderColor: "#2740BA" },
+  filterChipText: { fontSize: 10, fontWeight: "700", color: "#6b7694" },
+  filterChipTextActive: { color: "#fff" },
+  searchRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, gap: 7, marginTop: 3 },
+  searchField: { flex: 1, height: 38, flexDirection: "row", alignItems: "center", gap: 7, paddingHorizontal: 11, borderWidth: 1, borderColor: "#e4e8f0", borderRadius: 10, backgroundColor: "#fff" },
+  searchInput: { flex: 1, padding: 0, fontSize: 11, color: "#25304b" },
+  iconButton: { width: 38, height: 38, alignItems: "center", justifyContent: "center", borderWidth: 1, borderRadius: 10, backgroundColor: "#fff" },
+  disabled: { opacity: 0.6 },
+  listContent: { padding: 16, paddingBottom: 35 },
+  lotCard: { backgroundColor: "#fff", borderWidth: 1, borderColor: "#e4e8f0", borderRadius: 14, padding: 13, marginBottom: 11, shadowColor: "#1d2944", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 7, elevation: 2 },
+  lotHeader: { flexDirection: "row", alignItems: "flex-start", gap: 9 },
+  lotImage: { width: 46, height: 46, borderRadius: 10 },
+  lotImageFallback: { width: 46, height: 46, borderRadius: 10, backgroundColor: "#f2f3f7", alignItems: "center", justifyContent: "center" },
+  lotTitleBlock: { flex: 1 },
+  lotName: { fontSize: 13, fontWeight: "700", color: "#1d2944", lineHeight: 17 },
+  lotBusiness: { fontSize: 10, color: "#6b7694", marginTop: 2 },
+  lotCode: { fontSize: 9, color: "#a8b2c8", fontFamily: "monospace", marginTop: 3 },
+  statusBadge: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 7, paddingVertical: 5, borderRadius: 15, maxWidth: 125 },
+  statusText: { fontSize: 9, fontWeight: "700", flexShrink: 1 },
+  compactBadge: { borderRadius: 15, paddingHorizontal: 7, paddingVertical: 5 },
+  compactBadgeText: { fontSize: 9, fontWeight: "700" },
+  lotInfoRow: { flexDirection: "row", gap: 15, borderTopWidth: 1, borderTopColor: "#f0f2f8", marginTop: 11, paddingTop: 9 },
+  lotInfo: { flexDirection: "row", alignItems: "center", gap: 4 },
+  lotInfoText: { fontSize: 10, color: "#6b7694" },
+  cardActions: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 11 },
+  cardPrimaryButton: { flex: 1, minHeight: 37, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, backgroundColor: "#2740BA", borderRadius: 9, paddingHorizontal: 10 },
+  cardPrimaryText: { fontSize: 11, fontWeight: "700", color: "#fff" },
+  inactiveButton: { backgroundColor: "#f2f3f7" },
+  inactiveButtonText: { color: "#a8b2c8" },
+  syncedAction: { flex: 1, minHeight: 37, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 9, backgroundColor: "#e8f5ed" },
+  syncedActionText: { fontSize: 10, color: "#2a9d6e", fontWeight: "700" },
+  emptyState: { alignItems: "center", paddingTop: 50, gap: 9 },
+  emptyText: { fontSize: 12, color: "#a8b2c8" },
+  overlay: { flex: 1, backgroundColor: "rgba(15,25,50,.42)", alignItems: "center", justifyContent: "center", padding: 20 },
+  qrCard: { width: "100%", maxWidth: 360, backgroundColor: "#fff", borderRadius: 18, padding: 20, alignItems: "center" },
+  modalTitleRow: { width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 15 },
+  modalTitle: { fontSize: 15, fontWeight: "700", color: "#1d2944" },
+  qrImage: { width: 190, height: 190, borderRadius: 10, borderWidth: 1, borderColor: "#e4e8f0" },
+  qrLot: { fontFamily: "monospace", fontSize: 12, fontWeight: "700", color: "#2a9d6e", marginTop: 12 },
+  qrProduct: { fontSize: 12, fontWeight: "600", color: "#34405a", marginTop: 4, textAlign: "center" },
+  qrBusiness: { fontSize: 10, color: "#6b7694", marginTop: 3, textAlign: "center" },
+  portalLink: { width: "100%", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 7, borderWidth: 1, borderColor: "#2a9d6e", borderRadius: 10, paddingVertical: 10, marginTop: 15 },
+  portalLinkText: { fontSize: 11, fontWeight: "700", color: "#2a9d6e" },
+  qrHint: { fontSize: 10, color: "#a8b2c8", textAlign: "center", fontStyle: "italic", marginTop: 15 },
+  modalSafe: { flex: 1, backgroundColor: "#f5f7fb" },
+  modalHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 13, backgroundColor: "#fff", borderBottomWidth: 1, borderBottomColor: "#e4e8f0" },
+  modalHeaderText: { flex: 1, marginRight: 12 },
+  modalProduct: { fontSize: 14, fontWeight: "700", color: "#1d2944", marginTop: 3 },
+  wizardBar: { flexDirection: "row", alignItems: "center", paddingHorizontal: 18, paddingVertical: 11, backgroundColor: "#fbfcfe", borderBottomWidth: 1, borderBottomColor: "#f0f2f8" },
+  wizardStep: { flexDirection: "row", alignItems: "center", gap: 6 },
+  wizardDot: { width: 23, height: 23, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: "#e4e8f0" },
+  wizardDotActive: { backgroundColor: "#2740BA" },
+  wizardNumber: { fontSize: 11, fontWeight: "700", color: "#a8b2c8" },
+  wizardNumberActive: { color: "#fff" },
+  wizardLabel: { fontSize: 10, color: "#a8b2c8", fontWeight: "600" },
+  wizardLabelActive: { color: "#2740BA" },
+  wizardLine: { width: 25, height: 1, backgroundColor: "#e4e8f0", marginHorizontal: 9 },
+  modalContent: { padding: 16, paddingBottom: 30 },
+  productPreview: { flexDirection: "row", gap: 10, backgroundColor: "#fff", borderWidth: 1, borderColor: "#e4e8f0", borderRadius: 13, padding: 10, marginBottom: 17 },
+  previewImage: { width: 62, height: 62, borderRadius: 10 },
+  previewImageFallback: { width: 62, height: 62, borderRadius: 10, backgroundColor: "#f2f3f7", alignItems: "center", justifyContent: "center" },
+  previewText: { flex: 1, justifyContent: "center" },
+  previewName: { fontSize: 13, fontWeight: "700", color: "#1d2944" },
+  previewBusiness: { fontSize: 10, color: "#6b7694", marginTop: 3 },
+  previewMeta: { fontFamily: "monospace", fontSize: 9, color: "#a8b2c8", marginTop: 6 },
+  sectionLabel: { fontSize: 9, fontWeight: "800", letterSpacing: 1, color: "#a8b2c8", marginTop: 5, marginBottom: 9 },
+  sectionTitle: { fontSize: 16, fontWeight: "700", color: "#1d2944" },
+  sectionHint: { fontSize: 11, color: "#6b7694", marginTop: 3, marginBottom: 15 },
+  readonlyRow: { backgroundColor: "#fff", borderWidth: 1, borderColor: "#e4e8f0", borderRadius: 10, padding: 10, marginBottom: 8 },
+  fieldLabel: { fontSize: 10, fontWeight: "700", color: "#6b7694", marginBottom: 5 },
+  readonlyValue: { fontSize: 12, color: "#25304b" },
+  input: { minHeight: 40, backgroundColor: "#fff", borderWidth: 1, borderColor: "#e4e8f0", borderRadius: 10, paddingHorizontal: 11, paddingVertical: 9, color: "#25304b", fontSize: 12, marginBottom: 12 },
+  smallInput: { minHeight: 38, backgroundColor: "#fff", borderWidth: 1, borderColor: "#e4e8f0", borderRadius: 9, paddingHorizontal: 9, paddingVertical: 8, color: "#25304b", fontSize: 10, marginBottom: 10 },
+  monoInput: { fontFamily: "monospace" },
+  textarea: { minHeight: 65, textAlignVertical: "top" },
+  fieldPair: { flexDirection: "row", gap: 8 },
+  halfField: { flex: 1 },
+  txngCard: { backgroundColor: "#fff", borderWidth: 1, borderColor: "#e4e8f0", borderRadius: 12, padding: 11, marginBottom: 11 },
+  txngCardHeader: { flexDirection: "row", alignItems: "center", gap: 7, borderBottomWidth: 1, borderBottomColor: "#f0f2f8", paddingBottom: 9, marginBottom: 10 },
+  txngNumber: { width: 22, height: 22, borderRadius: 11, alignItems: "center", justifyContent: "center", backgroundColor: "#2740BA" },
+  txngNumberText: { fontSize: 10, fontWeight: "700", color: "#fff" },
+  txngName: { fontSize: 12, fontWeight: "700", color: "#1d2944" },
+  modalFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 9, padding: 14, backgroundColor: "#fff", borderTopWidth: 1, borderTopColor: "#e4e8f0" },
+  primaryButton: { minHeight: 40, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, backgroundColor: "#2740BA", borderRadius: 9, paddingHorizontal: 17 },
+  primaryButtonText: { fontSize: 11, fontWeight: "700", color: "#fff" },
+  secondaryButton: { minHeight: 40, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderWidth: 1, borderColor: "#e4e8f0", borderRadius: 9, paddingHorizontal: 15 },
+  secondaryButtonText: { fontSize: 11, fontWeight: "700", color: "#6b7694" },
+  successButton: { flex: 1, minHeight: 40, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, backgroundColor: "#2a9d6e", borderRadius: 9, paddingHorizontal: 12 },
+  successState: { alignItems: "center", paddingTop: 55 },
+  successIcon: { width: 72, height: 72, alignItems: "center", justifyContent: "center", borderRadius: 36, backgroundColor: "#e8f5ed" },
+  successTitle: { fontSize: 18, fontWeight: "700", color: "#1d2944", marginTop: 16 },
+  successText: { fontSize: 11, color: "#6b7694", textAlign: "center", marginTop: 6, lineHeight: 17 },
+  successUrl: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#e8f5ed", borderWidth: 1, borderColor: "#b8e2c8", borderRadius: 10, paddingHorizontal: 11, paddingVertical: 9, marginTop: 18 },
+  successUrlText: { fontSize: 10, color: "#2a9d6e", fontWeight: "600" },
 });
