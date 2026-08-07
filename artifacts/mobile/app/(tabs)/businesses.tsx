@@ -7,8 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 
 /* ─── Mock Data ────────────────────────────────────────────── */
-const SECTORS = ['Tất cả', 'Nông sản', 'Thủy sản', 'Chế biến thực phẩm', 'Dược liệu', 'Đồ uống'];
-const STATUSES = ['Tất cả', 'Hoạt động', 'Chờ xét duyệt', 'Tạm khóa'];
+const STATUSES = ['Tất cả', 'Đã duyệt', 'Chờ duyệt', 'Đã khóa'];
 
 interface Business {
   id: string;
@@ -39,9 +38,9 @@ const BUSINESSES: Business[] = [
 ];
 
 const STATUS_META = {
-  active: { label: 'Hoạt động', color: '#1f7a45', bg: '#e8f5ed' },
-  pending: { label: 'Chờ xét duyệt', color: '#9a6116', bg: '#fff4d4' },
-  locked: { label: 'Tạm khóa', color: '#c0392b', bg: '#fef0f0' },
+  active: { label: 'Đã duyệt', color: '#1f7a45', bg: '#e8f5ed' },
+  pending: { label: 'Chờ duyệt', color: '#9a6116', bg: '#fff4d4' },
+  locked: { label: 'Đã khóa', color: '#c0392b', bg: '#fef0f0' },
 };
 
 /* ─── Utility ──────────────────────────────────────────────── */
@@ -114,7 +113,7 @@ function BusinessDetail({ biz, onBack }: { biz: Business; onBack: () => void }) 
 
   const TIMELINE = [
     { date: '2024-08-01', event: 'Cập nhật thông tin doanh nghiệp', user: 'Nguyễn Admin' },
-    { date: '2024-07-15', event: 'Gia hạn chứng nhận ISO 22000', user: 'Hệ thống' },
+    { date: '2024-07-15', event: 'Cập nhật chứng nhận ISO 22000', user: 'Hệ thống' },
     { date: '2024-05-20', event: 'Thêm sản phẩm mới vào danh mục', user: biz.representative },
     { date: '2024-03-10', event: 'Phê duyệt hồ sơ đăng ký', user: 'Trần Duyệt Viên' },
     { date: biz.joinDate, event: 'Doanh nghiệp đăng ký tham gia hệ thống', user: biz.representative },
@@ -277,7 +276,7 @@ export default function BusinessesScreen() {
   const [search, setSearch] = useState('');
   const [selectedSector, setSelectedSector] = useState('Tất cả');
   const [selectedStatus, setSelectedStatus] = useState('Tất cả');
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  
   const [selected, setSelected] = useState<Business | null>(null);
 
   const filtered = useMemo(() => {
@@ -286,7 +285,7 @@ export default function BusinessesScreen() {
       if (q && !b.name.toLowerCase().includes(q) && !b.code.toLowerCase().includes(q) && !b.representative.toLowerCase().includes(q)) return false;
       if (selectedSector !== 'Tất cả' && b.sector !== selectedSector) return false;
       if (selectedStatus !== 'Tất cả') {
-        const map: Record<string, Business['status']> = { 'Hoạt động': 'active', 'Chờ xét duyệt': 'pending', 'Tạm khóa': 'locked' };
+        const map: Record<string, Business['status']> = { 'Đã duyệt': 'active', 'Chờ duyệt': 'pending', 'đã khóa': 'locked' };
         if (b.status !== map[selectedStatus]) return false;
       }
       return true;
@@ -309,14 +308,7 @@ export default function BusinessesScreen() {
           <Text style={s.title}>Doanh nghiệp</Text>
           <Text style={s.subtitle}>{BUSINESSES.length} doanh nghiệp đã đăng ký</Text>
         </View>
-        <View style={s.headerActions}>
-          <TouchableOpacity style={[s.viewBtn, viewMode === 'list' && s.viewBtnActive]} onPress={() => setViewMode('list')}>
-            <Feather name="list" size={15} color={viewMode === 'list' ? '#2740BA' : '#6b7694'} />
-          </TouchableOpacity>
-          <TouchableOpacity style={[s.viewBtn, viewMode === 'grid' && s.viewBtnActive]} onPress={() => setViewMode('grid')}>
-            <Feather name="grid" size={15} color={viewMode === 'grid' ? '#2740BA' : '#6b7694'} />
-          </TouchableOpacity>
-        </View>
+      
       </View>
 
       {/* Search */}
@@ -336,19 +328,21 @@ export default function BusinessesScreen() {
         )}
       </View>
 
-      {/* Status filter */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.chips} style={{ maxHeight: 44, flexGrow: 0 }}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={s.chips}
+        style={{
+          flexGrow: 0,
+          marginBottom: 10,
+        }}>
         {STATUSES.map(st => (
           <TouchableOpacity key={st} style={[s.chip, selectedStatus === st && s.chipActive]} onPress={() => setSelectedStatus(st)}>
             <Text style={[s.chipText, selectedStatus === st && s.chipTextActive]}>{st}</Text>
           </TouchableOpacity>
         ))}
         <View style={{ width: 4 }} />
-        {SECTORS.slice(1).map(sec => (
-          <TouchableOpacity key={sec} style={[s.chip, s.chipSector, selectedSector === sec && s.chipSectorActive]} onPress={() => setSelectedSector(selectedSector === sec ? 'Tất cả' : sec)}>
-            <Text style={[s.chipText, selectedSector === sec && { color: '#E8650A', fontWeight: '700' }]}>{sec}</Text>
-          </TouchableOpacity>
-        ))}
+        
       </ScrollView>
 
       {/* Results count */}
@@ -364,12 +358,13 @@ export default function BusinessesScreen() {
       <FlatList
         data={filtered}
         keyExtractor={b => b.id}
-        numColumns={viewMode === 'grid' ? 2 : 1}
-        key={viewMode}
+        numColumns={1}
+        
         renderItem={({ item }) => (
-          <View style={viewMode === 'grid' ? { flex: 1, margin: 4 } : {}}>
-            <BizCard biz={item} onPress={() => setSelected(item)} />
-          </View>
+          <BizCard
+            biz={item}
+            onPress={() => setSelected(item)}
+          />
         )}
         contentContainerStyle={{ padding: 12, paddingBottom: 16 }}
         showsVerticalScrollIndicator={false}
@@ -388,24 +383,41 @@ export default function BusinessesScreen() {
 /* ─── Styles ────────────────────────────────────────────────── */
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#f5f7fb' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: 16, paddingTop: 30, paddingBottom: 8 },
   title: { fontSize: 20, fontWeight: '700', color: '#1d2944', letterSpacing: -0.5 },
   subtitle: { fontSize: 11, color: '#6b7694', marginTop: 2 },
-  headerActions: { flexDirection: 'row', gap: 4 },
-  viewBtn: { padding: 8, borderRadius: 8, borderWidth: 1, borderColor: '#e4e8f0', backgroundColor: '#fff' },
-  viewBtnActive: { borderColor: '#2740BA', backgroundColor: '#edf0ff' },
-
+ 
+  
+ 
   searchRow: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12,
     borderWidth: 1, borderColor: '#e4e8f0', marginHorizontal: 12, marginBottom: 8, paddingHorizontal: 12, height: 42,
   },
   searchIcon: { marginRight: 8 },
   searchInput: { flex: 1, fontSize: 13, color: '#1d2944' },
-
-  chips: { paddingHorizontal: 12, paddingVertical: 4, gap: 6 },
   chip: {
-    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20,
-    backgroundColor: '#fff', borderWidth: 1, borderColor: '#e4e8f0',
+    width: 90,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e4e8f0',
+  },
+  chips: {
+    paddingHorizontal: 12,
+    paddingTop: 4,
+    paddingBottom: 29,
+    gap: 6,
+  },
+  resultsRow: {
+    marginTop: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 6,
   },
   chipActive: { backgroundColor: '#edf0ff', borderColor: '#2740BA' },
   chipSector: {},
@@ -413,7 +425,7 @@ const s = StyleSheet.create({
   chipText: { fontSize: 11, color: '#6b7694', fontWeight: '500' },
   chipTextActive: { color: '#2740BA', fontWeight: '700' },
 
-  resultsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 6 },
+ 
   resultsText: { fontSize: 11, color: '#6b7694' },
   clearText: { fontSize: 11, fontWeight: '600', color: '#2740BA' },
 
