@@ -48,10 +48,13 @@ const TABS = [
   { key: 'backup', label: 'Sao lưu', icon: 'database' },
 ] as const;
 type Tab = typeof TABS[number]['key'];
+const CONFIG_SECTIONS = ['Chung', 'Email', 'QR Code', 'API / Tích hợp'] as const;
+type ConfigSection = typeof CONFIG_SECTIONS[number];
 
 export default function SystemScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('audit');
+  const [activeConfigSection, setActiveConfigSection] = useState<ConfigSection>('Chung');
   const [configs, setConfigs] = useState<Config[]>(CONFIGS);
   const [backingUp, setBackingUp] = useState(false);
   const [restoring, setRestoring] = useState(false);
@@ -120,7 +123,7 @@ export default function SystemScreen() {
       </View>
 
       {/* Tabs */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.tabsRow} style={{ maxHeight: 52, flexGrow: 0 }}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.tabsRow} style={s.tabsScroll}>
         {TABS.map(t => (
           <TouchableOpacity key={t.key} style={[s.tab, activeTab === t.key && s.tabActive]} onPress={() => setActiveTab(t.key)}>
             <Feather name={t.icon as any} size={13} color={activeTab === t.key ? '#2740BA' : '#6b7694'} />
@@ -168,42 +171,85 @@ export default function SystemScreen() {
       {/* Config Tab */}
       {activeTab === 'config' && (
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
-          {configs.map(cfg => (
-            <View key={cfg.key} style={s.configCard}>
-              <View style={s.configHeader}>
-                <View style={{ flex: 1 }}>
-                  <Text style={s.configLabel}>{cfg.label}</Text>
-                  <Text style={s.configDesc}>{cfg.description}</Text>
-                </View>
-                {cfg.type === 'toggle' && (
-                  <Switch
-                    value={cfg.enabled}
-                    onValueChange={() => handleToggle(cfg.key)}
-                    trackColor={{ false: '#e4e8f0', true: '#2740BA' }}
-                    thumbColor="#fff"
-                    style={{ transform: [{ scale: 0.85 }] }}
-                  />
-                )}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.configTabsRow} style={s.configTabsScroll}>
+            {CONFIG_SECTIONS.map(section => (
+              <TouchableOpacity
+                key={section}
+                style={[s.configTab, activeConfigSection === section && s.configTabActive]}
+                onPress={() => setActiveConfigSection(section)}
+              >
+                <Text style={[s.configTabText, activeConfigSection === section && s.configTabTextActive]}>{section}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+          <View style={s.configSectionCard}>
+            <Text style={s.configSectionTitle}>Cấu hình {activeConfigSection.toLowerCase()}</Text>
+            {activeConfigSection === 'Chung' && (
+              <>
+                {[
+                  ['Tên hệ thống', configs.find(c => c.key === 'system_name')?.value ?? 'Đồng Nai Trace', 'text'],
+                  ['Tên đơn vị quản lý', 'Sở Khoa học và Công nghệ tỉnh Đồng Nai', 'text'],
+                  ['Múi giờ', 'Asia/Ho_Chi_Minh (UTC+7)', 'text'],
+                  ['Số bản ghi mỗi trang', configs.find(c => c.key === 'page_size')?.value ?? '20', 'number'],
+                  ['Thông báo bảo trì', 'Để trống nếu không có thông báo', 'textarea'],
+                ].map(([label, value, type]) => (
+                  <View key={label} style={s.configField}>
+                    <Text style={s.configLabel}>{label}</Text>
+                    <TextInput
+                      style={[s.configInput, type === 'textarea' && s.configTextarea]}
+                      value={value}
+                      onChangeText={nextValue => {
+                        if (label === 'Tên hệ thống') handleConfigChange('system_name', nextValue);
+                        if (label === 'Số bản ghi mỗi trang') handleConfigChange('page_size', nextValue);
+                      }}
+                      placeholder={value}
+                      placeholderTextColor="#a8b2c8"
+                      keyboardType={type === 'number' ? 'numeric' : 'default'}
+                      multiline={type === 'textarea'}
+                      textAlignVertical={type === 'textarea' ? 'top' : 'center'}
+                    />
+                  </View>
+                ))}
+                {configs.filter(cfg => cfg.type === 'toggle').map(cfg => (
+                  <View key={cfg.key} style={s.toggleConfigCard}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={s.configLabel}>{cfg.label}</Text>
+                      <Text style={s.configDesc}>{cfg.description}</Text>
+                    </View>
+                    <Switch value={cfg.enabled} onValueChange={() => handleToggle(cfg.key)} trackColor={{ false: '#e4e8f0', true: '#2740BA' }} thumbColor="#fff" />
+                  </View>
+                ))}
+              </>
+            )}
+            {activeConfigSection === 'Email' && [
+              ['SMTP Host', 'smtp.gmail.com'], ['SMTP Port', '587'], ['Email người gửi', 'noreply@dongnaitrace.vn'], ['Tên người gửi', 'Đồng Nai Trace'], ['Mật khẩu ứng dụng', '••••••••••••'],
+            ].map(([label, value]) => (
+              <View key={label} style={s.configField}>
+                <Text style={s.configLabel}>{label}</Text>
+                <TextInput style={s.configInput} defaultValue={value} placeholderTextColor="#a8b2c8" secureTextEntry={label === 'Mật khẩu ứng dụng'} />
               </View>
-              {cfg.type === 'number' && (
-                <TextInput
-                  style={s.configInput}
-                  value={cfg.value}
-                  onChangeText={v => handleConfigChange(cfg.key, v)}
-                  keyboardType="numeric"
-                  placeholderTextColor="#a8b2c8"
-                />
-              )}
-              {cfg.type === 'text' && (
-                <TextInput
-                  style={s.configInput}
-                  value={cfg.value}
-                  onChangeText={v => handleConfigChange(cfg.key, v)}
-                  placeholderTextColor="#a8b2c8"
-                />
-              )}
-            </View>
-          ))}
+            ))}
+            {activeConfigSection === 'QR Code' && [
+              ['Kích thước QR (px)', '256'], ['Màu nền', '#FFFFFF'], ['Màu mã', '#000000'], ['URL tiền tố truy xuất', 'https://trace.dongnai.gov.vn/verify/'], ['Thời hạn hiệu lực (ngày)', '365'],
+            ].map(([label, value]) => (
+              <View key={label} style={s.configField}>
+                <Text style={s.configLabel}>{label}</Text>
+                <TextInput style={s.configInput} defaultValue={value} placeholderTextColor="#a8b2c8" />
+              </View>
+            ))}
+            {activeConfigSection === 'API / Tích hợp' && [
+              ['API Key hệ thống', 'dk-xxxxxxxx-xxxx-xxxx'], ['Webhook URL thông báo', 'https://your-service.com/webhook'], ['Google Maps API Key', 'AIza...'], ['Token VNPT/Viettel SMS', 'Bearer xxx...'],
+            ].map(([label, value]) => (
+              <View key={label} style={s.configField}>
+                <Text style={s.configLabel}>{label}</Text>
+                <TextInput style={[s.configInput, s.monoInput]} defaultValue={value} placeholderTextColor="#a8b2c8" autoCapitalize="none" />
+              </View>
+            ))}
+          </View>
+          <TouchableOpacity style={s.saveConfigButton} onPress={() => Alert.alert('Đã lưu', 'Cấu hình hệ thống đã được cập nhật.')}>
+            <Feather name="save" size={15} color="#fff" />
+            <Text style={s.saveConfigButtonText}>Lưu cấu hình</Text>
+          </TouchableOpacity>
         </ScrollView>
       )}
 
@@ -279,6 +325,7 @@ const s = StyleSheet.create({
   saveConfigBtn: { backgroundColor: '#2740BA', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8 },
   saveConfigText: { fontSize: 13, fontWeight: '700', color: '#fff' },
   tabsRow: { paddingHorizontal: 12, paddingVertical: 6, gap: 8 },
+  tabsScroll: { height: 52, flexGrow: 0 },
   tab: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10, borderWidth: 1, borderColor: '#e4e8f0', backgroundColor: '#fff' },
   tabActive: { borderColor: '#2740BA', backgroundColor: '#edf0ff' },
   tabText: { fontSize: 12, color: '#6b7694', fontWeight: '500' },
@@ -299,6 +346,20 @@ const s = StyleSheet.create({
   configLabel: { fontSize: 13, fontWeight: '600', color: '#1d2944', marginBottom: 2 },
   configDesc: { fontSize: 10, color: '#6b7694', lineHeight: 14 },
   configInput: { backgroundColor: '#f9fafb', borderRadius: 10, borderWidth: 1, borderColor: '#e4e8f0', paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, color: '#1d2944' },
+  configTabsScroll: { height: 44, flexGrow: 0, marginBottom: 12 },
+  configTabsRow: { gap: 7 },
+  configTab: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: '#fff', borderWidth: 1, borderColor: '#e4e8f0' },
+  configTabActive: { backgroundColor: '#edf0ff', borderColor: '#2740BA' },
+  configTabText: { fontSize: 10, fontWeight: '600', color: '#6b7694' },
+  configTabTextActive: { color: '#2740BA', fontWeight: '700' },
+  configSectionCard: { backgroundColor: '#fff', borderRadius: 14, padding: 14, borderWidth: 1, borderColor: '#e4e8f0' },
+  configSectionTitle: { fontSize: 13, fontWeight: '700', color: '#1d2944', marginBottom: 14 },
+  configField: { marginBottom: 13 },
+  configTextarea: { minHeight: 76, paddingTop: 11 },
+  monoInput: { fontFamily: 'monospace' },
+  toggleConfigCard: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 12, marginTop: 2, borderTopWidth: 1, borderTopColor: '#f0f2f8' },
+  saveConfigButton: { height: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 12, backgroundColor: '#E8650A', marginTop: 14 },
+  saveConfigButtonText: { fontSize: 13, fontWeight: '700', color: '#fff' },
   backupActions: { flexDirection: 'row', gap: 10, marginBottom: 16 },
   backupBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, height: 48, borderRadius: 12, backgroundColor: '#2740BA' },
   backupBtnText: { fontSize: 13, fontWeight: '700', color: '#fff' },

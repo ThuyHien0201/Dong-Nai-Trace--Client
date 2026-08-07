@@ -528,7 +528,7 @@ export default function CategoriesScreen() {
     if (!form) return;
     if (form.mode === "edit-region") {
       setRegions((items) => updateRegion(items, form.node.id, (node) => ({ ...node, name })));
-    } else {
+    } else if (form.mode === "add") {
       const child: RegionNode = {
         id: `r-${Date.now()}`,
         name,

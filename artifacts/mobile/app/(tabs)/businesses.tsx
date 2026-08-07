@@ -902,7 +902,7 @@ export default function BusinessesScreen() {
 /* ─── Styles ────────────────────────────────────────────────── */
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#f5f7fb' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: 16, paddingTop: 30, paddingBottom: 8 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8 },
   title: { fontSize: 20, fontWeight: '700', color: '#1d2944', letterSpacing: -0.5 },
   subtitle: { fontSize: 11, color: '#6b7694', marginTop: 2 },
  

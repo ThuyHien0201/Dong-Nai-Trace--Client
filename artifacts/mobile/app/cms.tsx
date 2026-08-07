@@ -12,15 +12,15 @@ import { useColors } from '@/hooks/useColors';
 /* ─── Mock Data ─────────────────────────────────────────────── */
 interface Article {
   id: string; title: string; category: string; status: 'published' | 'draft';
-  author: string; date: string; views: number; excerpt: string;
+  author: string; date: string; views: number; excerpt: string; imageUri?: string;
 }
 
 const ARTICLES: Article[] = [
-  { id: 'A1', title: 'Đồng Nai triển khai hệ thống truy xuất nguồn gốc toàn tỉnh', category: 'Tin tức', status: 'published', author: 'Ban Biên Tập', date: '2024-08-01', views: 2341, excerpt: 'UBND tỉnh Đồng Nai chính thức ra mắt cổng truy xuất nguồn gốc sản phẩm địa phương...' },
-  { id: 'A2', title: 'Hướng dẫn đăng ký doanh nghiệp trên hệ thống TraceMark', category: 'Hướng dẫn', status: 'published', author: 'Phòng Kỹ Thuật', date: '2024-07-28', views: 1823, excerpt: 'Bước 1: Chuẩn bị hồ sơ đăng ký kinh doanh, mã số thuế hợp lệ...' },
-  { id: 'A3', title: 'Lễ trao chứng nhận VietGAP đợt 2 năm 2024 cho HTX Tân Triều', category: 'Sự kiện', status: 'published', author: 'Ban Biên Tập', date: '2024-07-20', views: 987, excerpt: 'Sáng ngày 20/7, Sở NN&PTNT tỉnh Đồng Nai đã tổ chức lễ trao chứng nhận...' },
-  { id: 'A4', title: 'Cập nhật tính năng mới: Tích hợp QR đa năng và bản đồ vùng trồng', category: 'Thông báo', status: 'draft', author: 'Phòng Kỹ Thuật', date: '2024-08-05', views: 0, excerpt: 'Phiên bản 2.1.0 sẽ mang đến nhiều cải tiến quan trọng về tính năng quét QR và hiển thị...' },
-  { id: 'A5', title: 'Kết quả kiểm tra an toàn vệ sinh thực phẩm Q2/2024 tại Đồng Nai', category: 'Báo cáo', status: 'published', author: 'Sở Y Tế', date: '2024-07-10', views: 1245, excerpt: 'Kết quả kiểm tra 247 cơ sở sản xuất, chế biến thực phẩm trong Q2/2024...' },
+  { id: 'A1', title: 'Đồng Nai triển khai hệ thống truy xuất nguồn gốc toàn tỉnh', category: 'Tin tức', status: 'published', author: 'Ban Biên Tập', date: '2024-08-01', views: 2341, excerpt: 'UBND tỉnh Đồng Nai chính thức ra mắt cổng truy xuất nguồn gốc sản phẩm địa phương...', imageUri: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=450&fit=crop' },
+  { id: 'A2', title: 'Hướng dẫn đăng ký doanh nghiệp trên hệ thống TraceMark', category: 'Hướng dẫn', status: 'published', author: 'Phòng Kỹ Thuật', date: '2024-07-28', views: 1823, excerpt: 'Bước 1: Chuẩn bị hồ sơ đăng ký kinh doanh, mã số thuế hợp lệ...', imageUri: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&h=450&fit=crop' },
+  { id: 'A3', title: 'Lễ trao chứng nhận VietGAP đợt 2 năm 2024 cho HTX Tân Triều', category: 'Sự kiện', status: 'published', author: 'Ban Biên Tập', date: '2024-07-20', views: 987, excerpt: 'Sáng ngày 20/7, Sở NN&PTNT tỉnh Đồng Nai đã tổ chức lễ trao chứng nhận...', imageUri: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&h=450&fit=crop' },
+  { id: 'A4', title: 'Cập nhật tính năng mới: Tích hợp QR đa năng và bản đồ vùng trồng', category: 'Thông báo', status: 'draft', author: 'Phòng Kỹ Thuật', date: '2024-08-05', views: 0, excerpt: 'Phiên bản 2.1.0 sẽ mang đến nhiều cải tiến quan trọng về tính năng quét QR và hiển thị...', imageUri: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=450&fit=crop' },
+  { id: 'A5', title: 'Kết quả kiểm tra an toàn vệ sinh thực phẩm Q2/2024 tại Đồng Nai', category: 'Báo cáo', status: 'published', author: 'Sở Y Tế', date: '2024-07-10', views: 1245, excerpt: 'Kết quả kiểm tra 247 cơ sở sản xuất, chế biến thực phẩm trong Q2/2024...', imageUri: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&h=450&fit=crop' },
 ];
 
 interface Banner {
@@ -56,11 +56,14 @@ export default function CMSScreen() {
   const router = useRouter();
   const colors = useColors();
   const [activeTab, setActiveTab] = useState<Tab>('Tin tức');
+  const [articles, setArticles] = useState<Article[]>(ARTICLES);
+  const [articleCategory, setArticleCategory] = useState('Tất cả');
   const [banners, setBanners] = useState<Banner[]>(INITIAL_BANNERS);
   const [showEditor, setShowEditor] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editExcerpt, setEditExcerpt] = useState('');
   const [editCat, setEditCat] = useState('Tin tức');
+  const [editImageUri, setEditImageUri] = useState<string | undefined>();
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [showBannerEditor, setShowBannerEditor] = useState(false);
   const [selectedBanner, setSelectedBanner] = useState<Banner | null>(null);
@@ -161,15 +164,66 @@ export default function CMSScreen() {
     setEditTitle('');
     setEditExcerpt('');
     setEditCat('Tin tức');
+    setEditImageUri(undefined);
     setSelectedArticle(null);
     setShowEditor(true);
   };
 
-  const handleSaveArticle = () => {
+  const openArticleEditor = (article: Article) => {
+    setSelectedArticle(article);
+    setEditTitle(article.title);
+    setEditExcerpt(article.excerpt);
+    setEditCat(article.category);
+    setEditImageUri(article.imageUri);
+    setShowEditor(true);
+  };
+
+  const pickArticleImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Cần quyền truy cập', 'Cho phép ứng dụng truy cập thư viện ảnh để chọn ảnh bài viết.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [16, 9],
+      quality: 0.9,
+    });
+    if (!result.canceled) setEditImageUri(result.assets[0]?.uri);
+  };
+
+  const handleSaveArticle = (publish = false) => {
     if (!editTitle.trim()) { Alert.alert('Lỗi', 'Vui lòng nhập tiêu đề bài viết.'); return; }
-    Alert.alert('Thành công', 'Bài viết đã được lưu thành bản nháp.');
+    if (selectedArticle) {
+      setArticles(current => current.map(article => article.id === selectedArticle.id ? {
+        ...article,
+        title: editTitle.trim(),
+        excerpt: editExcerpt.trim(),
+        category: editCat,
+        imageUri: editImageUri,
+        status: publish ? 'published' : article.status,
+      } : article));
+    } else {
+      setArticles(current => [...current, {
+        id: `A${current.length + 1}`,
+        title: editTitle.trim(),
+        excerpt: editExcerpt.trim(),
+        category: editCat,
+        imageUri: editImageUri,
+        status: publish ? 'published' : 'draft',
+        author: 'Ban Biên Tập',
+        date: new Date().toISOString().slice(0, 10),
+        views: 0,
+      }]);
+    }
+    Alert.alert('Thành công', publish ? 'Bài viết đã được xuất bản.' : 'Bài viết đã được lưu thành bản nháp.');
     setShowEditor(false);
   };
+
+  const visibleArticles = articleCategory === 'Tất cả'
+    ? articles
+    : articles.filter(article => article.category === articleCategory);
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
@@ -205,11 +259,24 @@ export default function CMSScreen() {
       {/* Content */}
       {activeTab === 'Tin tức' ? (
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
-          {ARTICLES.map(art => {
+          <Text style={s.sectionLabel}>Chuyên mục</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.categoryFilterRow} style={s.horizontalFilter}>
+            {['Tất cả', ...Object.keys(CAT_COLOR)].map(category => (
+              <TouchableOpacity key={category} style={[s.categoryFilter, articleCategory === category && s.categoryFilterActive]} onPress={() => setArticleCategory(category)}>
+                <Text style={[s.categoryFilterText, articleCategory === category && s.categoryFilterTextActive]}>{category}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+          <View style={s.articleCountRow}>
+            <Text style={s.articleCount}>{visibleArticles.length} bài viết</Text>
+            <Text style={s.articleCountHint}>Tin tức & nội dung</Text>
+          </View>
+          {visibleArticles.map(art => {
             const cc = CAT_COLOR[art.category] || { bg: '#f5f7fb', text: '#6b7694' };
             return (
               <TouchableOpacity key={art.id} style={s.articleCard} activeOpacity={0.85}
-                onPress={() => { setSelectedArticle(art); setEditTitle(art.title); setEditExcerpt(art.excerpt); setEditCat(art.category); setShowEditor(true); }}>
+                onPress={() => openArticleEditor(art)}>
+                {art.imageUri ? <Image source={{ uri: art.imageUri }} style={s.articleImage} resizeMode="cover" /> : <View style={s.articleImagePlaceholder}><Feather name="image" size={22} color="#a8b2c8" /></View>}
                 <View style={s.articleHeader}>
                   <View style={[s.catBadge, { backgroundColor: cc.bg }]}>
                     <Text style={[s.catBadgeText, { color: cc.text }]}>{art.category}</Text>
@@ -241,7 +308,7 @@ export default function CMSScreen() {
                     <Text style={s.actionChipText}>Sửa</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[s.actionChip, { backgroundColor: '#fef0f0' }]}
-                    onPress={() => Alert.alert('Xóa bài viết', `Bạn có chắc muốn xóa "${art.title}"?`, [{ text: 'Hủy' }, { text: 'Xóa', style: 'destructive', onPress: () => {} }])}>
+                    onPress={() => Alert.alert('Xóa bài viết', `Bạn có chắc muốn xóa "${art.title}"?`, [{ text: 'Hủy' }, { text: 'Xóa', style: 'destructive', onPress: () => setArticles(current => current.filter(article => article.id !== art.id)) }])}>
                     <Feather name="trash-2" size={12} color="#c0392b" />
                     <Text style={[s.actionChipText, { color: '#c0392b' }]}>Xóa</Text>
                   </TouchableOpacity>
@@ -315,11 +382,16 @@ export default function CMSScreen() {
               <Feather name="x" size={22} color="#1d2944" />
             </TouchableOpacity>
             <Text style={s.editorTitle}>{selectedArticle ? 'Chỉnh sửa bài viết' : 'Bài viết mới'}</Text>
-            <TouchableOpacity style={s.saveBtn} onPress={handleSaveArticle}>
+            <TouchableOpacity style={s.saveBtn} onPress={() => handleSaveArticle(false)}>
               <Text style={s.saveBtnText}>Lưu</Text>
             </TouchableOpacity>
           </View>
-          <ScrollView contentContainerStyle={{ padding: 16 }}>
+          <KeyboardAwareScrollViewCompat
+            contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+            bottomOffset={80}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
             <Text style={s.fieldLabel}>Danh mục</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, marginBottom: 16 }} style={{ maxHeight: 40, flexGrow: 0 }}>
               {Object.keys(CAT_COLOR).map(cat => (
@@ -328,6 +400,24 @@ export default function CMSScreen() {
                 </TouchableOpacity>
               ))}
             </ScrollView>
+            <Text style={s.fieldLabel}>Ảnh đại diện</Text>
+            <TouchableOpacity style={s.articleImagePicker} onPress={pickArticleImage} activeOpacity={0.8}>
+              {editImageUri ? (
+                <>
+                  <Image source={{ uri: editImageUri }} style={s.selectedArticleImage} resizeMode="cover" />
+                  <View style={s.changeImageBadge}>
+                    <Feather name="camera" size={13} color="#fff" />
+                    <Text style={s.changeImageText}>Đổi ảnh</Text>
+                  </View>
+                </>
+              ) : (
+                <>
+                  <Feather name="image" size={24} color="#a8b2c8" />
+                  <Text style={s.imagePickerText}>Chạm để chọn ảnh bài viết</Text>
+                  <Text style={s.imagePickerHint}>Tỉ lệ đề xuất 16:9</Text>
+                </>
+              )}
+            </TouchableOpacity>
             <Text style={s.fieldLabel}>Tiêu đề *</Text>
             <TextInput
               style={s.fieldInput}
@@ -347,16 +437,16 @@ export default function CMSScreen() {
               multiline
             />
             <View style={s.editorActions}>
-              <TouchableOpacity style={s.draftBtn} onPress={handleSaveArticle}>
+              <TouchableOpacity style={s.draftBtn} onPress={() => handleSaveArticle(false)}>
                 <Feather name="save" size={14} color="#6b7694" />
                 <Text style={s.draftBtnText}>Lưu nháp</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={s.publishBtn} onPress={() => { setShowEditor(false); Alert.alert('Đã đăng', 'Bài viết đã được xuất bản.'); }}>
+              <TouchableOpacity style={s.publishBtn} onPress={() => handleSaveArticle(true)}>
                 <Feather name="send" size={14} color="#fff" />
                 <Text style={s.publishBtnText}>Xuất bản</Text>
               </TouchableOpacity>
             </View>
-          </ScrollView>
+          </KeyboardAwareScrollViewCompat>
         </SafeAreaView>
       </Modal>
 
@@ -480,6 +570,18 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: '#e4e8f0',
     shadowColor: '#1d2944', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
+  sectionLabel: { fontSize: 10, fontWeight: '700', color: '#6b7694', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 7 },
+  horizontalFilter: { flexGrow: 0, maxHeight: 42, marginBottom: 12 },
+  categoryFilterRow: { gap: 7 },
+  categoryFilter: { paddingHorizontal: 11, paddingVertical: 7, borderRadius: 18, backgroundColor: '#fff', borderWidth: 1, borderColor: '#e4e8f0' },
+  categoryFilterActive: { backgroundColor: '#2740BA', borderColor: '#2740BA' },
+  categoryFilterText: { fontSize: 10, fontWeight: '600', color: '#6b7694' },
+  categoryFilterTextActive: { color: '#fff' },
+  articleCountRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 9 },
+  articleCount: { fontSize: 12, fontWeight: '700', color: '#1d2944' },
+  articleCountHint: { fontSize: 10, color: '#a8b2c8' },
+  articleImage: { width: '100%', height: 128, borderRadius: 10, marginBottom: 11, backgroundColor: '#f0f2f8' },
+  articleImagePlaceholder: { width: '100%', height: 128, borderRadius: 10, marginBottom: 11, backgroundColor: '#f0f2f8', alignItems: 'center', justifyContent: 'center' },
   articleHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
   catBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20 },
   catBadgeText: { fontSize: 10, fontWeight: '600' },
@@ -549,6 +651,8 @@ const s = StyleSheet.create({
   catChipActive: { backgroundColor: '#edf0ff', borderColor: '#2740BA' },
   catChipText: { fontSize: 11, color: '#6b7694' },
   editorActions: { flexDirection: 'row', gap: 12, marginTop: 8 },
+  articleImagePicker: { height: 142, borderRadius: 14, borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#c9ddf4', backgroundColor: '#f3f8ff', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: 16 },
+  selectedArticleImage: { width: '100%', height: '100%' },
   draftBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, height: 48, borderRadius: 12, borderWidth: 1, borderColor: '#e4e8f0' },
   draftBtnText: { fontSize: 13, fontWeight: '600', color: '#6b7694' },
   publishBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, height: 48, borderRadius: 12, backgroundColor: '#2740BA' },
