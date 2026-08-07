@@ -549,7 +549,7 @@ function LotCard({
             <Text style={[s.cardPrimaryText, !lot.isComplete && s.inactiveButtonText]}>{lot.isComplete ? "Đồng bộ" : "Thiếu TXNG"}</Text>
           </TouchableOpacity>
         ) : (
-          <View style={s.syncedAction}><Feather name="check-circle" size={14} color="#2a9d6e" /><Text style={s.syncedActionText}>Đã sẵn sàng trên cổng</Text></View>
+          <View style={s.syncedAction}><Feather name="check-circle" size={14} color="#2a9d6e" /><Text style={s.syncedActionText}> Đã đồng bộ</Text></View>
         )}
       </View>
     </View>
@@ -646,29 +646,48 @@ export default function SyncScreen() {
           </TouchableOpacity>
         )}
       </View>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={s.tabScroll}
-        contentContainerStyle={s.tabs}
-        contentInsetAdjustmentBehavior="never"
-      >
-        <TouchableOpacity onPress={() => setTab("solution")} style={[s.tab, tab === "solution" && s.activeTab]}>
-          <Text style={[s.tabText, tab === "solution" && s.activeTabText]}>Đơn vị giải pháp</Text>
+      <View style={s.tabContainer}>
+        <TouchableOpacity
+          onPress={() => setTab("solution")}
+          style={[
+            s.tab,
+            tab === "solution" && s.activeTab,
+          ]}
+        >
+          <Text
+            style={[
+              s.tabText,
+              tab === "solution" && s.activeTabText,
+            ]}
+            numberOfLines={1}
+          >
+            Đơn vị giải pháp
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => setTab("portal")} style={[s.tab, tab === "portal" && s.activeTab]}>
-          <Text style={[s.tabText, tab === "portal" && s.activeTabText]}>Cổng TXNG Đồng Nai</Text>
+
+        <TouchableOpacity
+          onPress={() => setTab("portal")}
+          style={[
+            s.tab,
+            tab === "portal" && s.activeTab,
+          ]}
+        >
+          <Text
+            style={[
+              s.tabText,
+              tab === "portal" && s.activeTabText,
+            ]}
+            numberOfLines={1}
+          >
+            Cổng TXNG Đồng Nai
+          </Text>
         </TouchableOpacity>
-      </ScrollView>
+      </View>
 
       <View style={s.pageIntro}>
         <Text style={s.eyebrow}>HỆ THỐNG</Text>
         <Text style={s.pageTitle} numberOfLines={2}>{tab === "solution" ? "Đồng bộ sang đơn vị giải pháp" : "Cổng truy xuất nguồn gốc"}</Text>
-        <Text style={s.pageHint} numberOfLines={3}>
-          {tab === "solution"
-            ? "Gửi thông tin doanh nghiệp và sản phẩm để bổ sung dữ liệu TXNG qua API."
-            : "Xem xét hồ sơ hoàn thiện và đẩy lên cổng truy xuất nguồn gốc quốc gia."}
-        </Text>
+        
       </View>
       <View style={s.apiStatus}>
         <Feather name={error ? "wifi-off" : "wifi"} size={12} color={error ? "#a8b2c8" : "#1f7a45"} />
@@ -726,6 +745,18 @@ export default function SyncScreen() {
 }
 
 const s = StyleSheet.create({
+  tabContainer: {
+    flexDirection: "row",
+    marginHorizontal: 16,
+    marginTop: 8,
+    backgroundColor: "#F3F5F9",
+    borderRadius: 12,
+    padding: 4,
+  },
+
+  activeTabText: {
+    color: "#FFFFFF",
+  },
   safe: { flex: 1, backgroundColor: "#f5f7fb" },
   header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingTop: 10, paddingBottom: 8, gap: 9 },
   backButton: { padding: 4 },
@@ -739,7 +770,7 @@ const s = StyleSheet.create({
   tab: { minHeight: 36, paddingHorizontal: 13, paddingVertical: 9, borderRadius: 9, backgroundColor: "#fff", borderWidth: 1, borderColor: "#e4e8f0", flexShrink: 0 },
   activeTab: { backgroundColor: "#2740BA", borderColor: "#2740BA" },
   tabText: { fontSize: 11, fontWeight: "700", color: "#6b7694" },
-  activeTabText: { color: "#fff" },
+ 
   pageIntro: { paddingHorizontal: 16, paddingTop: 15, paddingBottom: 5 },
   eyebrow: { fontSize: 9, fontWeight: "800", letterSpacing: 1.3, color: "#E8650A" },
   pageTitle: { fontSize: 16, fontWeight: "700", color: "#1d2944", marginTop: 4, flexShrink: 1 },
