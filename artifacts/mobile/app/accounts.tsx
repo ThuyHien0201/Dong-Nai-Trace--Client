@@ -127,11 +127,6 @@ const initialAccounts: Account[] = [
 ];
 
 const roles: Role[] = ["Quản trị viên", "Biên tập viên", "Người xem"];
-const statusOptions: Array<"Tất cả" | AccountStatus> = [
-  "Tất cả",
-  "Đang hoạt động",
-  "Tạm khóa",
-];
 const roleMeta: Record<
   Role,
   {
@@ -652,10 +647,6 @@ export default function AccountsScreen() {
   const colors = useColors();
   const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("Tất cả");
-  const [statusFilter, setStatusFilter] = useState<"Tất cả" | AccountStatus>(
-    "Tất cả",
-  );
   const [modal, setModal] = useState<"add" | "edit" | null>(null);
   const [editing, setEditing] = useState<Account | null>(null);
   const [deleting, setDeleting] = useState<Account | null>(null);
@@ -668,28 +659,9 @@ export default function AccountsScreen() {
         account.name.toLowerCase().includes(query) ||
         account.username.toLowerCase().includes(query) ||
         account.email.toLowerCase().includes(query);
-      const matchesRole =
-        roleFilter === "Tất cả" || account.role === roleFilter;
-      const matchesStatus =
-        statusFilter === "Tất cả" || account.status === statusFilter;
-      return matchesSearch && matchesRole && matchesStatus;
+      return matchesSearch;
     });
-  }, [accounts, roleFilter, search, statusFilter]);
-
-  const roleCounts = useMemo(
-    () => ({
-      "Tất cả": accounts.length,
-      "Quản trị viên": accounts.filter(
-        (account) => account.role === "Quản trị viên",
-      ).length,
-      "Biên tập viên": accounts.filter(
-        (account) => account.role === "Biên tập viên",
-      ).length,
-      "Người xem": accounts.filter((account) => account.role === "Người xem")
-        .length,
-    }),
-    [accounts],
-  );
+  }, [accounts, search]);
 
   const openAdd = () => {
     setEditing(null);
@@ -836,92 +808,6 @@ export default function AccountsScreen() {
               </TouchableOpacity>
             )}
           </View>
-
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.horizontalTabScroll}
-            contentContainerStyle={styles.filterRow}
-            nestedScrollEnabled
-          >
-            {["Tất cả", ...roles].map((role) => {
-              const selected = roleFilter === role;
-              return (
-                <TouchableOpacity
-                  key={role}
-                  onPress={() => setRoleFilter(role)}
-                  style={[
-                    styles.filterChip,
-                    {
-                      borderColor: selected ? colors.primary : colors.border,
-                      backgroundColor: selected ? colors.primary : colors.card,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.filterText,
-                      {
-                        color: selected
-                          ? colors.primaryForeground
-                          : colors.textMuted,
-                      },
-                    ]}
-                  >
-                    {role}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.countText,
-                      {
-                        color: selected
-                          ? colors.primaryForeground
-                          : colors.textMuted,
-                      },
-                    ]}
-                  >
-                    {roleCounts[role as keyof typeof roleCounts]}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.horizontalTabScroll}
-            contentContainerStyle={styles.statusRow}
-            nestedScrollEnabled
-          >
-            {statusOptions.map((status) => {
-              const selected = statusFilter === status;
-              return (
-                <TouchableOpacity
-                  key={status}
-                  onPress={() => setStatusFilter(status)}
-                  style={[
-                    styles.statusChip,
-                    {
-                      borderColor: selected ? colors.primary : colors.border,
-                      backgroundColor: selected
-                        ? colors.primaryLight
-                        : colors.card,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.statusChipText,
-                      { color: selected ? colors.primary : colors.textMuted },
-                    ]}
-                  >
-                    {status}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
 
           <ScrollView
             contentContainerStyle={styles.listContent}
@@ -1204,7 +1090,6 @@ const styles = StyleSheet.create({
     borderBottomColor: "transparent",
   },
   tabText: { fontSize: 12, fontWeight: "600" },
-  horizontalTabScroll: { flexGrow: 0, width: "100%", maxHeight: 48 },
   searchRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -1217,26 +1102,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   searchInput: { flex: 1, fontSize: 12, paddingVertical: 0 },
-  filterRow: { gap: 6, paddingHorizontal: 12, paddingVertical: 10, alignItems: "center" },
-  filterChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingHorizontal: 11,
-    paddingVertical: 7,
-  },
-  filterText: { fontSize: 10, fontWeight: "600" },
-  countText: { fontSize: 9, fontWeight: "700" },
-  statusRow: { gap: 6, paddingHorizontal: 12, paddingBottom: 6, alignItems: "center" },
-  statusChip: {
-    borderWidth: 1,
-    borderRadius: 9,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  statusChipText: { fontSize: 10, fontWeight: "600" },
   listContent: { padding: 12, paddingBottom: 32 },
   accountCard: {
     borderRadius: 15,

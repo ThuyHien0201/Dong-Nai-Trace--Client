@@ -51,7 +51,6 @@ function RootLayoutNav() {
         <Stack.Screen name="sync" options={{ presentation: 'card', headerShown: false }} />
         <Stack.Screen name="settings" options={{ presentation: 'card', headerShown: false }} />
         <Stack.Screen name="system" options={{ presentation: 'card', headerShown: false }} />
-        <Stack.Screen name="connections" options={{ presentation: 'card', headerShown: false }} />
       </Stack>
     </>
   );

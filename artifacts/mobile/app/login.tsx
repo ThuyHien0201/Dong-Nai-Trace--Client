@@ -51,37 +51,38 @@ export default function LoginScreen() {
         <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
           {/* Header brand */}
           <View style={s.header}>
-            <View style={s.headerOverlay} />
             <View style={s.headerContent}>
               <View style={s.logoRow}>
-              <View style={s.logoBox}>
-                <Image source={require('../assets/images/logo-skhcn.png')} style={s.logoImage} />
-              </View>
-                <View>
-                  <Text style={s.brandName}>Đồng Nai <Text style={s.brandAccent}>Trace</Text></Text>
-                  <Text style={s.brandSub}>TRACE WITH CONFIDENCE</Text>
+                <Image
+                  source={require('../assets/images/logo-skhcn.png')}
+                  style={s.logoImage}
+                  resizeMode="contain"
+                  accessibilityLabel="Logo Sở Khoa học và Công nghệ Đồng Nai"
+                />
+                <View style={{ flex: 1 }}>
+                  <Text style={s.brandName}>ĐỒNG NAI TRACE</Text>
+                  <Text style={s.brandSub}>HỆ THỐNG TRUY XUẤT NGUỒN GỐC SẢN PHẨM</Text>
                 </View>
+                <Feather name="globe" size={19} color={C.light.primary} />
               </View>
-              <Text style={s.heroText}>Mỗi sản phẩm,{'\n'}<Text style={s.heroAccent}>một câu chuyện.</Text></Text>
             </View>
           </View>
 
           {/* Form card */}
           <View style={s.card}>
-            <Text style={s.cardLabel}>KHU VỰC TRUY CẬP</Text>
-            <Text style={s.cardTitle}>Chào mừng trở lại.</Text>
-            <Text style={s.cardSub}>Đăng nhập để tiếp tục quản lý dữ liệu truy xuất.</Text>
+            <Text style={s.cardTitle}>Đăng nhập</Text>
+            <Text style={s.cardSub}>Nhập thông tin tài khoản của bạn</Text>
 
             {/* Identifier */}
             <View style={s.fieldGroup}>
-              <Text style={s.fieldLabel}>Tên đăng nhập hoặc email</Text>
+              <Text style={s.fieldLabel}>TÊN ĐĂNG NHẬP</Text>
               <View style={[s.inputRow, error && !identifier ? s.inputError : null]}>
                 <Feather name="mail" size={16} color="#a8b2c8" style={s.inputIcon} />
                 <TextInput
                   style={s.input}
                   value={identifier}
                   onChangeText={v => { setIdentifier(v); if (error) setError(''); }}
-                  placeholder="Ví dụ: nguyenvana hoặc email@donai.gov.vn"
+                  placeholder="Mã số doanh nghiệp / CCCD / tài khoản"
                   placeholderTextColor="#a8b2c8"
                   autoCapitalize="none"
                   keyboardType="email-address"
@@ -91,7 +92,12 @@ export default function LoginScreen() {
 
             {/* Password */}
             <View style={[s.fieldGroup, { marginTop: 14 }]}>
-              <Text style={s.fieldLabel}>Mật khẩu</Text>
+              <View style={s.passwordLabelRow}>
+                <Text style={s.fieldLabel}>MẬT KHẨU</Text>
+                <TouchableOpacity onPress={handleForgot}>
+                  <Text style={s.forgotText}>Quên mật khẩu?</Text>
+                </TouchableOpacity>
+              </View>
               <View style={[s.inputRow, error && !password ? s.inputError : null]}>
                 <Feather name="lock" size={16} color="#a8b2c8" style={s.inputIcon} />
                 <TextInput
@@ -115,9 +121,6 @@ export default function LoginScreen() {
                   {remember && <Feather name="check" size={10} color="#fff" />}
                 </View>
                 <Text style={s.rememberText}>Ghi nhớ đăng nhập</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleForgot}>
-                <Text style={s.forgotText}>Quên mật khẩu?</Text>
               </TouchableOpacity>
             </View>
 
@@ -187,54 +190,38 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#f5f7fb' },
   scroll: { flexGrow: 1 },
   header: {
-    backgroundColor: '#152978',
-    paddingHorizontal: 24,
-    paddingTop: 32,
-    paddingBottom: 36,
-    overflow: 'hidden',
-  },
-  headerOverlay: {
-    position: 'absolute', top: -48, right: -40,
-    width: 160, height: 160, borderRadius: 80,
-    backgroundColor: 'rgba(49,74,198,0.5)',
+    backgroundColor: '#f5f7fb',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e4e8f0',
   },
   headerContent: { zIndex: 10 },
-  logoRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 24 },
-  logoBox: {
-    width: 44, height: 44, borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    alignItems: 'center', justifyContent: 'center',
-  },
-  logoImage: { width: 38, height: 38 },
-  brandName: { fontSize: 18, fontWeight: '700', color: '#fff', letterSpacing: -0.6 },
-  brandAccent: { color: '#ffb265' },
+  logoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  logoImage: { width: 42, height: 42, flexShrink: 0 },
+  brandName: { fontSize: 16, fontWeight: '700', color: '#2740BA' },
   brandSub: {
-    fontSize: 9, fontWeight: '500', color: 'rgba(219,234,254,0.7)',
-    letterSpacing: 2, marginTop: 2,
+    fontSize: 7, fontWeight: '500', color: '#8896b0',
+    marginTop: 2,
   },
-  heroText: { fontSize: 26, fontWeight: '700', color: '#fff', lineHeight: 34, letterSpacing: -0.8 },
-  heroAccent: { color: '#ffb265' },
 
   card: {
-    margin: 16, marginTop: -20, borderRadius: 20, backgroundColor: '#fff',
-    padding: 24, shadowColor: '#1e3264', shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1, shadowRadius: 24, elevation: 8,
-  },
-  cardLabel: {
-    fontSize: 9, fontWeight: '700', color: '#E8650A',
-    letterSpacing: 2, marginBottom: 8, fontFamily: 'Inter_700Bold',
+    paddingHorizontal: 20,
+    paddingTop: 28,
+    paddingBottom: 24,
   },
   cardTitle: {
-    fontSize: 22, fontWeight: '700', color: '#17213a',
-    letterSpacing: -0.8, marginBottom: 4,
+    fontSize: 27, fontWeight: '700', color: '#1d2944',
   },
-  cardSub: { fontSize: 12, color: '#6b7694', lineHeight: 18, marginBottom: 24 },
+  cardSub: { fontSize: 13, color: '#6b7694', lineHeight: 19, marginTop: 4, marginBottom: 20 },
 
   fieldGroup: {},
   fieldLabel: { fontSize: 11, fontWeight: '600', color: '#34405a', marginBottom: 7 },
+  passwordLabelRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   inputRow: {
     flexDirection: 'row', alignItems: 'center', borderRadius: 12,
-    borderWidth: 1, borderColor: '#dfe4ee', backgroundColor: '#f9faff', height: 50,
+    borderWidth: 1, borderColor: '#e4e8f0', backgroundColor: '#f5f7fb', height: 48,
   },
   inputError: { borderColor: '#d85b5b' },
   inputIcon: { marginLeft: 14 },
@@ -244,7 +231,7 @@ const styles = StyleSheet.create({
   },
   eyeBtn: { padding: 12 },
 
-  rememberRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 },
+  rememberRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
   checkRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   checkbox: {
     width: 16, height: 16, borderRadius: 4, borderWidth: 1,
@@ -266,9 +253,8 @@ const styles = StyleSheet.create({
 
   submitBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 8, height: 52, borderRadius: 12, backgroundColor: '#E8650A',
-    marginTop: 18, shadowColor: '#E8650A', shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25, shadowRadius: 14, elevation: 6,
+    gap: 8, height: 52, borderRadius: 10, backgroundColor: '#2740BA',
+    marginTop: 16,
   },
   submitText: { fontSize: 14, fontWeight: '700', color: '#fff' },
 

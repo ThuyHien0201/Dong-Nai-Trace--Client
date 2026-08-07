@@ -17,7 +17,6 @@ const MENU_GROUPS = [
     title: 'Vận hành',
     items: [
       { icon: 'refresh-cw', label: 'Đồng bộ dữ liệu', sub: 'Đẩy dữ liệu lên Cổng truy xuất quốc gia', color: '#E8650A', bg: '#fff4ed', route: '/sync' },
-      { icon: 'link', label: 'Kết nối hệ thống', sub: 'Cổng quốc gia, bộ ngành, giải pháp bên thứ 3', color: '#0891b2', bg: '#ecfeff', route: '/connections' },
       { icon: 'message-circle', label: 'Hỗ trợ & Thông báo', sub: 'Ticket hỗ trợ và gửi thông báo', color: '#7c3aed', bg: '#f4f0ff', route: '/support' },
     ],
   },
