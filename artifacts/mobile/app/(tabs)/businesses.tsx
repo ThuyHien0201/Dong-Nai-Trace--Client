@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
+import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 
 /* ─── Mock Data ────────────────────────────────────────────── */
 const STATUSES = ['Tất cả', 'Đã duyệt', 'Chờ duyệt', 'Đã khóa'];
@@ -288,41 +289,74 @@ function BizCard({
         <Text style={s.bizRowText}>{biz.representative}</Text>
       </View>
       {biz.certifications.length > 0 && (
+        <View style={s.certRow}>
+          {biz.certifications.map(cert => (
+            <View key={cert} style={s.certBadge}>
+              <Feather name="award" size={11} color="#2740BA" />
+              <Text style={s.certText}>{cert}</Text>
+            </View>
+          ))}
+        </View>
+      )}
       <View style={s.actionRow}>
         <TouchableOpacity
+          accessibilityLabel="Đặt lại mật khẩu"
+          hitSlop={8}
           onPress={() => onResetPassword(biz)}
         >
           <Feather name="key" size={16} color="#6366f1" />
         </TouchableOpacity>
 
         <TouchableOpacity
+          accessibilityLabel="Chỉnh sửa doanh nghiệp"
+          hitSlop={8}
           onPress={() => onEdit(biz)}
         >
           <Feather name="edit-2" size={16} color="#2563eb" />
         </TouchableOpacity>
 
         <TouchableOpacity
+          accessibilityLabel={biz.status === 'locked' ? 'Mở khóa doanh nghiệp' : 'Khóa doanh nghiệp'}
+          hitSlop={8}
           onPress={() => onLock(biz)}
         >
-          <Feather name="lock" size={16} color="#f59e0b" />
+          <Feather name={biz.status === 'locked' ? 'unlock' : 'lock'} size={16} color="#f59e0b" />
         </TouchableOpacity>
 
         <TouchableOpacity
+          accessibilityLabel="Xóa doanh nghiệp"
+          hitSlop={8}
           onPress={() => onDelete(biz)}
         >
           <Feather name="trash-2" size={16} color="#ef4444" />
         </TouchableOpacity>
       </View>
-      )}
     </TouchableOpacity>
   );
 }
 
 /* ─── Business Detail ───────────────────────────────────────── */
-function BusinessDetail({ biz, onBack }: { biz: Business; onBack: () => void }) {
+function BusinessDetail({
+  biz,
+  onBack,
+  onUpdate,
+  onDelete,
+  onLock,
+  onResetPassword,
+  onResetPasswordConfirmed,
+}: {
+  biz: Business;
+  onBack: () => void;
+  onUpdate: (business: Business) => void;
+  onDelete: (business: Business) => void;
+  onLock: (business: Business) => void;
+  onResetPassword: (business: Business) => void;
+  onResetPasswordConfirmed: (business: Business) => void;
+}) {
   const [tab, setTab] = useState<'info' | 'docs' | 'status_action'>('info');
   const [showQR, setShowQR] = useState(false);
   const [showReset, setShowReset] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
   const tabs = [
     { key: 'info', label: 'Thông tin' },
@@ -357,7 +391,7 @@ function BusinessDetail({ biz, onBack }: { biz: Business; onBack: () => void }) 
           <TouchableOpacity style={sd.actionBtn} onPress={() => setShowQR(true)}>
             <Feather name="maximize" size={14} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity style={[sd.actionBtn, { backgroundColor: '#E8650A' }]} onPress={() => Alert.alert('Trạng thái', 'Chức năng khóa/mở khóa đã được áp dụng.')}>
+          <TouchableOpacity style={[sd.actionBtn, { backgroundColor: '#E8650A' }]} onPress={() => onLock(biz)}>
             <Feather name={biz.status === 'locked' ? 'unlock' : 'lock'} size={14} color="#fff" />
           </TouchableOpacity>
         </View>
@@ -465,17 +499,7 @@ function BusinessDetail({ biz, onBack }: { biz: Business; onBack: () => void }) 
               Trạng thái & Thao tác
             </Text>
 
-            <View style={sd.statusBadge}>
-              <Feather
-                name="check-circle"
-                size={14}
-                color="#16A34A"
-              />
-
-              <Text style={sd.statusText}>
-                Đã duyệt
-              </Text>
-            </View>
+            <StatusBadge status={biz.status} />
 
             <View style={sd.contactCard}>
               <View style={sd.contactRow}>
@@ -506,7 +530,7 @@ function BusinessDetail({ biz, onBack }: { biz: Business; onBack: () => void }) 
             <View style={sd.actionRow}>
               <TouchableOpacity
                 style={sd.actionButton}
-                onPress={() => {}}
+                onPress={() => setShowEdit(true)}
               >
                 <Feather
                   name="edit-2"
@@ -521,23 +545,23 @@ function BusinessDetail({ biz, onBack }: { biz: Business; onBack: () => void }) 
 
               <TouchableOpacity
                 style={sd.actionButton}
-                onPress={() => {}}
+                onPress={() => onLock(biz)}
               >
                 <Feather
-                  name="lock"
+                  name={biz.status === 'locked' ? 'unlock' : 'lock'}
                   size={18}
                   color="#475569"
                 />
 
                 <Text style={sd.actionButtonText}>
-                  Khóa
+                  {biz.status === 'locked' ? 'Mở khóa' : 'Khóa'}
                 </Text>
               </TouchableOpacity>
             </View>
 
             <TouchableOpacity
               style={sd.resetButton}
-              onPress={() => {}}
+              onPress={() => setShowReset(true)}
             >
               <Feather
                 name="key"
@@ -545,9 +569,7 @@ function BusinessDetail({ biz, onBack }: { biz: Business; onBack: () => void }) 
                 color="#475569"
               />
 
-              <Text style={sd.actionButtonText}>
-                Đặt lại mật khẩu
-              </Text>
+              <Text style={sd.actionButtonText}>Đặt lại mật khẩu</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -579,19 +601,116 @@ function BusinessDetail({ biz, onBack }: { biz: Business; onBack: () => void }) 
               <TouchableOpacity style={sd.resetCancel} onPress={() => setShowReset(false)}>
                 <Text style={sd.resetCancelText}>Hủy</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={sd.resetConfirm} onPress={() => { setShowReset(false); Alert.alert('Thành công', 'Mật khẩu đã được đặt lại.'); }}>
+              <TouchableOpacity style={sd.resetConfirm} onPress={() => { setShowReset(false); onResetPasswordConfirmed(biz); }}>
                 <Text style={sd.resetConfirmText}>Xác nhận</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
+      <BusinessEditModal
+        key={`${biz.id}-${biz.name}-${biz.email}-${biz.phone}`}
+        business={biz}
+        visible={showEdit}
+        onClose={() => setShowEdit(false)}
+        onSave={(updatedBusiness) => {
+          onUpdate(updatedBusiness);
+          setShowEdit(false);
+        }}
+      />
     </View>
+  );
+}
+
+function BusinessEditModal({
+  business,
+  visible,
+  onClose,
+  onSave,
+}: {
+  business: Business;
+  visible: boolean;
+  onClose: () => void;
+  onSave: (business: Business) => void;
+}) {
+  const [name, setName] = useState(business.name);
+  const [representative, setRepresentative] = useState(business.representative);
+  const [phone, setPhone] = useState(business.phone);
+  const [email, setEmail] = useState(business.email);
+  const [address, setAddress] = useState(business.address);
+  const [sector, setSector] = useState(business.sector);
+
+  const save = () => {
+    if (!name.trim() || !representative.trim() || !phone.trim() || !email.trim()) {
+      Alert.alert('Thiếu thông tin', 'Vui lòng nhập tên doanh nghiệp, người đại diện, điện thoại và email.');
+      return;
+    }
+
+    onSave({
+      ...business,
+      name: name.trim(),
+      representative: representative.trim(),
+      phone: phone.trim(),
+      email: email.trim(),
+      address: address.trim() || business.address,
+      sector: sector.trim() || business.sector,
+    });
+  };
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={sd.modalOverlay}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+        <View style={sd.editModal}>
+          <View style={sd.sheetHandle} />
+          <View style={sd.editHeader}>
+            <View>
+              <Text style={sd.editTitle}>Chỉnh sửa doanh nghiệp</Text>
+              <Text style={sd.editSubtitle}>{business.code}</Text>
+            </View>
+            <TouchableOpacity onPress={onClose} hitSlop={10}>
+              <Feather name="x" size={20} color="#6b7694" />
+            </TouchableOpacity>
+          </View>
+          <KeyboardAwareScrollViewCompat
+            contentContainerStyle={sd.editContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {[
+              ['Tên doanh nghiệp', name, setName, 'Nhập tên doanh nghiệp'],
+              ['Người đại diện', representative, setRepresentative, 'Nhập người đại diện'],
+              ['Điện thoại', phone, setPhone, 'Nhập số điện thoại'],
+              ['Email', email, setEmail, 'Nhập email'],
+              ['Ngành hàng', sector, setSector, 'Nhập ngành hàng'],
+              ['Địa chỉ', address, setAddress, 'Nhập địa chỉ'],
+            ].map(([label, value, setter, placeholder]) => (
+              <View key={label as string}>
+                <Text style={sd.inputLabel}>{label as string}</Text>
+                <TextInput
+                  value={value as string}
+                  onChangeText={setter as (value: string) => void}
+                  placeholder={placeholder as string}
+                  placeholderTextColor="#a8b2c8"
+                  style={sd.input}
+                  keyboardType={label === 'Điện thoại' ? 'phone-pad' : label === 'Email' ? 'email-address' : 'default'}
+                  autoCapitalize={label === 'Email' ? 'none' : 'sentences'}
+                />
+              </View>
+            ))}
+            <TouchableOpacity style={sd.saveButton} onPress={save}>
+              <Feather name="save" size={16} color="#fff" />
+              <Text style={sd.saveButtonText}>Lưu thay đổi</Text>
+            </TouchableOpacity>
+          </KeyboardAwareScrollViewCompat>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
 /* ─── Main Screen ───────────────────────────────────────────── */
 export default function BusinessesScreen() {
+  const [businesses, setBusinesses] = useState<Business[]>(BUSINESSES);
   const [search, setSearch] = useState('');
   const [selectedSector, setSelectedSector] = useState('Tất cả');
   const [selectedStatus, setSelectedStatus] = useState('Tất cả');
@@ -599,6 +718,10 @@ export default function BusinessesScreen() {
   const [selected, setSelected] = useState<Business | null>(null);
   const handleEdit = (biz: Business) => {
     setSelected(biz);
+  };
+
+  const completeResetPassword = (biz: Business) => {
+    Alert.alert('Thành công', `Mật khẩu của ${biz.name} đã được đặt lại. Thông tin đăng nhập mới sẽ được gửi đến ${biz.email}.`);
   };
 
   const handleResetPassword = (biz: Business) => {
@@ -610,7 +733,7 @@ export default function BusinessesScreen() {
         {
           text: 'Đồng ý',
           onPress: () => {
-            // gọi API reset password
+            completeResetPassword(biz);
           },
         },
       ]
@@ -618,9 +741,25 @@ export default function BusinessesScreen() {
   };
 
   const handleLock = (biz: Business) => {
+    const willLock = biz.status !== 'locked';
     Alert.alert(
-      'Khóa doanh nghiệp',
-      `Khóa ${biz.name}?`
+      willLock ? 'Khóa doanh nghiệp' : 'Mở khóa doanh nghiệp',
+      willLock
+        ? `Khóa ${biz.name}? Doanh nghiệp sẽ không thể truy cập tài khoản.`
+        : `Mở khóa ${biz.name}? Doanh nghiệp sẽ có thể truy cập lại tài khoản.`,
+      [
+        { text: 'Hủy', style: 'cancel' },
+        {
+          text: willLock ? 'Khóa' : 'Mở khóa',
+          style: willLock ? 'destructive' : 'default',
+          onPress: () => {
+            const updated = { ...biz, status: willLock ? 'locked' : 'active' as Business['status'] };
+            setBusinesses(current => current.map(item => item.id === biz.id ? updated : item));
+            setSelected(current => current?.id === biz.id ? updated : current);
+            Alert.alert('Đã cập nhật', willLock ? 'Doanh nghiệp đã được khóa.' : 'Doanh nghiệp đã được mở khóa.');
+          },
+        },
+      ]
     );
   };
 
@@ -634,14 +773,21 @@ export default function BusinessesScreen() {
           text: 'Xóa',
           style: 'destructive',
           onPress: () => {
-            // gọi API xóa
+            setBusinesses(current => current.filter(item => item.id !== biz.id));
+            setSelected(current => current?.id === biz.id ? null : current);
+            Alert.alert('Đã xóa', 'Doanh nghiệp đã được xóa khỏi danh sách.');
           },
         },
       ]
     );
   };
+  const handleUpdate = (updated: Business) => {
+    setBusinesses(current => current.map(item => item.id === updated.id ? updated : item));
+    setSelected(updated);
+    Alert.alert('Đã lưu', 'Thông tin doanh nghiệp đã được cập nhật.');
+  };
   const filtered = useMemo(() => {
-    return BUSINESSES.filter(b => {
+    return businesses.filter(b => {
       const q = search.toLowerCase();
       if (q && !b.name.toLowerCase().includes(q) && !b.code.toLowerCase().includes(q) && !b.representative.toLowerCase().includes(q)) return false;
       if (selectedSector !== 'Tất cả' && b.sector !== selectedSector) return false;
@@ -651,12 +797,20 @@ export default function BusinessesScreen() {
       }
       return true;
     });
-  }, [search, selectedSector, selectedStatus]);
+  }, [businesses, search, selectedSector, selectedStatus]);
 
   if (selected) {
     return (
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
-        <BusinessDetail biz={selected} onBack={() => setSelected(null)} />
+        <BusinessDetail
+          biz={selected}
+          onBack={() => setSelected(null)}
+          onUpdate={handleUpdate}
+          onDelete={handleDelete}
+          onLock={handleLock}
+          onResetPassword={handleResetPassword}
+          onResetPasswordConfirmed={completeResetPassword}
+        />
       </SafeAreaView>
     );
   }
@@ -667,7 +821,7 @@ export default function BusinessesScreen() {
       <View style={s.header}>
         <View>
           <Text style={s.title}>Doanh nghiệp</Text>
-          <Text style={s.subtitle}>{BUSINESSES.length} doanh nghiệp đã đăng ký</Text>
+          <Text style={s.subtitle}>{businesses.length} doanh nghiệp đã đăng ký</Text>
         </View>
       
       </View>
@@ -917,6 +1071,16 @@ const sd = StyleSheet.create({
   resetCancelText: { fontSize: 13, color: '#6b7694', fontWeight: '600' },
   resetConfirm: { flex: 1, paddingVertical: 12, borderRadius: 10, backgroundColor: '#E8650A', alignItems: 'center' },
   resetConfirmText: { fontSize: 13, color: '#fff', fontWeight: '700' },
+  sheetHandle: { alignSelf: 'center', width: 38, height: 4, borderRadius: 4, backgroundColor: '#d9dce9', marginBottom: 14 },
+  editModal: { width: '100%', maxHeight: '90%', backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 18, paddingTop: 10, paddingBottom: 24 },
+  editHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 },
+  editTitle: { fontSize: 18, fontWeight: '700', color: '#1d2944' },
+  editSubtitle: { fontSize: 11, color: '#6b7694', marginTop: 3 },
+  editContent: { paddingBottom: 12 },
+  inputLabel: { fontSize: 11, fontWeight: '700', color: '#25304b', marginTop: 10, marginBottom: 6 },
+  input: { minHeight: 43, borderWidth: 1, borderColor: '#e4e8f0', borderRadius: 11, backgroundColor: '#f9fafb', color: '#1d2944', fontSize: 12, paddingHorizontal: 12 },
+  saveButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, minHeight: 44, borderRadius: 11, backgroundColor: '#2740BA', marginTop: 18 },
+  saveButtonText: { color: '#fff', fontSize: 12, fontWeight: '700' },
 
   empty: { alignItems: 'center', paddingVertical: 32 },
   actionCard: {
