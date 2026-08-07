@@ -25,16 +25,192 @@ interface Business {
   joinDate: string;
   certifications: string[];
   documents: { name: string; date: string }[];
+  image?: string;
+  images?: string[];
 }
 
 const BUSINESSES: Business[] = [
-  { id: 'B001', name: 'Công ty CP Thực phẩm Vĩnh Hảo', code: 'VH-2024-001', taxId: '0601234567', sector: 'Đồ uống', address: '15 Hùng Vương, TP Biên Hòa', district: 'Biên Hòa', phone: '0251.3890.123', email: 'contact@vinhhao.vn', representative: 'Nguyễn Văn Thành', status: 'active', productCount: 12, joinDate: '2024-01-15', certifications: ['ISO 22000', 'HACCP'], documents: [{ name: 'Giấy phép VSATTP', date: '2024-01-10' }, { name: 'Đăng ký kinh doanh', date: '2023-12-20' }] },
-  { id: 'B002', name: 'HTX Nông nghiệp Tân Triều', code: 'TT-2024-002', taxId: '0601234568', sector: 'Nông sản', address: '8 Đinh Tiên Hoàng, Vĩnh Cửu', district: 'Vĩnh Cửu', phone: '0251.3891.124', email: 'info@tantrieuhtx.vn', representative: 'Trần Thị Lan', status: 'active', productCount: 8, joinDate: '2024-02-03', certifications: ['VietGAP', 'GlobalGAP'], documents: [{ name: 'Chứng nhận VietGAP', date: '2024-02-01' }] },
-  { id: 'B003', name: 'Công ty TNHH An Phú Foods', code: 'AP-2024-003', taxId: '0601234569', sector: 'Chế biến thực phẩm', address: '22 Võ Thị Sáu, Long Thành', district: 'Long Thành', phone: '0251.3892.125', email: 'sales@anphufoods.com', representative: 'Lê Minh Khoa', status: 'pending', productCount: 5, joinDate: '2024-03-10', certifications: [], documents: [{ name: 'Đăng ký kinh doanh', date: '2024-03-08' }] },
-  { id: 'B004', name: 'Trại nuôi thủy sản Bình Sơn', code: 'BS-2024-004', taxId: '0601234570', sector: 'Thủy sản', address: '5 Trần Phú, Nhơn Trạch', district: 'Nhơn Trạch', phone: '0251.3893.126', email: 'binhson@aqua.vn', representative: 'Phạm Văn Bình', status: 'active', productCount: 6, joinDate: '2024-01-28', certifications: ['ASC'], documents: [{ name: 'Giấy phép nuôi trồng', date: '2024-01-25' }] },
-  { id: 'B005', name: 'HTX Dược liệu Xuân Lộc', code: 'XL-2024-005', taxId: '0601234571', sector: 'Dược liệu', address: '30 Hà Huy Tập, Xuân Lộc', district: 'Xuân Lộc', phone: '0251.3894.127', email: 'duoclieu@xuanloc.vn', representative: 'Nguyễn Thị Hoa', status: 'locked', productCount: 3, joinDate: '2024-04-15', certifications: ['GACP'], documents: [{ name: 'Giấy phép dược liệu', date: '2024-04-10' }] },
-  { id: 'B006', name: 'Công ty CP Chế biến Đồng Nai', code: 'DN-2024-006', taxId: '0601234572', sector: 'Chế biến thực phẩm', address: '100 KCN Tam Phước, Biên Hòa', district: 'Biên Hòa', phone: '0251.3895.128', email: 'info@chebiendongnai.vn', representative: 'Võ Văn Cường', status: 'active', productCount: 20, joinDate: '2023-11-01', certifications: ['ISO 22000', 'BRC'], documents: [{ name: 'Giấy phép KCN', date: '2023-10-28' }, { name: 'PCCC', date: '2023-10-15' }] },
-  { id: 'B007', name: 'Trang trại hữu cơ Green Valley', code: 'GV-2024-007', taxId: '0601234573', sector: 'Nông sản', address: '7 Phú Điền, Định Quán', district: 'Định Quán', phone: '0251.3896.129', email: 'greenvalley@organic.vn', representative: 'Trần Minh Tuấn', status: 'pending', productCount: 4, joinDate: '2024-06-01', certifications: ['Organic Vietnam'], documents: [] },
+  {
+    id: 'B001',
+    name: 'Công ty CP Thực phẩm Vĩnh Hảo',
+    code: 'VH-2024-001',
+    image: 'https://picsum.photos/seed/vinhhao/600/400',
+    images: [
+      'https://picsum.photos/seed/vinhhao1/800/600',
+      'https://picsum.photos/seed/vinhhao2/800/600',
+      'https://picsum.photos/seed/vinhhao3/800/600',
+    ],
+    taxId: '0601234567',
+    sector: 'Đồ uống',
+    address: '15 Hùng Vương, TP Biên Hòa',
+    district: 'Biên Hòa',
+    phone: '0251.3890.123',
+    email: 'contact@vinhhao.vn',
+    representative: 'Nguyễn Văn Thành',
+    status: 'active',
+    productCount: 12,
+    joinDate: '2024-01-15',
+    certifications: ['ISO 22000', 'HACCP'],
+    documents: [
+      { name: 'Giấy phép VSATTP', date: '2024-01-10' },
+      { name: 'Đăng ký kinh doanh', date: '2023-12-20' }
+    ]
+  },
+
+  {
+    id: 'B002',
+    name: 'HTX Nông nghiệp Tân Triều',
+    code: 'TT-2024-002',
+    image: 'https://picsum.photos/seed/tantrieu/600/400',
+    images: [
+      'https://picsum.photos/seed/tantrieu1/800/600',
+      'https://picsum.photos/seed/tantrieu2/800/600',
+      'https://picsum.photos/seed/tantrieu3/800/600',
+    ],
+    taxId: '0601234568',
+    sector: 'Nông sản',
+    address: '8 Đinh Tiên Hoàng, Vĩnh Cửu',
+    district: 'Vĩnh Cửu',
+    phone: '0251.3891.124',
+    email: 'info@tantrieuhtx.vn',
+    representative: 'Trần Thị Lan',
+    status: 'active',
+    productCount: 8,
+    joinDate: '2024-02-03',
+    certifications: ['VietGAP', 'GlobalGAP'],
+    documents: [
+      { name: 'Chứng nhận VietGAP', date: '2024-02-01' }
+    ]
+  },
+
+  {
+    id: 'B003',
+    name: 'Công ty TNHH An Phú Foods',
+    code: 'AP-2024-003',
+    image: 'https://picsum.photos/seed/anphu/600/400',
+    images: [
+      'https://picsum.photos/seed/anphu1/800/600',
+      'https://picsum.photos/seed/anphu2/800/600',
+      'https://picsum.photos/seed/anphu3/800/600',
+    ],
+    taxId: '0601234569',
+    sector: 'Chế biến thực phẩm',
+    address: '22 Võ Thị Sáu, Long Thành',
+    district: 'Long Thành',
+    phone: '0251.3892.125',
+    email: 'sales@anphufoods.com',
+    representative: 'Lê Minh Khoa',
+    status: 'pending',
+    productCount: 5,
+    joinDate: '2024-03-10',
+    certifications: [],
+    documents: [
+      { name: 'Đăng ký kinh doanh', date: '2024-03-08' }
+    ]
+  },
+
+  {
+    id: 'B004',
+    name: 'Trại nuôi thủy sản Bình Sơn',
+    code: 'BS-2024-004',
+    image: 'https://picsum.photos/seed/binhson/600/400',
+    images: [
+      'https://picsum.photos/seed/binhson1/800/600',
+      'https://picsum.photos/seed/binhson2/800/600',
+      'https://picsum.photos/seed/binhson3/800/600',
+    ],
+    taxId: '0601234570',
+    sector: 'Thủy sản',
+    address: '5 Trần Phú, Nhơn Trạch',
+    district: 'Nhơn Trạch',
+    phone: '0251.3893.126',
+    email: 'binhson@aqua.vn',
+    representative: 'Phạm Văn Bình',
+    status: 'active',
+    productCount: 6,
+    joinDate: '2024-01-28',
+    certifications: ['ASC'],
+    documents: [
+      { name: 'Giấy phép nuôi trồng', date: '2024-01-25' }
+    ]
+  },
+
+  {
+    id: 'B005',
+    name: 'HTX Dược liệu Xuân Lộc',
+    code: 'XL-2024-005',
+    image: 'https://picsum.photos/seed/xuanloc/600/400',
+    images: [
+      'https://picsum.photos/seed/xuanloc1/800/600',
+      'https://picsum.photos/seed/xuanloc2/800/600',
+      'https://picsum.photos/seed/xuanloc3/800/600',
+    ],
+    taxId: '0601234571',
+    sector: 'Dược liệu',
+    address: '30 Hà Huy Tập, Xuân Lộc',
+    district: 'Xuân Lộc',
+    phone: '0251.3894.127',
+    email: 'duoclieu@xuanloc.vn',
+    representative: 'Nguyễn Thị Hoa',
+    status: 'locked',
+    productCount: 3,
+    joinDate: '2024-04-15',
+    certifications: ['GACP'],
+    documents: [
+      { name: 'Giấy phép dược liệu', date: '2024-04-10' }
+    ]
+  },
+
+  {
+    id: 'B006',
+    name: 'Công ty CP Chế biến Đồng Nai',
+    code: 'DN-2024-006',
+    image: 'https://picsum.photos/seed/dongnai/600/400',
+    images: [
+      'https://picsum.photos/seed/dongnai1/800/600',
+      'https://picsum.photos/seed/dongnai2/800/600',
+      'https://picsum.photos/seed/dongnai3/800/600',
+    ],
+    taxId: '0601234572',
+    sector: 'Chế biến thực phẩm',
+    address: '100 KCN Tam Phước, Biên Hòa',
+    district: 'Biên Hòa',
+    phone: '0251.3895.128',
+    email: 'info@chebiendongnai.vn',
+    representative: 'Võ Văn Cường',
+    status: 'active',
+    productCount: 20,
+    joinDate: '2023-11-01',
+    certifications: ['ISO 22000', 'BRC'],
+    documents: [
+      { name: 'Giấy phép KCN', date: '2023-10-28' },
+      { name: 'PCCC', date: '2023-10-15' }
+    ]
+  },
+
+  {
+    id: 'B007',
+    name: 'Trang trại hữu cơ Green Valley',
+    code: 'GV-2024-007',
+    image: 'https://picsum.photos/seed/greenvalley/600/400',
+    images: [
+      'https://picsum.photos/seed/greenvalley1/800/600',
+      'https://picsum.photos/seed/greenvalley2/800/600',
+      'https://picsum.photos/seed/greenvalley3/800/600',
+    ],
+    taxId: '0601234573',
+    sector: 'Nông sản',
+    address: '7 Phú Điền, Định Quán',
+    district: 'Định Quán',
+    phone: '0251.3896.129',
+    email: 'greenvalley@organic.vn',
+    representative: 'Trần Minh Tuấn',
+    status: 'pending',
+    productCount: 4,
+    joinDate: '2024-06-01',
+    certifications: ['Organic Vietnam'],
+    documents: []
+  }
 ];
 
 const STATUS_META = {
@@ -59,7 +235,22 @@ const sb = StyleSheet.create({
 });
 
 /* ─── Business Card ─────────────────────────────────────────── */
-function BizCard({ biz, onPress }: { biz: Business; onPress: () => void }) {
+function BizCard({
+  biz,
+  onPress,
+  onEdit,
+  onDelete,
+  onLock,
+  onResetPassword,
+}: {
+  biz: Business;
+  onPress: () => void;
+  onEdit: (biz: Business) => void;
+  onDelete: (biz: Business) => void;
+  onLock: (biz: Business) => void;
+  onResetPassword: (biz: Business) => void;
+}) {
+  
   const m = STATUS_META[biz.status];
   return (
     <TouchableOpacity style={s.bizCard} onPress={onPress} activeOpacity={0.85}>
@@ -81,19 +272,35 @@ function BizCard({ biz, onPress }: { biz: Business; onPress: () => void }) {
       </View>
       <View style={s.bizRow}>
         <Feather name="package" size={11} color="#6b7694" />
-        <Text style={s.bizRowText}>{biz.productCount} sản phẩm</Text>
-        <Feather name="user" size={11} color="#6b7694" style={{ marginLeft: 12 }} />
+        
         <Text style={s.bizRowText}>{biz.representative}</Text>
       </View>
       {biz.certifications.length > 0 && (
-        <View style={s.certRow}>
-          {biz.certifications.map(c => (
-            <View key={c} style={s.certBadge}>
-              <Feather name="award" size={9} color="#2740BA" />
-              <Text style={s.certText}>{c}</Text>
-            </View>
-          ))}
-        </View>
+      <View style={s.actionRow}>
+        <TouchableOpacity
+          onPress={() => onResetPassword(biz)}
+        >
+          <Feather name="key" size={16} color="#6366f1" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => onEdit(biz)}
+        >
+          <Feather name="edit-2" size={16} color="#2563eb" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => onLock(biz)}
+        >
+          <Feather name="lock" size={16} color="#f59e0b" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => onDelete(biz)}
+        >
+          <Feather name="trash-2" size={16} color="#ef4444" />
+        </TouchableOpacity>
+      </View>
       )}
     </TouchableOpacity>
   );
@@ -123,13 +330,17 @@ function BusinessDetail({ biz, onBack }: { biz: Business; onBack: () => void }) 
     <View style={{ flex: 1, backgroundColor: '#f5f7fb' }}>
       {/* Cover */}
       <View style={sd.cover}>
+       
         <TouchableOpacity style={sd.backBtn} onPress={onBack}>
           <Feather name="arrow-left" size={18} color="#fff" />
         </TouchableOpacity>
         <View style={sd.coverContent}>
-          <View style={sd.coverAvatar}>
-            <Text style={sd.coverAvatarText}>{biz.name.charAt(0)}</Text>
-          </View>
+          <Image
+            source={{ uri: biz.image }}
+            style={sd.coverImage}
+            resizeMode="cover"
+          />
+
           <Text style={sd.coverName}>{biz.name}</Text>
           <Text style={sd.coverCode}>{biz.code}</Text>
         </View>
@@ -278,7 +489,49 @@ export default function BusinessesScreen() {
   const [selectedStatus, setSelectedStatus] = useState('Tất cả');
   
   const [selected, setSelected] = useState<Business | null>(null);
+  const handleEdit = (biz: Business) => {
+    setSelected(biz);
+  };
 
+  const handleResetPassword = (biz: Business) => {
+    Alert.alert(
+      'Đặt lại mật khẩu',
+      `Đặt lại mật khẩu cho ${biz.name}?`,
+      [
+        { text: 'Hủy' },
+        {
+          text: 'Đồng ý',
+          onPress: () => {
+            // gọi API reset password
+          },
+        },
+      ]
+    );
+  };
+
+  const handleLock = (biz: Business) => {
+    Alert.alert(
+      'Khóa doanh nghiệp',
+      `Khóa ${biz.name}?`
+    );
+  };
+
+  const handleDelete = (biz: Business) => {
+    Alert.alert(
+      'Xóa doanh nghiệp',
+      `Xóa ${biz.name}?`,
+      [
+        { text: 'Hủy' },
+        {
+          text: 'Xóa',
+          style: 'destructive',
+          onPress: () => {
+            // gọi API xóa
+          },
+        },
+      ]
+    );
+  };
   const filtered = useMemo(() => {
     return BUSINESSES.filter(b => {
       const q = search.toLowerCase();
@@ -364,6 +617,10 @@ export default function BusinessesScreen() {
           <BizCard
             biz={item}
             onPress={() => setSelected(item)}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onLock={handleLock}
+            onResetPassword={handleResetPassword}
           />
         )}
         contentContainerStyle={{ padding: 12, paddingBottom: 16 }}
@@ -388,7 +645,15 @@ const s = StyleSheet.create({
   subtitle: { fontSize: 11, color: '#6b7694', marginTop: 2 },
  
   
- 
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 16,
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#eef2f7',
+  },
   searchRow: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12,
     borderWidth: 1, borderColor: '#e4e8f0', marginHorizontal: 12, marginBottom: 8, paddingHorizontal: 12, height: 42,
@@ -460,6 +725,14 @@ const s = StyleSheet.create({
 });
 
 const sd = StyleSheet.create({
+  coverImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 16,
+    marginBottom: 12,
+    borderWidth: 3,
+    borderColor: '#fff',
+  },
   cover: { backgroundColor: '#1e3171', padding: 20, paddingTop: 16, paddingBottom: 24 },
   backBtn: {
     width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.15)',

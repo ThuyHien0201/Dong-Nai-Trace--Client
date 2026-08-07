@@ -367,8 +367,7 @@ function BusinessDetail({
                   ["Ngành hàng", business.sector],
                   ["Ngày đăng ký", business.registeredAt],
                   ["Loại hình", "TNHH / HTX"],
-                  ["Quy mô", "Vừa và nhỏ"],
-                  ["Vốn điều lệ", "5,000,000,000 đ"],
+                  ["Số lượng sản phẩm", "12"],
                   ["Người đại diện", business.representative],
                   ["SĐT liên hệ", business.phone],
                   ["Email", "lienhe@dntrace.vn"],
@@ -486,36 +485,7 @@ function BusinessDetail({
               </button>
             </div>
 
-            {/* Processing timeline */}
-            <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-[0_2px_12px_rgba(38,55,105,.04)]">
-              <p className="mb-5 text-[13px] font-bold text-[#1d2944]">Lịch sử xử lý hồ sơ</p>
-              <div className="space-y-0">
-                {timelineItems.map((item, i) => (
-                  <div key={i} className="relative flex gap-4 pb-5 last:pb-0">
-                    {i < timelineItems.length - 1 && (
-                      <span className="absolute left-[11px] top-6 h-full w-px bg-[#e4e8f0]" />
-                    )}
-                    <div
-                      className="relative z-10 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
-                      style={{
-                        background: item.done ? item.color : "#fff",
-                        boxShadow: `0 0 0 2px ${item.color}`,
-                      }}
-                    >
-                      {item.done ? (
-                        <Check className="h-3 w-3 text-white" strokeWidth={3} />
-                      ) : (
-                        <Clock className="h-3 w-3" style={{ color: item.color }} strokeWidth={2.5} />
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[12px] font-semibold text-[#25304b]">{item.action}</p>
-                      <p className="mt-0.5 text-[10px] text-slate-400">{item.actor} · {item.time}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+     
           </div>
         </div>
       </DashboardShell>
