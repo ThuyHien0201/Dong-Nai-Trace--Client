@@ -55,9 +55,9 @@ export default function MoreScreen() {
             <Image source={require('../../assets/images/logo-skhcn.png')} style={s.avatarLogo} />
           </View>
           <View style={s.headerInfo}>
-            <Text style={s.appName}>Đồng Nai <Text style={s.appAccent}>Trace</Text></Text>
-            <Text style={s.name}>Quản trị viên</Text>
-            <Text style={s.email}>admin@dongnai.gov.vn</Text>
+            <Text style={s.appName} numberOfLines={1} ellipsizeMode="tail">Đồng Nai <Text style={s.appAccent}>Trace</Text></Text>
+            <Text style={s.name} numberOfLines={1} ellipsizeMode="tail">Quản trị viên</Text>
+            <Text style={s.email} numberOfLines={1} ellipsizeMode="tail">admin@dongnai.gov.vn</Text>
             <View style={s.roleBadge}>
               <Feather name="shield" size={10} color="#2740BA" />
               <Text style={s.roleText}>Quản trị cấp tỉnh</Text>
@@ -149,14 +149,14 @@ const s = StyleSheet.create({
   },
   avatar: { width: 48, height: 48, borderRadius: 14, backgroundColor: '#2740BA', alignItems: 'center', justifyContent: 'center' },
   avatarLogo: { width: 44, height: 44, borderRadius: 13 },
-  headerInfo: { flex: 1 },
+  headerInfo: { flex: 1, minWidth: 0 },
   appName: { fontSize: 14, fontWeight: '700', color: '#1d2944' },
   appAccent: { color: '#E8650A' },
   name: { fontSize: 14, fontWeight: '700', color: '#1d2944' },
   email: { fontSize: 11, color: '#6b7694', marginTop: 2 },
   roleBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
   roleText: { fontSize: 10, color: '#2740BA', fontWeight: '600' },
-  settingsBtn: { padding: 8, borderRadius: 8, borderWidth: 1, borderColor: '#e4e8f0' },
+  settingsBtn: { flexShrink: 0, padding: 8, borderRadius: 8, borderWidth: 1, borderColor: '#e4e8f0' },
 
   statsRow: { flexDirection: 'row', paddingHorizontal: 12, gap: 8, marginBottom: 4 },
   statCard: {

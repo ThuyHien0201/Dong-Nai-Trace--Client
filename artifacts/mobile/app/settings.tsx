@@ -67,9 +67,9 @@ export default function SettingsScreen() {
         <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
           <Feather name="arrow-left" size={20} color="#1d2944" />
         </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={s.title}>Cài đặt cá nhân</Text>
-          <Text style={s.subtitle}>Hồ sơ và bảo mật tài khoản</Text>
+         <View style={{ flex: 1, minWidth: 0 }}>
+           <Text style={s.title} numberOfLines={1} ellipsizeMode="tail">Cài đặt cá nhân</Text>
+           <Text style={s.subtitle} numberOfLines={1} ellipsizeMode="tail">Hồ sơ và bảo mật tài khoản</Text>
         </View>
       </View>
 
@@ -90,14 +90,14 @@ export default function SettingsScreen() {
       </View>
 
       {/* Tabs */}
-      <View style={s.tabs}>
+       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.tabsScroll} contentContainerStyle={s.tabs}>
         {([['profile', 'Hồ sơ cá nhân'], ['password', 'Đổi mật khẩu']] as const).map(([k, l]) => (
           <TouchableOpacity key={k} style={[s.tab, activeTab === k && s.tabActive]} onPress={() => setActiveTab(k)}>
             <Feather name={k === 'profile' ? 'user' : 'lock'} size={13} color={activeTab === k ? '#2740BA' : '#6b7694'} />
             <Text style={[s.tabText, activeTab === k && s.tabTextActive]}>{l}</Text>
           </TouchableOpacity>
         ))}
-      </View>
+       </ScrollView>
 
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
         {activeTab === 'profile' ? (
@@ -260,8 +260,9 @@ const s = StyleSheet.create({
   avatarName: { fontSize: 15, fontWeight: '700', color: '#1d2944' },
   roleBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 4 },
   roleText: { fontSize: 11, color: '#2740BA', fontWeight: '600' },
-  tabs: { flexDirection: 'row', backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e4e8f0' },
-  tab: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12 },
+  tabsScroll: { flexGrow: 0, maxHeight: 49, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e4e8f0' },
+  tabs: { flexGrow: 1, minWidth: '100%', flexDirection: 'row' },
+  tab: { flex: 1, minWidth: 170, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12 },
   tabActive: { borderBottomWidth: 2, borderBottomColor: '#2740BA' },
   tabText: { fontSize: 12, color: '#6b7694', fontWeight: '500' },
   tabTextActive: { color: '#2740BA', fontWeight: '700' },

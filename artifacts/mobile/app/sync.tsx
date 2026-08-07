@@ -531,7 +531,9 @@ function LotCard({
         ) : <StatusBadge lot={lot} sessionSynced={sessionSynced} />}
       </View>
       <View style={s.lotInfoRow}>
-        <View style={s.lotInfo}><Feather name="hash" size={12} color="#6b7694" /><Text style={s.lotInfoText}>{lot.lotCode}</Text></View>
+        {!solution && (
+          <View style={s.lotInfo}><Feather name="hash" size={12} color="#6b7694" /><Text style={s.lotInfoText}>{lot.lotCode}</Text></View>
+        )}
         <View style={s.lotInfo}><Feather name="calendar" size={12} color="#6b7694" /><Text style={s.lotInfoText}>{formatDate(lot.activatedAt)}</Text></View>
       </View>
       <View style={s.cardActions}>
@@ -635,8 +637,8 @@ export default function SyncScreen() {
           <Feather name="arrow-left" size={20} color="#1d2944" />
         </TouchableOpacity>
         <View style={s.headerText}>
-          <Text style={s.title}>Đồng bộ dữ liệu</Text>
-          <Text style={s.subtitle}>Hồ sơ giải pháp & cổng truy xuất nguồn gốc</Text>
+          <Text style={s.title} numberOfLines={1}>Đồng bộ dữ liệu</Text>
+          <Text style={s.subtitle} numberOfLines={1}>Hồ sơ giải pháp & cổng truy xuất nguồn gốc</Text>
         </View>
         {tab === "portal" && (
           <TouchableOpacity style={s.syncAllButton} onPress={syncAll} disabled={syncingAll}>
@@ -644,7 +646,13 @@ export default function SyncScreen() {
           </TouchableOpacity>
         )}
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.tabs}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={s.tabScroll}
+        contentContainerStyle={s.tabs}
+        contentInsetAdjustmentBehavior="never"
+      >
         <TouchableOpacity onPress={() => setTab("solution")} style={[s.tab, tab === "solution" && s.activeTab]}>
           <Text style={[s.tabText, tab === "solution" && s.activeTabText]}>Đơn vị giải pháp</Text>
         </TouchableOpacity>
@@ -655,8 +663,8 @@ export default function SyncScreen() {
 
       <View style={s.pageIntro}>
         <Text style={s.eyebrow}>HỆ THỐNG</Text>
-        <Text style={s.pageTitle}>{tab === "solution" ? "Đồng bộ sang đơn vị giải pháp" : "Cổng truy xuất nguồn gốc"}</Text>
-        <Text style={s.pageHint}>
+        <Text style={s.pageTitle} numberOfLines={2}>{tab === "solution" ? "Đồng bộ sang đơn vị giải pháp" : "Cổng truy xuất nguồn gốc"}</Text>
+        <Text style={s.pageHint} numberOfLines={3}>
           {tab === "solution"
             ? "Gửi thông tin doanh nghiệp và sản phẩm để bổ sung dữ liệu TXNG qua API."
             : "Xem xét hồ sơ hoàn thiện và đẩy lên cổng truy xuất nguồn gốc quốc gia."}
@@ -724,16 +732,17 @@ const s = StyleSheet.create({
   headerText: { flex: 1 },
   title: { fontSize: 18, fontWeight: "700", color: "#1d2944", letterSpacing: -0.5 },
   subtitle: { fontSize: 10, color: "#6b7694", marginTop: 2 },
-  syncAllButton: { flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: "#2740BA", paddingHorizontal: 10, paddingVertical: 8, borderRadius: 10 },
+  syncAllButton: { flexShrink: 0, flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: "#2740BA", paddingHorizontal: 10, paddingVertical: 8, borderRadius: 10 },
   syncAllText: { fontSize: 10, fontWeight: "700", color: "#fff" },
-  tabs: { paddingHorizontal: 16, gap: 8, borderBottomWidth: 1, borderBottomColor: "#e4e8f0" },
-  tab: { paddingHorizontal: 13, paddingVertical: 10, borderRadius: 9, marginBottom: 8, backgroundColor: "#fff", borderWidth: 1, borderColor: "#e4e8f0" },
+  tabScroll: { flexGrow: 0, maxHeight: 52, borderBottomWidth: 1, borderBottomColor: "#e4e8f0" },
+  tabs: { paddingHorizontal: 16, gap: 8, alignItems: "center" },
+  tab: { minHeight: 36, paddingHorizontal: 13, paddingVertical: 9, borderRadius: 9, backgroundColor: "#fff", borderWidth: 1, borderColor: "#e4e8f0" },
   activeTab: { backgroundColor: "#2740BA", borderColor: "#2740BA" },
   tabText: { fontSize: 11, fontWeight: "700", color: "#6b7694" },
   activeTabText: { color: "#fff" },
   pageIntro: { paddingHorizontal: 16, paddingTop: 15, paddingBottom: 5 },
   eyebrow: { fontSize: 9, fontWeight: "800", letterSpacing: 1.3, color: "#E8650A" },
-  pageTitle: { fontSize: 16, fontWeight: "700", color: "#1d2944", marginTop: 4 },
+  pageTitle: { fontSize: 16, fontWeight: "700", color: "#1d2944", marginTop: 4, flexShrink: 1 },
   pageHint: { fontSize: 10, color: "#6b7694", lineHeight: 15, marginTop: 3 },
   apiStatus: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 16, paddingVertical: 6 },
   apiStatusText: { fontSize: 10, flex: 1 },

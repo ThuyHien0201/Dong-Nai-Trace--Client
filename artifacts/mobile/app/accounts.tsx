@@ -326,17 +326,21 @@ function AccountModal({
           >
             <TouchableOpacity
               onPress={onClose}
-              style={styles.iconButton}
+              style={styles.modalHeaderAction}
               accessibilityLabel="Đóng"
             >
               <Feather name="x" size={21} color={colors.textPrimary} />
             </TouchableOpacity>
-            <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
+            <Text
+              style={[styles.modalTitle, { color: colors.textPrimary }]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
               {isEdit ? "Chỉnh sửa tài khoản" : "Thêm tài khoản mới"}
             </Text>
             <TouchableOpacity
               onPress={submit}
-              style={[styles.modalSave, { backgroundColor: colors.primary }]}
+              style={[styles.modalHeaderSave, { backgroundColor: colors.primary }]}
             >
               <Text style={styles.modalSaveText}>{isEdit ? "Lưu" : "Tạo"}</Text>
             </TouchableOpacity>
@@ -540,6 +544,7 @@ function AccountModal({
                   },
                 ]}
                 accessibilityLabel="Đổi trạng thái tài khoản"
+                hitSlop={8}
               >
                 <View
                   style={[
@@ -764,11 +769,11 @@ export default function AccountsScreen() {
         >
           <Feather name="arrow-left" size={20} color={colors.textPrimary} />
         </TouchableOpacity>
-        <View style={styles.flex}>
-          <Text style={[styles.title, { color: colors.textPrimary }]}>
+        <View style={[styles.flex, styles.headerTitleBlock]}>
+          <Text style={[styles.title, { color: colors.textPrimary }]} numberOfLines={1} ellipsizeMode="tail">
             Quản lý tài khoản
           </Text>
-          <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+          <Text style={[styles.subtitle, { color: colors.textMuted }]} numberOfLines={1} ellipsizeMode="tail">
             {accounts.length} tài khoản hệ thống
           </Text>
         </View>
@@ -810,7 +815,9 @@ export default function AccountsScreen() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
+            style={styles.horizontalTabScroll}
             contentContainerStyle={styles.filterRow}
+            nestedScrollEnabled
           >
             {["Tất cả", ...roles].map((role) => {
               const selected = roleFilter === role;
@@ -858,7 +865,9 @@ export default function AccountsScreen() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
+            style={styles.horizontalTabScroll}
             contentContainerStyle={styles.statusRow}
+            nestedScrollEnabled
           >
             {statusOptions.map((status) => {
               const selected = statusFilter === status;
@@ -1146,7 +1155,9 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 10,
   },
+  headerTitleBlock: { minWidth: 0 },
   iconButton: { padding: 5 },
+  modalHeaderAction: { width: 34, height: 34, alignItems: "center", justifyContent: "center", flexShrink: 0 },
   title: { fontSize: 18, fontWeight: "700", letterSpacing: -0.4 },
   subtitle: { fontSize: 11, marginTop: 2 },
   addButton: {
@@ -1168,6 +1179,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "transparent",
   },
   tabText: { fontSize: 12, fontWeight: "600" },
+  horizontalTabScroll: { flexGrow: 0, width: "100%", maxHeight: 48 },
   searchRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -1272,8 +1284,8 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     borderBottomWidth: 1,
   },
-  modalTitle: { flex: 1, textAlign: "center", fontSize: 15, fontWeight: "700" },
-  modalSave: { borderRadius: 8, paddingHorizontal: 15, paddingVertical: 7 },
+  modalTitle: { flex: 1, minWidth: 0, textAlign: "center", fontSize: 15, fontWeight: "700" },
+  modalHeaderSave: { minWidth: 48, alignItems: "center", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 7, flexShrink: 0 },
   modalSaveText: { color: "#fff", fontSize: 12, fontWeight: "700" },
   modalContent: { padding: 18, paddingBottom: 40 },
   field: { marginBottom: 16 },
