@@ -3,8 +3,8 @@ name: Imported workspace runtime
 description: Environment-specific setup note for imported artifact workspaces.
 ---
 
-Imported artifact metadata may exist in the repository without being registered in the runtime artifact catalog. In that case, the managed artifact workflow name is unavailable and the app must be run with a minimal named workflow that supplies the artifact's existing PORT and BASE_PATH values.
+Imported artifact metadata may exist in the repository without being registered in the runtime artifact catalog. In that case, the managed artifact workflow name is unavailable and the app must be run with a minimal named workflow that supplies the artifact's existing PORT and BASE_PATH values. Also verify the workspace dependencies are installed before diagnosing a Vite/Expo workflow failure.
 
-**Why:** The runtime can have no registered artifacts even when `.replit-artifact/artifact.toml` is present, so assuming managed workflow registration can leave a working app unable to start.
+**Why:** The runtime can have no registered artifacts even when `.replit-artifact/artifact.toml` is present, so assuming managed workflow registration can leave a working app unable to start. An imported workspace may also have no `node_modules`, causing misleading `vite: not found` or missing build-tool errors before application code runs.
 
 **How to apply:** Check the runtime artifact/workflow lists before restarting an imported app; if the artifact is absent, use its existing metadata values rather than changing the app's Vite configuration.
