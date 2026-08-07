@@ -51,7 +51,7 @@ export default function MoreScreen() {
         {/* Header */}
         <View style={s.header}>
           <View style={s.avatar}>
-            <Image source={require('../../assets/images/logo-skhcn.png')} style={s.avatarLogo} />
+            <Image source={require('../../assets/images/logo-skhcn.png')} style={s.avatarLogo} resizeMode="contain" />
           </View>
           <View style={s.headerInfo}>
             <Text style={s.appName} numberOfLines={1} ellipsizeMode="tail">Đồng Nai <Text style={s.appAccent}>Trace</Text></Text>
@@ -146,8 +146,8 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: '#e4e8f0',
     shadowColor: '#1d2944', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
-  avatar: { width: 48, height: 48, borderRadius: 14, backgroundColor: '#2740BA', alignItems: 'center', justifyContent: 'center' },
-  avatarLogo: { width: 44, height: 44, borderRadius: 13 },
+  avatar: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
+  avatarLogo: { width: 44, height: 44 },
   headerInfo: { flex: 1, minWidth: 0 },
   appName: { fontSize: 14, fontWeight: '700', color: '#1d2944' },
   appAccent: { color: '#E8650A' },

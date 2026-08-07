@@ -67,7 +67,7 @@ export default function DashboardScreen() {
         <View style={s.header}>
           <View>
             <View style={s.brandRow}>
-              <Image source={require('../../assets/images/logo-skhcn.png')} style={s.brandLogo} />
+              <Image source={require('../../assets/images/logo-skhcn.png')} style={s.brandLogo} resizeMode="contain" />
               <View>
                 <Text style={s.brandName}>
                   Đồng Nai <Text style={s.brandAccent}>Trace</Text>
@@ -178,7 +178,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 16, paddingTop: 12, paddingBottom: 4,
   },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 9 },
-  brandLogo: { width: 36, height: 36, borderRadius: 18 },
+  brandLogo: { width: 36, height: 36 },
   brandName: { fontSize: 18, fontWeight: '700', color: '#1d2944', letterSpacing: -0.5 },
   brandAccent: { color: '#E8650A' },
   brandSub: { fontSize: 8, color: '#8896b0', letterSpacing: 1.5, marginTop: 2 },

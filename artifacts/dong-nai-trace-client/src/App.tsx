@@ -96,7 +96,7 @@ function TraceMark({
       data-testid="brand-logo"
     >
       <div
-        className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-xl ${compact ? "h-10 w-10" : "h-[52px] w-[52px]"}`}
+        className={`relative flex shrink-0 items-center justify-center ${compact ? "h-10 w-10" : "h-[52px] w-[52px]"}`}
       >
         <img
           src={skhcnLogo}
