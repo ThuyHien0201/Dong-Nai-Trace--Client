@@ -54,9 +54,9 @@ export default function LoginScreen() {
             <View style={s.headerOverlay} />
             <View style={s.headerContent}>
               <View style={s.logoRow}>
-                <View style={s.logoBox}>
-                  <Text style={s.logoText}>🏛</Text>
-                </View>
+              <View style={s.logoBox}>
+                <Image source={require('../assets/images/logo-skhcn.png')} style={s.logoImage} />
+              </View>
                 <View>
                   <Text style={s.brandName}>Đồng Nai <Text style={s.brandAccent}>Trace</Text></Text>
                   <Text style={s.brandSub}>TRACE WITH CONFIDENCE</Text>
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.15)',
     alignItems: 'center', justifyContent: 'center',
   },
-  logoText: { fontSize: 22 },
+  logoImage: { width: 38, height: 38 },
   brandName: { fontSize: 18, fontWeight: '700', color: '#fff', letterSpacing: -0.6 },
   brandAccent: { color: '#ffb265' },
   brandSub: {

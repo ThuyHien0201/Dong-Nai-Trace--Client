@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -52,9 +52,10 @@ export default function MoreScreen() {
         {/* Header */}
         <View style={s.header}>
           <View style={s.avatar}>
-            <Text style={s.avatarText}>QT</Text>
+            <Image source={require('../../assets/images/logo-skhcn.png')} style={s.avatarLogo} />
           </View>
           <View style={s.headerInfo}>
+            <Text style={s.appName}>Đồng Nai <Text style={s.appAccent}>Trace</Text></Text>
             <Text style={s.name}>Quản trị viên</Text>
             <Text style={s.email}>admin@dongnai.gov.vn</Text>
             <View style={s.roleBadge}>
@@ -72,7 +73,7 @@ export default function MoreScreen() {
           {[
             { label: 'Doanh nghiệp', value: '247', icon: 'briefcase' },
             { label: 'Sản phẩm', value: '1.842', icon: 'package' },
-            { label: 'QR tháng này', value: '12.4K', icon: 'scan' },
+            { label: 'QR tháng này', value: '12.4K', icon: 'crosshair' },
           ].map((stat, i) => (
             <View key={i} style={s.statCard}>
               <Feather name={stat.icon as any} size={14} color="#2740BA" />
@@ -132,7 +133,7 @@ export default function MoreScreen() {
           <Text style={s.logoutText}>Đăng xuất</Text>
         </TouchableOpacity>
 
-        <Text style={s.footer}>© 2024 Đồng Nai Trace · TraceMark Technology</Text>
+         <Text style={s.footer}>© 2024 Đồng Nai Trace · TraceMark Technology</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -147,8 +148,10 @@ const s = StyleSheet.create({
     shadowColor: '#1d2944', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2,
   },
   avatar: { width: 48, height: 48, borderRadius: 14, backgroundColor: '#2740BA', alignItems: 'center', justifyContent: 'center' },
-  avatarText: { fontSize: 16, fontWeight: '700', color: '#fff' },
+  avatarLogo: { width: 44, height: 44, borderRadius: 13 },
   headerInfo: { flex: 1 },
+  appName: { fontSize: 14, fontWeight: '700', color: '#1d2944' },
+  appAccent: { color: '#E8650A' },
   name: { fontSize: 14, fontWeight: '700', color: '#1d2944' },
   email: { fontSize: 11, color: '#6b7694', marginTop: 2 },
   roleBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },

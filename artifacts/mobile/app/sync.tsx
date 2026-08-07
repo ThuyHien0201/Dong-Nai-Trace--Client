@@ -30,7 +30,18 @@ type ModalStep = 'basic' | 'txng' | null;
 export default function SyncScreen() {
   const router = useRouter();
   const { data: apiLots, isLoading, error } = useListPortalLots();
-  const lots: Lot[] = (apiLots as any[])?.length ? (apiLots as any[]) : MOCK_LOTS;
+  const lots: Lot[] = apiLots?.data?.length
+    ? apiLots.data.map((lot) => ({
+        id: String(lot.id),
+        name: lot.lotCode,
+        business: lot.businessName,
+        product: lot.productName,
+        quantity: '—',
+        date: lot.activatedAt?.slice(0, 10) ?? '—',
+        status: lot.syncStatus === 'synced' ? 'synced' : 'pending',
+        txngSteps: [],
+      }))
+    : MOCK_LOTS;
 
   const [selectedLot, setSelectedLot] = useState<Lot | null>(null);
   const [modalStep, setModalStep] = useState<ModalStep>(null);

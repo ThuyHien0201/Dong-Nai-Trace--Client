@@ -10,7 +10,7 @@ const REGIONS = ['Tất cả', 'Biên Hòa', 'Long Thành', 'Nhơn Trạch', 'Xu
 const KPIS = [
   { label: 'Tổng doanh nghiệp', value: '247', delta: '+5.2%', positive: true, icon: 'briefcase', color: '#2740BA', bg: '#edf0ff' },
   { label: 'Tổng sản phẩm', value: '1.842', delta: '+12.1%', positive: true, icon: 'package', color: '#1f7a45', bg: '#e8f5ed' },
-  { label: 'QR quét tháng này', value: '12.456', delta: '+28.4%', positive: true, icon: 'scan', color: '#E8650A', bg: '#fff4ed' },
+  { label: 'QR quét tháng này', value: '12.456', delta: '+28.4%', positive: true, icon: 'crosshair', color: '#E8650A', bg: '#fff4ed' },
   { label: 'Chờ phê duyệt', value: '31', delta: '-8.2%', positive: false, icon: 'clock', color: '#7c3aed', bg: '#f4f0ff' },
 ];
 
@@ -173,7 +173,7 @@ export default function AnalyticsScreen() {
           <Text style={s.cardSub}>5 tháng gần đây</Text>
           <View style={s.chartWrap}>
             <BarChart
-              data={NEW_BIZ_MONTHLY.map(d => ({ label: d.label, value: d.val, color: '#7c3aed' }))}
+              data={NEW_BIZ_MONTHLY.map(d => ({ label: d.label, value: d.value, color: '#7c3aed' }))}
               width={chartWidth}
               height={120}
               defaultColor="#7c3aed"

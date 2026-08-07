@@ -13,6 +13,7 @@ import {
 } from '@expo-google-fonts/inter';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 
 SplashScreen.preventAutoHideAsync();
@@ -74,6 +75,7 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
+      <StatusBar style="dark" backgroundColor="#f5f7fb" translucent={false} />
       <ErrorBoundary>
         <AuthProvider>
           <QueryClientProvider client={queryClient}>

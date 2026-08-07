@@ -84,7 +84,7 @@ function ProductCard({ product, onPress }: { product: Product; onPress: () => vo
             <Text style={s.metaText}>{product.category}</Text>
           </View>
           <View style={s.metaChip}>
-            <Feather name="scan" size={10} color="#6b7694" />
+            <Feather name="crosshair" size={10} color="#6b7694" />
             <Text style={s.metaText}>{product.qrScans.toLocaleString('vi-VN')}</Text>
           </View>
         </View>
@@ -154,7 +154,7 @@ function ProductDetail({ product, onBack }: { product: Product; onBack: () => vo
               { label: 'Nguồn gốc', value: product.origin, icon: 'map-pin' },
               { label: 'Ngày thu hoạch', value: product.harvestDate, icon: 'calendar' },
               { label: 'Hạn sử dụng', value: product.expiryDate, icon: 'clock' },
-              { label: 'Lượt quét QR', value: product.qrScans.toLocaleString('vi-VN'), icon: 'scan' },
+              { label: 'Lượt quét QR', value: product.qrScans.toLocaleString('vi-VN'), icon: 'crosshair' },
             ].map(row => (
               <View key={row.label} style={pd.infoRow}>
                 <Feather name={row.icon as any} size={13} color="#6b7694" style={{ marginRight: 10, marginTop: 2 }} />

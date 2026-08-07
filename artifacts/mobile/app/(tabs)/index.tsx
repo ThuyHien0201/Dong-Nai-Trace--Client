@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl,
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -10,7 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const KPI_CARDS = [
   { label: 'Doanh nghiệp', value: '247', delta: '+5.2%', icon: 'briefcase', color: '#2740BA', bg: '#edf0ff' },
   { label: 'Sản phẩm', value: '1.842', delta: '+12.1%', icon: 'package', color: '#1f7a45', bg: '#e8f5ed' },
-  { label: 'Lượt quét QR', value: '12.456', delta: '+28.4%', icon: 'scan', color: '#E8650A', bg: '#fff4ed' },
+  { label: 'Lượt quét QR', value: '12.456', delta: '+28.4%', icon: 'crosshair', color: '#E8650A', bg: '#fff4ed' },
   { label: 'Tỷ lệ phê duyệt', value: '94.2%', delta: '+1.8%', icon: 'check-circle', color: '#7c3aed', bg: '#f4f0ff' },
 ];
 
@@ -38,7 +38,7 @@ const PIE_DATA = [
 const ACTIVITIES = [
   { id: 1, title: 'Doanh nghiệp "Vĩnh Hảo" đã được phê duyệt', time: '2 phút trước', type: 'approve', icon: 'check-circle', color: '#1f7a45' },
   { id: 2, title: 'Sản phẩm mới "Bưởi Tân Triều" đăng ký', time: '15 phút trước', type: 'register', icon: 'plus-circle', color: '#2740BA' },
-  { id: 3, title: 'QR Code "BVHO-2024" bị quét lần thứ 500', time: '45 phút trước', type: 'qr', icon: 'scan', color: '#E8650A' },
+  { id: 3, title: 'QR Code "BVHO-2024" bị quét lần thứ 500', time: '45 phút trước', type: 'qr', icon: 'crosshair', color: '#E8650A' },
   { id: 4, title: 'Doanh nghiệp "An Phú Foods" cập nhật hồ sơ', time: '1 giờ trước', type: 'update', icon: 'edit', color: '#7c3aed' },
   { id: 5, title: 'Đồng bộ dữ liệu portal thành công — 18 lô hàng', time: '2 giờ trước', type: 'sync', icon: 'refresh-cw', color: '#1f7a45' },
   { id: 6, title: 'Chứng nhận "VietGAP" gia hạn thành công', time: '4 giờ trước', type: 'cert', icon: 'award', color: '#2740BA' },
@@ -72,10 +72,16 @@ export default function DashboardScreen() {
         {/* Header */}
         <View style={s.header}>
           <View>
-            <Text style={s.brandName}>
-              Đồng Nai <Text style={s.brandAccent}>Trace</Text>
-            </Text>
-            <Text style={s.greeting}>Chào mừng, Quản trị viên 👋</Text>
+            <View style={s.brandRow}>
+              <Image source={require('../../assets/images/logo-skhcn.png')} style={s.brandLogo} />
+              <View>
+                <Text style={s.brandName}>
+                  Đồng Nai <Text style={s.brandAccent}>Trace</Text>
+                </Text>
+                <Text style={s.brandSub}>TRACE WITH CONFIDENCE</Text>
+              </View>
+            </View>
+            <Text style={s.greeting}>Chào mừng, Quản trị viên</Text>
           </View>
           <View style={s.headerActions}>
             <TouchableOpacity style={s.iconBtn}>
@@ -200,8 +206,11 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingTop: 12, paddingBottom: 4,
   },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 9 },
+  brandLogo: { width: 36, height: 36, borderRadius: 18 },
   brandName: { fontSize: 18, fontWeight: '700', color: '#1d2944', letterSpacing: -0.5 },
-  brandAccent: { color: '#2740BA' },
+  brandAccent: { color: '#E8650A' },
+  brandSub: { fontSize: 8, color: '#8896b0', letterSpacing: 1.5, marginTop: 2 },
   greeting: { fontSize: 11, color: '#6b7694', marginTop: 2 },
   headerActions: { flexDirection: 'row', gap: 8 },
   iconBtn: {
