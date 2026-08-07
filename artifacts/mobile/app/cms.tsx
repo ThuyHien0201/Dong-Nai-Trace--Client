@@ -63,6 +63,7 @@ export default function CMSScreen() {
   const [editTitle, setEditTitle] = useState('');
   const [editExcerpt, setEditExcerpt] = useState('');
   const [editCat, setEditCat] = useState('Tin tức');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [editImageUri, setEditImageUri] = useState<string | undefined>();
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [showBannerEditor, setShowBannerEditor] = useState(false);
@@ -164,6 +165,7 @@ export default function CMSScreen() {
     setEditTitle('');
     setEditExcerpt('');
     setEditCat('Tin tức');
+    setShowCategoryDropdown(false);
     setEditImageUri(undefined);
     setSelectedArticle(null);
     setShowEditor(true);
@@ -174,6 +176,7 @@ export default function CMSScreen() {
     setEditTitle(article.title);
     setEditExcerpt(article.excerpt);
     setEditCat(article.category);
+    setShowCategoryDropdown(false);
     setEditImageUri(article.imageUri);
     setShowEditor(true);
   };
@@ -392,14 +395,6 @@ export default function CMSScreen() {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            <Text style={s.fieldLabel}>Danh mục</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, marginBottom: 16, alignItems: 'center' }} style={{ maxHeight: 40, flexGrow: 0 }}>
-              {Object.keys(CAT_COLOR).map(cat => (
-                <TouchableOpacity key={cat} style={[s.catChip, editCat === cat && s.catChipActive]} onPress={() => setEditCat(cat)}>
-                  <Text style={[s.catChipText, editCat === cat && { color: '#2740BA', fontWeight: '700' }]}>{cat}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
             <Text style={s.fieldLabel}>Ảnh đại diện</Text>
             <TouchableOpacity style={s.articleImagePicker} onPress={pickArticleImage} activeOpacity={0.8}>
               {editImageUri ? (
@@ -418,6 +413,44 @@ export default function CMSScreen() {
                 </>
               )}
             </TouchableOpacity>
+            <Text style={s.fieldLabel}>Danh mục *</Text>
+            <View style={s.categorySelectWrap}>
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="Chọn danh mục bài viết"
+                accessibilityState={{ expanded: showCategoryDropdown }}
+                style={[s.categorySelect, showCategoryDropdown && s.categorySelectActive]}
+                onPress={() => setShowCategoryDropdown(current => !current)}
+              >
+                <Text style={s.categorySelectText}>{editCat}</Text>
+                <Feather
+                  name={showCategoryDropdown ? 'chevron-up' : 'chevron-down'}
+                  size={16}
+                  color="#6b7694"
+                />
+              </TouchableOpacity>
+              {showCategoryDropdown && (
+                <View style={s.categoryDropdown}>
+                  {Object.keys(CAT_COLOR).map(cat => (
+                    <TouchableOpacity
+                      key={cat}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected: editCat === cat }}
+                      style={[s.categoryOption, editCat === cat && s.categoryOptionActive]}
+                      onPress={() => {
+                        setEditCat(cat);
+                        setShowCategoryDropdown(false);
+                      }}
+                    >
+                      <Text style={[s.categoryOptionText, editCat === cat && s.categoryOptionTextActive]}>
+                        {cat}
+                      </Text>
+                      {editCat === cat && <Feather name="check" size={15} color="#2740BA" />}
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </View>
             <Text style={s.fieldLabel}>Tiêu đề *</Text>
             <TextInput
               style={s.fieldInput}
@@ -647,9 +680,15 @@ const s = StyleSheet.create({
   saveBtnText: { fontSize: 13, fontWeight: '700', color: '#fff' },
   fieldLabel: { fontSize: 11, fontWeight: '700', color: '#34405a', marginBottom: 8 },
   fieldInput: { backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: '#e4e8f0', padding: 12, fontSize: 13, color: '#1d2944', marginBottom: 16 },
-  catChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, backgroundColor: '#fff', borderWidth: 1, borderColor: '#e4e8f0' },
-  catChipActive: { backgroundColor: '#edf0ff', borderColor: '#2740BA' },
-  catChipText: { fontSize: 11, color: '#6b7694' },
+  categorySelectWrap: { marginBottom: 16 },
+  categorySelect: { height: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 13, borderRadius: 12, borderWidth: 1, borderColor: '#e4e8f0', backgroundColor: '#fff' },
+  categorySelectActive: { borderColor: '#2740BA', backgroundColor: '#f8f9ff' },
+  categorySelectText: { fontSize: 13, color: '#1d2944', fontWeight: '500' },
+  categoryDropdown: { marginTop: 6, borderRadius: 12, borderWidth: 1, borderColor: '#e4e8f0', backgroundColor: '#fff', overflow: 'hidden' },
+  categoryOption: { minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 13, borderBottomWidth: 1, borderBottomColor: '#f0f2f8' },
+  categoryOptionActive: { backgroundColor: '#edf0ff' },
+  categoryOptionText: { fontSize: 12, color: '#6b7694' },
+  categoryOptionTextActive: { color: '#2740BA', fontWeight: '700' },
   editorActions: { flexDirection: 'row', gap: 12, marginTop: 8 },
   articleImagePicker: { height: 142, borderRadius: 14, borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#c9ddf4', backgroundColor: '#f3f8ff', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: 16 },
   selectedArticleImage: { width: '100%', height: '100%' },
