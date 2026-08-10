@@ -12,7 +12,7 @@ import { Feather } from '@expo/vector-icons';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 
 /* ─── Mock Data ────────────────────────────────────────────── */
-const STATUSES = ['Tất cả', 'Đã duyệt', 'Chờ duyệt', 'Đã khóa'];
+const STATUSES = ['Tất cả', 'Hoạt động', "Đã Khóa"];
 
 interface Business {
   id: string;
@@ -26,7 +26,7 @@ interface Business {
   phone: string;
   email: string;
   representative: string;
-  status: 'active' | 'pending' | 'locked';
+  status: 'active'  | 'locked';
   productCount: number;
   joinDate: string;
   certifications: string[];
@@ -109,7 +109,7 @@ const BUSINESSES: Business[] = [
     phone: '0251.3892.125',
     email: 'sales@anphufoods.com',
     representative: 'Lê Minh Khoa',
-    status: 'pending',
+    status: 'locked',
     productCount: 5,
     joinDate: '2024-03-10',
     certifications: [],
@@ -218,7 +218,7 @@ const BUSINESSES: Business[] = [
     phone: '0251.3896.129',
     email: 'greenvalley@organic.vn',
     representative: 'Trần Minh Tuấn',
-    status: 'pending',
+    status: 'locked',
     productCount: 4,
     joinDate: '2024-06-01',
     certifications: ['Organic Vietnam'],
@@ -227,8 +227,8 @@ const BUSINESSES: Business[] = [
 ];
 
 const STATUS_META = {
-  active: { label: 'Đã duyệt', color: '#1f7a45', bg: '#e8f5ed' },
-  pending: { label: 'Chờ duyệt', color: '#9a6116', bg: '#fff4d4' },
+  active: { label: 'Hoạt động', color: '#1f7a45', bg: '#e8f5ed' },
+  
   locked: { label: 'Đã khóa', color: '#c0392b', bg: '#fef0f0' },
 };
 
@@ -365,7 +365,7 @@ function BusinessDetail({
   ] as const;
 
   const STATUS_ACTIONS = {
-    status: biz.status ?? 'Đã duyệt',
+    status: biz.status ?? 'Hoạt động',
     phone: biz.phone,
     address: biz.address,
   };
@@ -792,7 +792,7 @@ export default function BusinessesScreen() {
       if (q && !b.name.toLowerCase().includes(q) && !b.code.toLowerCase().includes(q) && !b.representative.toLowerCase().includes(q)) return false;
       if (selectedSector !== 'Tất cả' && b.sector !== selectedSector) return false;
       if (selectedStatus !== 'Tất cả') {
-        const map: Record<string, Business['status']> = { 'Đã duyệt': 'active', 'Chờ duyệt': 'pending', 'đã khóa': 'locked' };
+        const map: Record<string, Business['status']> = { 'Hoạt động': 'active', 'đã khóa': 'locked' };
         if (b.status !== map[selectedStatus]) return false;
       }
       return true;

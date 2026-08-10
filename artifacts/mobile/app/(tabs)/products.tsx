@@ -186,19 +186,13 @@ const REGIONS = ['Tất cả địa bàn', 'Vĩnh Cửu', 'Định Quán', 'Nhơ
 const SECTORS = ['Tất cả ngành', 'OCOP', 'Nông sản', 'Thủy sản', 'Thực phẩm CB', 'Dược liệu', 'Chăn nuôi'];
 const STATUS_OPTIONS: Array<{ key: 'all' | ProductStatus; label: string }> = [
   { key: 'all', label: 'Tất cả' },
-  { key: 'pending', label: 'Chờ duyệt' },
-  { key: 'approved', label: 'Đã duyệt' },
+ 
 ];
 
 function StatusBadge({ status, compact = false }: { status: ProductStatus; compact?: boolean }) {
   const colors = useColors();
   const approved = status === 'approved';
-  return (
-    <View style={[styles.statusBadge, { backgroundColor: approved ? colors.successLight : colors.warningLight, borderColor: approved ? colors.successBorder : colors.warningBorder }, compact && styles.statusBadgeCompact]}>
-      <Feather name={approved ? 'check' : 'clock'} size={compact ? 10 : 12} color={approved ? colors.success : colors.warning} />
-      <Text style={[styles.statusText, { color: approved ? colors.success : colors.warning }]}>{approved ? 'Đã duyệt' : 'Chờ duyệt'}</Text>
-    </View>
-  );
+  
 }
 
 function ProductCard({ product, onPress, onDelete }: { product: Product; onPress: () => void; onDelete: () => void }) {
@@ -526,7 +520,7 @@ export default function ProductsScreen() {
   };
 
   const exportData = async () => {
-    const csv = ['Mã sản phẩm,Tên sản phẩm,Doanh nghiệp,Ngành hàng,Khu vực,Trạng thái', ...filtered.map(product => `${product.id},"${product.name}","${product.company}",${product.sector},${product.region},${product.status === 'approved' ? 'Đã duyệt' : 'Chờ duyệt'}`)].join('\n');
+    const csv = ['Mã sản phẩm,Tên sản phẩm,Doanh nghiệp,Ngành hàng,Khu vực,Trạng thái', ...filtered.map(product => `${product.id},"${product.name}","${product.company}",${product.sector},${product.region}`)].join('\n');
     await Share.share({ title: 'Danh sách sản phẩm', message: csv });
   };
 
@@ -542,13 +536,7 @@ export default function ProductsScreen() {
         <View><Text style={styles.eyebrow}>QUẢN LÝ</Text><Text style={styles.pageTitle}>Sản phẩm</Text><Text style={styles.pageSubtitle}>{products.length} sản phẩm đã đăng ký</Text></View>
         <TouchableOpacity style={styles.exportButton} onPress={exportData}><Feather name="share-2" size={15} color={colors.primary} /><Text style={styles.exportText}>Xuất</Text></TouchableOpacity>
       </View>
-      <View style={styles.statusTabs}>
-        {[
-          ['all', 'Tất cả', products.length],
-          ['pending', 'Chờ duyệt', pendingCount],
-          ['approved', 'Đã duyệt', approvedCount],
-        ].map(([key, label, count]) => <TouchableOpacity key={key} style={[styles.statusTab, status === key && { backgroundColor: colors.primary }]} onPress={() => setStatus(key as 'all' | ProductStatus)}><Text style={[styles.statusTabText, status === key && { color: colors.primaryForeground }]}>{label}</Text><View style={[styles.countPill, status === key && { backgroundColor: 'rgba(255,255,255,0.2)' }]}><Text style={[styles.countText, status === key && { color: colors.primaryForeground }]}>{count}</Text></View></TouchableOpacity>)}
-      </View>
+      
       <View style={styles.searchToolbar}>
         <Feather name="search" size={16} color={colors.textPlaceholder} />
         <TextInput value={search} onChangeText={setSearch} style={styles.searchInput} placeholder="Tìm tên, doanh nghiệp, mã..." placeholderTextColor={colors.textPlaceholder} returnKeyType="search" />
