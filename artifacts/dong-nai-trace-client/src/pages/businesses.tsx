@@ -34,7 +34,7 @@ import {
 } from "lucide-react";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
-type Status = "Đã duyệt" | "Chờ duyệt"| "Đã khóa";
+type Status = "Hoạt động"| "Đã khóa";
 type SortDir = "asc" | "desc" | null;
 type SortKey = keyof Business | null;
 
@@ -54,33 +54,32 @@ interface Business {
 
 // ─── Mock data ─────────────────────────────────────────────────────────────────
 const initialBusinesses: Business[] = [
-  { id: "DN-001", name: "Công ty TNHH Nông sản An Phú", taxCode: "3601234567", region: "Biên Hòa", sector: "Nông sản", status: "Đã duyệt", registeredAt: "12/10/2024", representative: "Nguyễn Văn An", phone: "0901 234 567", businessCode: "DNT-2024-0001", imageUrl: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400&h=220&fit=crop" },
-  { id: "DN-002", name: "HTX Nông nghiệp Xuân Lộc", taxCode: "3607654321", region: "Xuân Lộc", sector: "OCOP", status: "Chờ duyệt", registeredAt: "18/12/2024", representative: "Trần Thị Bình", phone: "0912 345 678", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=220&fit=crop" },
-  { id: "DN-003", name: "Công ty CP Thực phẩm Đồng Nai", taxCode: "3601112233", region: "Long Khánh", sector: "Thực phẩm CB", status: "Đã duyệt", registeredAt: "05/09/2024", representative: "Lê Hoàng Nam", phone: "0923 456 789", businessCode: "DNT-2024-0002", imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=220&fit=crop" },
-  { id: "DN-004", name: "Trại nuôi thủy sản Nhơn Trạch", taxCode: "3608889900", region: "Nhơn Trạch", sector: "Thủy sản", status: "Đã duyệt", registeredAt: "22/11/2024", representative: "Phạm Minh Cường", phone: "0934 567 890", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=220&fit=crop" },
+  { id: "DN-001", name: "Công ty TNHH Nông sản An Phú", taxCode: "3601234567", region: "Biên Hòa", sector: "Nông sản", status: "Hoạt động", registeredAt: "12/10/2024", representative: "Nguyễn Văn An", phone: "0901 234 567", businessCode: "DNT-2024-0001", imageUrl: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400&h=220&fit=crop" },
+  { id: "DN-002", name: "HTX Nông nghiệp Xuân Lộc", taxCode: "3607654321", region: "Xuân Lộc", sector: "OCOP", status: "Hoạt động", registeredAt: "18/12/2024", representative: "Trần Thị Bình", phone: "0912 345 678", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=220&fit=crop" },
+  { id: "DN-003", name: "Công ty CP Thực phẩm Đồng Nai", taxCode: "3601112233", region: "Long Khánh", sector: "Thực phẩm CB", status: "Hoạt động", registeredAt: "05/09/2024", representative: "Lê Hoàng Nam", phone: "0923 456 789", businessCode: "DNT-2024-0002", imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=220&fit=crop" },
+  { id: "DN-004", name: "Trại nuôi thủy sản Nhơn Trạch", taxCode: "3608889900", region: "Nhơn Trạch", sector: "Thủy sản", status: "Hoạt động", registeredAt: "22/11/2024", representative: "Phạm Minh Cường", phone: "0934 567 890", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=220&fit=crop" },
   { id: "DN-005", name: "Trang trại hữu cơ Long Thành", taxCode: "3605556677", region: "Long Thành", sector: "Nông sản", status: "Đã khóa", registeredAt: "01/08/2024", representative: "Vũ Thị Dung", phone: "0945 678 901", businessCode: "DNT-2024-0003", imageUrl: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=400&h=220&fit=crop" },
-  { id: "DN-006", name: "Cơ sở chế biến Bưởi Tân Triều", taxCode: "3602223344", region: "Vĩnh Cửu", sector: "OCOP", status: "Chờ duyệt", registeredAt: "15/12/2024", representative: "Đỗ Văn Em", phone: "0956 789 012", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1588165171080-c89acfa5ee83?w=400&h=220&fit=crop" },
-  { id: "DN-007", name: "Công ty TNHH Dược liệu Định Quán", taxCode: "3609990011", region: "Định Quán", sector: "Dược liệu", status: "Đã duyệt", registeredAt: "30/07/2024", representative: "Bùi Thị Phương", phone: "0967 890 123", businessCode: "DNT-2024-0004", imageUrl: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=400&h=220&fit=crop" },
-  { id: "DN-008", name: "HTX Chăn nuôi Tân Phú", taxCode: "3604445566", region: "Tân Phú", sector: "Chăn nuôi", status: "Chờ duyệt", registeredAt: "19/12/2024", representative: "Hoàng Văn Giang", phone: "0978 901 234", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=400&h=220&fit=crop" },
-  { id: "DN-009", name: "Công ty TNHH Xuất khẩu Xoài Đồng Nai", taxCode: "3603334455", region: "Cao Lãnh", sector: "Nông sản", status: "Đã duyệt", registeredAt: "14/06/2024", representative: "Nguyễn Thị Hoa", phone: "0989 012 345", businessCode: "DNT-2024-0005", imageUrl: "https://images.unsplash.com/photo-1553279768-865429fa0078?w=400&h=220&fit=crop" },
-  { id: "DN-010", name: "HTX Nông nghiệp Sạch Trảng Bom", taxCode: "3606667788", region: "Trảng Bom", sector: "Nông sản", status: "Chờ duyệt", registeredAt: "20/12/2024", representative: "Trần Văn Inh", phone: "0990 123 456", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&h=220&fit=crop" },
-  { id: "DN-011", name: "Công ty CP Chế biến Cacao Việt", taxCode: "3600001122", region: "Biên Hòa", sector: "Thực phẩm CB", status: "Đã duyệt", registeredAt: "28/05/2024", representative: "Lê Thị Kim", phone: "0901 234 567", businessCode: "DNT-2024-0006", imageUrl: "https://images.unsplash.com/photo-1606312619070-d48b4c652a52?w=400&h=220&fit=crop" },
-  { id: "DN-012", name: "Trang trại hữu cơ Xuân Thành", taxCode: "3607778899", region: "Xuân Lộc", sector: "Nông sản", status: "Đã duyệt", registeredAt: "08/11/2024", representative: "Phạm Văn Long", phone: "0912 345 678", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400&h=220&fit=crop" },
-  { id: "DN-013", name: "Cơ sở nuôi trồng Đông trùng Hạ thảo", taxCode: "3608881122", region: "Định Quán", sector: "Dược liệu", status: "Đã duyệt", registeredAt: "17/04/2024", representative: "Vũ Hoàng Minh", phone: "0923 456 789", businessCode: "DNT-2024-0007", imageUrl: "https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?w=400&h=220&fit=crop" },
+  { id: "DN-006", name: "Cơ sở chế biến Bưởi Tân Triều", taxCode: "3602223344", region: "Vĩnh Cửu", sector: "OCOP", status: "Hoạt động", registeredAt: "15/12/2024", representative: "Đỗ Văn Em", phone: "0956 789 012", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1588165171080-c89acfa5ee83?w=400&h=220&fit=crop" },
+  { id: "DN-007", name: "Công ty TNHH Dược liệu Định Quán", taxCode: "3609990011", region: "Định Quán", sector: "Dược liệu", status: "Hoạt động", registeredAt: "30/07/2024", representative: "Bùi Thị Phương", phone: "0967 890 123", businessCode: "DNT-2024-0004", imageUrl: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=400&h=220&fit=crop" },
+  { id: "DN-008", name: "HTX Chăn nuôi Tân Phú", taxCode: "3604445566", region: "Tân Phú", sector: "Chăn nuôi", status: "Hoạt động", registeredAt: "19/12/2024", representative: "Hoàng Văn Giang", phone: "0978 901 234", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=400&h=220&fit=crop" },
+  { id: "DN-009", name: "Công ty TNHH Xuất khẩu Xoài Đồng Nai", taxCode: "3603334455", region: "Cao Lãnh", sector: "Nông sản", status: "Hoạt động", registeredAt: "14/06/2024", representative: "Nguyễn Thị Hoa", phone: "0989 012 345", businessCode: "DNT-2024-0005", imageUrl: "https://images.unsplash.com/photo-1553279768-865429fa0078?w=400&h=220&fit=crop" },
+  { id: "DN-010", name: "HTX Nông nghiệp Sạch Trảng Bom", taxCode: "3606667788", region: "Trảng Bom", sector: "Nông sản", status: "Hoạt động", registeredAt: "20/12/2024", representative: "Trần Văn Inh", phone: "0990 123 456", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&h=220&fit=crop" },
+  { id: "DN-011", name: "Công ty CP Chế biến Cacao Việt", taxCode: "3600001122", region: "Biên Hòa", sector: "Thực phẩm CB", status: "Hoạt động", registeredAt: "28/05/2024", representative: "Lê Thị Kim", phone: "0901 234 567", businessCode: "DNT-2024-0006", imageUrl: "https://images.unsplash.com/photo-1606312619070-d48b4c652a52?w=400&h=220&fit=crop" },
+  { id: "DN-012", name: "Trang trại hữu cơ Xuân Thành", taxCode: "3607778899", region: "Xuân Lộc", sector: "Nông sản", status: "Hoạt động", registeredAt: "08/11/2024", representative: "Phạm Văn Long", phone: "0912 345 678", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400&h=220&fit=crop" },
+  { id: "DN-013", name: "Cơ sở nuôi trồng Đông trùng Hạ thảo", taxCode: "3608881122", region: "Định Quán", sector: "Dược liệu", status: "Hoạt động", registeredAt: "17/04/2024", representative: "Vũ Hoàng Minh", phone: "0923 456 789", businessCode: "DNT-2024-0007", imageUrl: "https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?w=400&h=220&fit=crop" },
   { id: "DN-014", name: "HTX Thủy sản sạch Long Thành", taxCode: "3601113344", region: "Long Thành", sector: "Thủy sản", status: "Đã khóa", registeredAt: "03/03/2024", representative: "Đỗ Thị Nga", phone: "0934 567 890", businessCode: "DNT-2024-0008", imageUrl: "https://images.unsplash.com/photo-1534787238916-9ba6764efd4f?w=400&h=220&fit=crop" },
-  { id: "DN-015", name: "Công ty TNHH OCOP Nhơn Trạch", taxCode: "3604445678", region: "Nhơn Trạch", sector: "OCOP", status: "Chờ duyệt", registeredAt: "21/12/2024", representative: "Bùi Văn Oanh", phone: "0945 678 901", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1471193945509-9ad0617afabf?w=400&h=220&fit=crop" },
+  { id: "DN-015", name: "Công ty TNHH OCOP Nhơn Trạch", taxCode: "3604445678", region: "Nhơn Trạch", sector: "OCOP", status: "Hoạt động", registeredAt: "21/12/2024", representative: "Bùi Văn Oanh", phone: "0945 678 901", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1471193945509-9ad0617afabf?w=400&h=220&fit=crop" },
 ];
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 const STATUS_ALL = "Tất cả";
-const statuses: Status[] = ["Đã duyệt", "Chờ duyệt", "Đã khóa"];
+const statuses: Status[] = ["Hoạt động", "Đã khóa"];
 const regions = ["Tất cả địa bàn", "Biên Hòa", "Long Khánh", "Xuân Lộc", "Nhơn Trạch", "Long Thành", "Trảng Bom", "Định Quán", "Tân Phú", "Vĩnh Cửu", "Cao Lãnh"];
 const sectors = ["Tất cả ngành", "Nông sản", "Thực phẩm CB", "Thủy sản", "OCOP", "Dược liệu", "Chăn nuôi"];
 const PAGE_SIZE = 8;
 
 const statusConfig: Record<Status, { cls: string; icon: typeof Check }> = {
-  "Đã duyệt": { cls: "bg-[#e8f5ed] text-[#1f7a45] border border-[#b8e2c8]", icon: Check },
-  "Chờ duyệt": { cls: "bg-[#fff4ed] text-[#E8650A] border border-[#fcd9bb]", icon: Clock },
+  "Hoạt động": { cls: "bg-[#e8f5ed] text-[#1f7a45] border border-[#b8e2c8]", icon: Check },
   "Đã khóa": { cls: "bg-[#f2f3f7] text-[#6b7694] border border-[#d9dce9]", icon: Lock },
 };
 
@@ -294,17 +293,7 @@ function BusinessDetail({
   const [qrOpen, setQrOpen] = useState(false);
   const [resetPwdOpen, setResetPwdOpen] = useState(false);
 
-  const timelineItems = [
-    { action: "Hồ sơ được tiếp nhận", actor: "Hệ thống tự động", time: "18/12/2024 08:30", color: "#2740BA", done: true },
-    { action: "Chuyển xét duyệt vòng 1", actor: "Admin · Nguyễn Hoàng", time: "18/12/2024 09:05", color: "#4f9a77", done: true },
-    { action: "Xác minh tài liệu pháp lý", actor: "Chuyên viên · Minh Anh", time: "18/12/2024 10:30", color: "#2e9fbf", done: true },
-    ...(business.status === "Đã duyệt"
-      ? [{ action: "Phê duyệt & cấp mã định danh", actor: "Admin · Nguyễn Hoàng", time: "18/12/2024 11:15", color: "#1f7a45", done: true }]
-      : business.status === "Chờ duyệt"
-      ? [{ action: "Hồ sơ chờ duyệt", color: "#c0392b", done: true }]
-      : [{ action: "Đang chờ xử lý", actor: "Quản trị viên", time: "18/12/2024 11:00", color: "#E8650A", done: false }]
-    ),
-  ];
+  
 
   return (
     <>
@@ -380,7 +369,7 @@ function BusinessDetail({
               </div>
 
               {/* Issued code (if approved) */}
-              {business.status === "Đã duyệt" && business.businessCode && (
+              {business.status === "Hoạt động" && business.businessCode && (
                 <div className="mt-5 rounded-xl border border-[#b8e2c8] bg-[#e8f5ed] p-3.5">
                   <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#1f7a45]">Mã định danh tổ chức</p>
                   <div className="flex items-center gap-2">
@@ -441,7 +430,7 @@ function BusinessDetail({
               </div>
 
               {/* QR code button (approved only) */}
-              {business.status === "Đã duyệt" && business.businessCode && (
+              {business.status === "Hoạt động" && business.businessCode && (
                 <button
                   onClick={() => setQrOpen(true)}
                   className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-[#dce3ff] bg-[#f0f2ff] py-3 text-[12px] font-semibold text-[#2740BA] transition hover:bg-[#e4e8ff]"
@@ -468,7 +457,7 @@ function BusinessDetail({
                   <Pencil className="h-3.5 w-3.5" /> Chỉnh sửa
                 </button>
                 <button
-                  onClick={() => onUpdate(business.id, { status: business.status === "Đã khóa" ? "Đã duyệt" : "Đã khóa" })}
+                  onClick={() => onUpdate(business.id, { status: business.status === "Đã khóa" ? "Hoạt động" : "Đã khóa" })}
                   className="flex items-center justify-center gap-2 rounded-xl border border-[#e4e8f0] bg-white py-3 text-[12px] font-semibold text-slate-600 transition hover:border-[#E8650A] hover:text-[#E8650A]"
                 >
                   {business.status === "Đã khóa" ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
@@ -902,7 +891,7 @@ export default function Businesses() {
                         <KeyRound className="h-3.5 w-3.5" />
                       </button>
                       <button
-                        onClick={() => handleUpdate(b.id, { status: b.status === "Đã khóa" ? "Đã duyệt" : "Đã khóa" })}
+                        onClick={() => handleUpdate(b.id, { status: b.status === "Đã khóa" ? "Hoạt động" : "Đã khóa" })}
                         className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#f0f2f8] hover:text-slate-600"
                         title={b.status === "Đã khóa" ? "Mở khóa" : "Khóa"}
                       >

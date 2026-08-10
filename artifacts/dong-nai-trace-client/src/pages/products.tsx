@@ -228,11 +228,7 @@ const statusConfig: Record<ProductStatus, { cls: string; dotCls: string; icon: R
 
 function StatusBadge({ status }: { status: ProductStatus }) {
   const cfg = statusConfig[status];
-  return (
-    <span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${cfg.cls}`}>
-      {cfg.icon} {status}
-    </span>
-  );
+  
 }
 
 function SelectFilter({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: string[] }) {
@@ -287,9 +283,7 @@ function ProductCard({ product, onView }: { product: Product; onView: () => void
           className="h-full w-full object-cover transition-transform hover:scale-105"
           onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
         />
-        <div className="absolute top-2 right-2">
-          <StatusBadge status={product.status} />
-        </div>
+       
       </div>
       <div className="flex flex-1 flex-col p-4">
         <p className="font-bold text-[13px] text-[#1d2944] leading-snug">{product.name}</p>
@@ -416,7 +410,7 @@ function ProductDetail({
           <p className="font-mono text-[10px] uppercase tracking-[.18em] text-[#E8650A]">Sản phẩm</p>
           <h2 className="mt-1 text-[20px] font-bold tracking-[-0.04em] text-[#1d2944]">{product.name}</h2>
         </div>
-        <StatusBadge status={product.status} />
+        
       </div>
 
       {/* Tabs */}
@@ -533,7 +527,7 @@ function ProductDetail({
             {/* Status + actions card */}
             <div className="rounded-2xl border border-[#e4e8f0] bg-white p-6 shadow-sm">
               <p className="mb-3 text-[13px] font-bold text-[#1d2944]">Trạng thái</p>
-              <StatusBadge status={product.status} />
+             
 
               {/* QR code button for approved/traced */}
               {(product.status === "Đã duyệt") && (
@@ -822,24 +816,7 @@ export default function Products() {
         </div>
       </div>
 
-      {/* Status tabs */}
-      <div className="mb-4 flex flex-wrap gap-2">
-        {allStatuses.map((s) => {
-          const active = statusFilter === s;
-          return (
-            <button
-              key={s}
-              onClick={() => setStatusFilter(s)}
-              className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-[11px] font-semibold transition-colors ${active ? "bg-[#2740BA] text-white shadow-[0_3px_10px_rgba(39,64,186,.2)]" : "border border-[#e4e8f0] bg-white text-slate-500 hover:border-[#2740BA] hover:text-[#2740BA]"}`}
-            >
-              {s}
-              <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${active ? "bg-white/20 text-white" : "bg-[#f0f2f8] text-slate-500"}`}>
-                {statusCounts[s] ?? 0}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+     
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#e4e8f0] bg-white px-4 py-3 shadow-sm">
@@ -895,7 +872,7 @@ export default function Products() {
             <table className="min-w-full text-[12px]">
               <thead>
                 <tr className="border-b border-[#e4e8f0] bg-[#f9fafb]">
-                  {["Sản phẩm", "Doanh nghiệp", "Ngành hàng", "Khu vực", "Đơn vị", "Trạng thái", "Thao tác"].map((h) => (
+                  {["Sản phẩm", "Doanh nghiệp", "Ngành hàng", "Khu vực", "Đơn vị", "Thao tác"].map((h) => (
                     <th key={h} className="whitespace-nowrap px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wide text-slate-400">{h}</th>
                   ))}
                 </tr>
@@ -927,9 +904,7 @@ export default function Products() {
                     <td className="px-4 py-3.5 text-slate-500">{p.sector}</td>
                     <td className="px-4 py-3.5 text-slate-500">{p.region}</td>
                     <td className="px-4 py-3.5 font-semibold text-[#E8650A]">{p.unit}</td>
-                    <td className="px-4 py-3.5">
-                      <StatusBadge status={p.status} />
-                    </td>
+                    
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-1">
                         <button
