@@ -14,10 +14,6 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import {
-  useListPortalLots,
-  type ListPortalLotsSyncStatus,
-} from "@workspace/api-client-react";
 
 type FeatherName = React.ComponentProps<typeof Feather>["name"];
 type PageTab = "solution" | "portal";
@@ -347,7 +343,9 @@ function SyncModal({
 }) {
   const [step, setStep] = useState<"basic" | "txng">("basic");
   const [pushed, setPushed] = useState(false);
+  const [failed, setFailed] = useState(false);
   const [pushing, setPushing] = useState(false);
+  const [attempts, setAttempts] = useState(0);
   const [province, setProvince] = useState("Đồng Nai");
   const [productionZone, setProductionZone] = useState("Vùng sản xuất Đồng Nai");
   const [steps, setSteps] = useState<TxngStep[]>(() => mockStepsForLot(lot));
@@ -360,10 +358,17 @@ function SyncModal({
 
   const pushToPortal = () => {
     setPushing(true);
+    setFailed(false);
     setTimeout(() => {
       setPushing(false);
-      setPushed(true);
-      onSuccess(lot.id);
+      const nextAttempt = attempts + 1;
+      setAttempts(nextAttempt);
+      if (nextAttempt === 1) {
+        setFailed(true);
+      } else {
+        setPushed(true);
+        onSuccess(lot.id);
+      }
     }, 1000);
   };
 
@@ -410,6 +415,16 @@ function SyncModal({
                 <Feather name="external-link" size={14} color="#2a9d6e" />
                 <Text style={s.successUrlText}>txng.gov.vn/lot/{lot.lotCode.replace("LOT-", "")}</Text>
               </View>
+            </View>
+          ) : failed ? (
+            <View style={s.failureState}>
+              <View style={s.failureIcon}><Feather name="x" size={32} color="#c0392b" /></View>
+              <Text style={s.failureTitle}>Đồng bộ không thành công</Text>
+              <Text style={s.failureText}>Không thể kết nối với Cổng thông tin TXNG quốc gia. Vui lòng thử lại.</Text>
+              <TouchableOpacity onPress={pushToPortal} disabled={pushing} style={[s.primaryButton, pushing && s.disabled]}>
+                {pushing ? <ActivityIndicator size="small" color="#fff" /> : <Feather name="refresh-cw" size={15} color="#fff" />}
+                <Text style={s.primaryButtonText}>{pushing ? "Đang thử lại..." : "Đồng bộ lại"}</Text>
+              </TouchableOpacity>
             </View>
           ) : step === "basic" ? (
             <View>
@@ -499,6 +514,7 @@ function LotCard({
   lot,
   sessionSynced,
   solutionSent,
+  solutionFailed,
   onSync,
   onQr,
   onSend,
@@ -508,6 +524,7 @@ function LotCard({
   lot: Lot;
   sessionSynced: boolean;
   solutionSent: boolean;
+  solutionFailed: boolean;
   onSync: () => void;
   onQr: () => void;
   onSend: () => void;
@@ -525,8 +542,8 @@ function LotCard({
           <Text style={s.lotCode}>GTIN: {lot.gtin}</Text>
         </View>
         {solution ? (
-          <View style={[s.compactBadge, { backgroundColor: synced ? "#e8f5ed" : "#f2f3f7" }]}>
-            <Text style={[s.compactBadgeText, { color: synced ? "#1f7a45" : "#6b7694" }]}>{synced ? "Đã gửi" : "Chưa gửi"}</Text>
+          <View style={[s.compactBadge, { backgroundColor: solutionFailed ? "#fef0f0" : synced ? "#e8f5ed" : "#f2f3f7" }]}>
+            <Text style={[s.compactBadgeText, { color: solutionFailed ? "#c0392b" : synced ? "#1f7a45" : "#6b7694" }]}>{solutionFailed ? "Đồng bộ lỗi" : synced ? "Đã gửi" : "Chưa gửi"}</Text>
           </View>
         ) : <StatusBadge lot={lot} sessionSynced={sessionSynced} />}
       </View>
@@ -541,7 +558,7 @@ function LotCard({
         {solution ? (
           <TouchableOpacity style={s.cardPrimaryButton} onPress={onSend} disabled={sending}>
             {sending ? <ActivityIndicator size="small" color="#fff" /> : <Feather name={synced ? "refresh-cw" : "send"} size={14} color="#fff" />}
-            <Text style={s.cardPrimaryText}>{sending ? "Đang gửi..." : synced ? "Đồng bộ lại" : "Đồng bộ"}</Text>
+            <Text style={s.cardPrimaryText}>{sending ? "Đang gửi..." : solutionFailed || synced ? "Đồng bộ lại" : "Đồng bộ"}</Text>
           </TouchableOpacity>
         ) : !synced ? (
           <TouchableOpacity style={[s.cardPrimaryButton, !lot.isComplete && s.inactiveButton]} onPress={onSync} disabled={!lot.isComplete}>
@@ -565,31 +582,13 @@ export default function SyncScreen() {
   const [qrLot, setQrLot] = useState<Lot | null>(null);
   const [sessionSynced, setSessionSynced] = useState<Set<number>>(new Set());
   const [sentLots, setSentLots] = useState<Set<number>>(new Set());
+  const [failedLots, setFailedLots] = useState<Set<number>>(new Set());
   const [sendingLot, setSendingLot] = useState<number | null>(null);
   const [syncingAll, setSyncingAll] = useState(false);
-
-  const { data, isLoading, error, refetch } = useListPortalLots({
-    syncStatus: filterStatus === "all" ? undefined : (filterStatus as ListPortalLotsSyncStatus),
-    gtin: undefined,
-    lotCode: undefined,
-    businessName: undefined,
-    productName: undefined,
-    pageSize: 50,
-  });
-
-  const apiLots: Lot[] = (data?.data ?? []).map((lot) => ({
-    id: lot.id,
-    productName: lot.productName,
-    gtin: lot.gtin,
-    lotCode: lot.lotCode,
-    businessName: lot.businessName,
-    activatedAt: lot.activatedAt ?? "",
-    imageUrl: lot.imageUrl,
-    syncStatus: lot.syncStatus === "synced" ? "synced" : "not_synced",
-    isComplete: lot.isComplete ?? true,
-    portalUrl: lot.portalUrl,
-  }));
-  const sourceLots = apiLots.length > 0 ? apiLots : !isLoading ? MOCK_LOTS : [];
+  const [localLots, setLocalLots] = useState<Lot[]>(MOCK_LOTS);
+  const [syncAllFailed, setSyncAllFailed] = useState(false);
+  const [syncAllAttempts, setSyncAllAttempts] = useState(0);
+  const sourceLots = localLots;
   const lots = useMemo(() => {
     const query = search.trim().toLowerCase();
     return sourceLots.filter((lot) => {
@@ -607,13 +606,22 @@ export default function SyncScreen() {
     });
   }, [filterStatus, search, sessionSynced, sourceLots]);
 
-  const allSourceLots = apiLots.length > 0 ? apiLots : MOCK_LOTS;
+  const allSourceLots = localLots;
   const pendingLots = allSourceLots.filter((lot) => lot.syncStatus !== "synced" && !sessionSynced.has(lot.id));
   const syncedCount = allSourceLots.filter((lot) => lot.syncStatus === "synced" || sessionSynced.has(lot.id)).length;
   const sendLot = (id: number) => {
     setSendingLot(id);
     setTimeout(() => {
-      setSentLots((current) => new Set(current).add(id));
+      if (!failedLots.has(id)) {
+        setFailedLots((current) => new Set(current).add(id));
+      } else {
+        setFailedLots((current) => {
+          const next = new Set(current);
+          next.delete(id);
+          return next;
+        });
+        setSentLots((current) => new Set(current).add(id));
+      }
       setSendingLot(null);
     }, 900);
   };
@@ -624,7 +632,15 @@ export default function SyncScreen() {
     }
     setSyncingAll(true);
     setTimeout(() => {
+      const nextAttempt = syncAllAttempts + 1;
+      setSyncAllAttempts(nextAttempt);
+      if (nextAttempt === 1) {
+        setSyncAllFailed(true);
+        setSyncingAll(false);
+        return;
+      }
       setSessionSynced((current) => new Set([...current, ...pendingLots.map((lot) => lot.id)]));
+      setLocalLots((current) => current.map((lot) => pendingLots.some((pending) => pending.id === lot.id) ? { ...lot, syncStatus: "synced" } : lot));
       setSyncingAll(false);
       Alert.alert("Hoàn tất", `Đã đồng bộ ${pendingLots.length} lô hàng lên cổng quốc gia.`);
     }, 1400);
@@ -690,11 +706,8 @@ export default function SyncScreen() {
         
       </View>
       <View style={s.apiStatus}>
-        <Feather name={error ? "wifi-off" : "wifi"} size={12} color={error ? "#a8b2c8" : "#1f7a45"} />
-        <Text style={[s.apiStatusText, { color: error ? "#a8b2c8" : "#1f7a45" }]}>
-          {error ? "API không kết nối — đang hiển thị dữ liệu mẫu" : isLoading ? "Đang tải từ API..." : "Kết nối API: Bình thường"}
-        </Text>
-        {isLoading && <ActivityIndicator size="small" color="#2740BA" />}
+        <Feather name="database" size={12} color="#2740BA" />
+        <Text style={[s.apiStatusText, { color: "#2740BA" }]}>Đang sử dụng dữ liệu mẫu trên thiết bị</Text>
       </View>
 
       {tab === "portal" && (
@@ -712,7 +725,7 @@ export default function SyncScreen() {
       )}
       <View style={s.searchRow}>
         <SearchField placeholder="Lô, doanh nghiệp, thương phẩm hoặc GTIN" value={search} onChangeText={setSearch} />
-        <IconButton icon="refresh-cw" label="Làm mới dữ liệu" color="#6b7694" onPress={() => void refetch()} />
+        <IconButton icon="refresh-cw" label="Làm mới dữ liệu mẫu" color="#6b7694" onPress={() => setSearch("")} />
       </View>
       <ScrollView contentContainerStyle={s.listContent} showsVerticalScrollIndicator={false}>
         {lots.map((lot) => (
@@ -721,6 +734,7 @@ export default function SyncScreen() {
             lot={lot}
             sessionSynced={sessionSynced.has(lot.id)}
             solutionSent={sentLots.has(lot.id)}
+            solutionFailed={failedLots.has(lot.id)}
             onQr={() => setQrLot(lot)}
             onSync={() => setSyncLot(lot)}
             onSend={() => sendLot(lot.id)}
@@ -728,7 +742,7 @@ export default function SyncScreen() {
             solution={tab === "solution"}
           />
         ))}
-        {!isLoading && lots.length === 0 && (
+        {lots.length === 0 && (
           <View style={s.emptyState}><Feather name="package" size={34} color="#c8cfdd" /><Text style={s.emptyText}>Không có dữ liệu phù hợp</Text></View>
         )}
       </ScrollView>
@@ -740,6 +754,19 @@ export default function SyncScreen() {
           onSuccess={(id) => setSessionSynced((current) => new Set(current).add(id))}
         />
       )}
+      <Modal visible={syncAllFailed} transparent animationType="fade" onRequestClose={() => setSyncAllFailed(false)}>
+        <View style={s.overlay}>
+          <View style={s.failureCard}>
+            <View style={s.failureIcon}><Feather name="x" size={30} color="#c0392b" /></View>
+            <Text style={s.failureTitle}>Đồng bộ không thành công</Text>
+            <Text style={s.failureText}>Không thể hoàn tất đồng bộ dữ liệu mẫu. Bạn có thể thử lại ngay.</Text>
+            <View style={s.failureActions}>
+              <TouchableOpacity style={s.secondaryButton} onPress={() => setSyncAllFailed(false)}><Text style={s.secondaryButtonText}>Đóng</Text></TouchableOpacity>
+              <TouchableOpacity style={s.primaryButton} onPress={() => { setSyncAllFailed(false); syncAll(); }}><Feather name="refresh-cw" size={14} color="#fff" /><Text style={s.primaryButtonText}>Đồng bộ lại</Text></TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -868,6 +895,12 @@ const s = StyleSheet.create({
   secondaryButtonText: { fontSize: 11, fontWeight: "700", color: "#6b7694" },
   successButton: { flex: 1, minHeight: 40, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, backgroundColor: "#2a9d6e", borderRadius: 9, paddingHorizontal: 12 },
   successState: { alignItems: "center", paddingTop: 55 },
+  failureState: { alignItems: "center", paddingTop: 45, paddingHorizontal: 16 },
+  failureIcon: { width: 72, height: 72, alignItems: "center", justifyContent: "center", borderRadius: 36, backgroundColor: "#fef0f0" },
+  failureTitle: { fontSize: 18, fontWeight: "700", color: "#1d2944", marginTop: 16, textAlign: "center" },
+  failureText: { fontSize: 11, color: "#6b7694", textAlign: "center", marginTop: 6, lineHeight: 17 },
+  failureCard: { width: "100%", maxWidth: 350, backgroundColor: "#fff", borderRadius: 18, padding: 22, alignItems: "center" },
+  failureActions: { flexDirection: "row", width: "100%", gap: 9, marginTop: 20 },
   successIcon: { width: 72, height: 72, alignItems: "center", justifyContent: "center", borderRadius: 36, backgroundColor: "#e8f5ed" },
   successTitle: { fontSize: 18, fontWeight: "700", color: "#1d2944", marginTop: 16 },
   successText: { fontSize: 11, color: "#6b7694", textAlign: "center", marginTop: 6, lineHeight: 17 },

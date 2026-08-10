@@ -59,6 +59,7 @@ import Support from "@/pages/support";
 import System from "@/pages/system";
 import Sync from "@/pages/sync";
 import Connections from "@/pages/connections";
+import SolutionProviders from "@/pages/solution-providers";
 import Accounts from "@/pages/accounts";
 import SettingsPage from "@/pages/settings";
 import { DashboardShell } from "@/components/dashboard-shell";
@@ -1253,6 +1254,7 @@ function Router() {
       <Route path="/dashboard/ho-tro" component={Support} />
       <Route path="/dashboard/he-thong" component={System} />
       <Route path="/dashboard/dong-bo" component={Sync} />
+      <Route path="/dashboard/don-vi-giai-phap" component={SolutionProviders} />
       <Route path="/dashboard/ket-noi" component={Connections} />
       <Route path="/dashboard/tai-khoan" component={Accounts} />
       <Route path="/dashboard/cai-dat">

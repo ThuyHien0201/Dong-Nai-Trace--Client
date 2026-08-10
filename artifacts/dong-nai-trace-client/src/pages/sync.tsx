@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import {
   Search,
@@ -15,8 +15,6 @@ import {
   QrCode,
   CalendarDays,
 } from "lucide-react";
-import { useListPortalLots } from "@workspace/api-client-react";
-import type { ListPortalLotsSyncStatus } from "@workspace/api-client-react";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -534,7 +532,9 @@ function SyncModal({ lot, onClose, onSuccess }: SyncModalProps) {
   const detail = getMockDetail(lot);
   const [step, setStep] = useState<"basic" | "txng">("basic");
   const [pushed, setPushed] = useState(false);
+  const [failed, setFailed] = useState(false);
   const [pushing, setPushing] = useState(false);
+  const [pushAttempts, setPushAttempts] = useState(0);
 
   // Editable fields for basic info
   const [province, setProvince] = useState(detail.province);
@@ -553,8 +553,15 @@ function SyncModal({ lot, onClose, onSuccess }: SyncModalProps) {
 
   async function handlePush() {
     setPushing(true);
+    setFailed(false);
     await new Promise((r) => setTimeout(r, 1200));
     setPushing(false);
+    const nextAttempt = pushAttempts + 1;
+    setPushAttempts(nextAttempt);
+    if (nextAttempt === 1) {
+      setFailed(true);
+      return;
+    }
     setPushed(true);
     onSuccess(lot.id);
   }
@@ -647,8 +654,26 @@ function SyncModal({ lot, onClose, onSuccess }: SyncModalProps) {
             </div>
           )}
 
+          {!pushed && failed && (
+            <div role="alert" className="flex flex-col items-center gap-4 rounded-2xl border border-[#f5bcbc] bg-[#fff6f6] px-6 py-10 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#fef0f0]">
+                <X className="h-8 w-8 text-[#c0392b]" />
+              </div>
+              <div>
+                <p className="text-[18px] font-bold text-[#1d2944]">Đồng bộ không thành công</p>
+                <p className="mt-1 max-w-sm text-[12px] leading-5 text-slate-500">
+                  Không thể kết nối với Cổng thông tin TXNG quốc gia. Vui lòng kiểm tra lại và thử đồng bộ lại.
+                </p>
+              </div>
+              <button type="button" onClick={handlePush} disabled={pushing} className="flex items-center gap-2 rounded-xl bg-[#2740BA] px-5 py-2.5 text-[12px] font-bold text-white hover:bg-[#1e33a0] disabled:opacity-70">
+                {pushing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                {pushing ? "Đang thử lại..." : "Đồng bộ lại"}
+              </button>
+            </div>
+          )}
+
           {/* ── STEP 1: Thông tin cơ bản ── */}
-          {!pushed && step === "basic" && (
+          {!pushed && !failed && step === "basic" && (
             <>
               {/* Product overview */}
               <div className="flex items-start gap-4 rounded-2xl border border-[#e4e8f0] bg-[#f9fafb] p-4">
@@ -747,7 +772,7 @@ function SyncModal({ lot, onClose, onSuccess }: SyncModalProps) {
           )}
 
           {/* ── STEP 2: Thông tin TXNG ── */}
-          {!pushed && step === "txng" && (
+          {!pushed && !failed && step === "txng" && (
             <div className="space-y-4">
               {steps.map((s, idx) => (
                 <div
@@ -864,11 +889,19 @@ function SyncModal({ lot, onClose, onSuccess }: SyncModalProps) {
 
         {/* Footer */}
         <div className="flex items-center justify-between border-t border-[#f0f2f8] px-6 py-4">
-          {pushed ? (
+          {failed ? (
+            <button onClick={onClose} className="ml-auto rounded-lg border border-[#e4e8f0] px-6 py-2.5 text-[12px] font-semibold text-slate-600 hover:bg-[#f9fafb]">
+              Đóng
+            </button>
+          ) : pushed ? (
             <button
               onClick={onClose}
               className="ml-auto rounded-lg bg-[#2a9d6e] px-6 py-2.5 text-[12px] font-bold text-white hover:bg-[#238a5e]"
             >
+              Đóng
+            </button>
+          ) : failed ? (
+            <button onClick={onClose} className="ml-auto rounded-lg border border-[#e4e8f0] px-6 py-2.5 text-[12px] font-semibold text-slate-600 hover:bg-[#f9fafb]">
               Đóng
             </button>
           ) : step === "basic" ? (
@@ -996,24 +1029,33 @@ function SolutionProviderTab() {
   // Track which lots have been "sent" to solution provider (mock)
   const [sentLots, setSentLots] = useState<Set<number>>(new Set());
   const [sendingLot, setSendingLot] = useState<number | null>(null);
-
-  const { data, isLoading, refetch } = useListPortalLots({
-    gtin: searchGtin || undefined,
-    lotCode: searchLot || undefined,
-    businessName: searchBusiness || undefined,
-    productName: searchProduct || undefined,
-    pageSize: 50,
-  });
-
-  const rawLots = data?.data ?? [];
-  const lots =
-    rawLots.length > 0 ? rawLots : !isLoading ? MOCK_SOLUTION_LOTS : [];
-  const total = data?.total ?? lots.length;
+  const [failedLots, setFailedLots] = useState<Set<number>>(new Set());
+  const [sendAttempts, setSendAttempts] = useState<Record<number, number>>({});
+  const lots = useMemo(() => MOCK_SOLUTION_LOTS.filter((lot) => {
+    const matches = (value: string, query: string) =>
+      !query || value.toLowerCase().includes(query.toLowerCase());
+    return matches(lot.gtin, searchGtin) &&
+      matches(lot.lotCode, searchLot) &&
+      matches(lot.businessName, searchBusiness) &&
+      matches(lot.productName, searchProduct);
+  }), [searchGtin, searchLot, searchBusiness, searchProduct]);
+  const total = lots.length;
 
   async function handleSend(lotId: number) {
     setSendingLot(lotId);
-    // Mock: simulate API call to solution provider
     await new Promise((r) => setTimeout(r, 900));
+    const attempt = (sendAttempts[lotId] ?? 0) + 1;
+    setSendAttempts((prev) => ({ ...prev, [lotId]: attempt }));
+    if (attempt === 1) {
+      setFailedLots((prev) => new Set(prev).add(lotId));
+      setSendingLot(null);
+      return;
+    }
+    setFailedLots((prev) => {
+      const next = new Set(prev);
+      next.delete(lotId);
+      return next;
+    });
     setSentLots((prev) => new Set(prev).add(lotId));
     setSendingLot(null);
   }
@@ -1056,7 +1098,12 @@ function SolutionProviderTab() {
           </div>
         ))}
         <button
-          onClick={() => refetch()}
+          onClick={() => {
+            setSearchGtin("");
+            setSearchLot("");
+            setSearchBusiness("");
+            setSearchProduct("");
+          }}
           className="ml-auto rounded-xl border border-[#e4e8f0] p-2 text-slate-400 hover:border-[#2740BA] hover:text-[#2740BA]"
         >
           <RefreshCw className="h-3.5 w-3.5" />
@@ -1087,13 +1134,7 @@ function SolutionProviderTab() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#f0f2f8]">
-            {isLoading ? (
-              <tr>
-                <td colSpan={8} className="px-4 py-10 text-center">
-                  <Loader2 className="mx-auto h-5 w-5 animate-spin text-[#2740BA]" />
-                </td>
-              </tr>
-            ) : lots.length === 0 ? (
+            {lots.length === 0 ? (
               <tr>
                 <td
                   colSpan={8}
@@ -1105,6 +1146,7 @@ function SolutionProviderTab() {
             ) : (
               lots.map((lot, idx) => {
                 const isSent = sentLots.has(lot.id);
+                const isFailed = failedLots.has(lot.id);
                 const isSending = sendingLot === lot.id;
                 return (
                   <tr
@@ -1140,7 +1182,11 @@ function SolutionProviderTab() {
                       {fmtDate(lot.activatedAt)}
                     </td>
                     <td className="px-4 py-3.5">
-                      {isSent ? (
+                      {isFailed ? (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-[#f5bcbc] bg-[#fef0f0] px-2.5 py-0.5 text-[10px] font-bold text-[#c0392b]">
+                          <X className="h-3 w-3" /> Đồng bộ lỗi
+                        </span>
+                      ) : isSent ? (
                         <span className="inline-flex items-center gap-1 rounded-full border border-[#b8e2c8] bg-[#e8f5ed] px-2.5 py-0.5 text-[10px] font-bold text-[#1f7a45]">
                           <CheckCircle2 className="h-3 w-3" /> Đã gửi
                         </span>
@@ -1151,7 +1197,7 @@ function SolutionProviderTab() {
                       )}
                     </td>
                     <td className="px-4 py-3.5">
-                      {!isSent ? (
+                      {!isSent || isFailed ? (
                         <button
                           onClick={() => handleSend(lot.id)}
                           disabled={isSending}
@@ -1164,7 +1210,7 @@ function SolutionProviderTab() {
                             </>
                           ) : (
                             <>
-                              <Send className="h-3 w-3" /> Đồng bộ
+                              {isFailed ? <RefreshCw className="h-3 w-3" /> : <Send className="h-3 w-3" />} {isFailed ? "Đồng bộ lại" : "Đồng bộ"}
                             </>
                           )}
                         </button>
@@ -1183,7 +1229,7 @@ function SolutionProviderTab() {
             )}
           </tbody>
         </table>
-        {!isLoading && total > 0 && (
+        {total > 0 && (
           <div className="border-t border-[#f0f2f8] px-4 py-3 text-[11px] text-slate-400">
             Tổng: <span className="font-semibold text-[#25304b]">{total}</span>{" "}
             lô thương phẩm
@@ -1364,45 +1410,19 @@ function TxngPortalTab() {
   // Track lots that have been synced in this session
   const [sessionSynced, setSessionSynced] = useState<Set<number>>(new Set());
 
-  const { data, isLoading, refetch } = useListPortalLots({
-    syncStatus: filterStatus as ListPortalLotsSyncStatus,
-    gtin: searchGtin || undefined,
-    lotCode: searchLot || undefined,
-    businessName: searchBusiness || undefined,
-    productName: searchProduct || undefined,
-    pageSize: 50,
-  });
-
-  const rawLots = data?.data ?? [];
-  const useMock = !isLoading && rawLots.length === 0;
-
-  // Apply mock filtering
-  const mockFiltered = MOCK_TXNG_LOTS.filter((l) => {
-    const q =
-      searchLot.toLowerCase() +
-      searchBusiness.toLowerCase() +
-      searchProduct.toLowerCase() +
-      searchGtin.toLowerCase();
-    if (
-      q &&
-      !l.lotCode.toLowerCase().includes(q) &&
-      !l.businessName.toLowerCase().includes(q) &&
-      !l.productName.toLowerCase().includes(q) &&
-      !l.gtin.includes(q)
-    )
-      return false;
-    if (filterStatus !== "all" && l.syncStatus !== filterStatus) return false;
-    return true;
-  });
-
-  const lots = useMock ? mockFiltered : rawLots;
-  const total = useMock ? mockFiltered.length : (data?.total ?? 0);
-  const notSyncedCount = useMock
-    ? MOCK_TXNG_LOTS.filter((l) => l.syncStatus === "not_synced").length
-    : (data?.notSyncedCount ?? 0);
-  const syncedCount = useMock
-    ? MOCK_TXNG_LOTS.filter((l) => l.syncStatus === "synced").length
-    : (data?.syncedCount ?? 0);
+  const [mockLots, setMockLots] = useState(MOCK_TXNG_LOTS);
+  const mockFiltered = useMemo(() => MOCK_TXNG_LOTS.filter((l) => {
+    const queries = [searchLot, searchBusiness, searchProduct, searchGtin]
+      .map((value) => value.trim().toLowerCase())
+      .filter(Boolean);
+    const searchable = `${l.lotCode} ${l.businessName} ${l.productName} ${l.gtin}`.toLowerCase();
+    return (!queries.length || queries.every((query) => searchable.includes(query))) &&
+      (filterStatus === "all" || l.syncStatus === filterStatus);
+  }), [filterStatus, searchBusiness, searchGtin, searchLot, searchProduct]);
+  const lots = mockFiltered.map((lot) => mockLots.find((item) => item.id === lot.id) ?? lot);
+  const total = lots.length;
+  const notSyncedCount = mockLots.filter((l) => l.syncStatus === "not_synced").length;
+  const syncedCount = mockLots.filter((l) => l.syncStatus === "synced").length;
 
   const filterTabs: {
     id: FilterStatus;
@@ -1491,7 +1511,12 @@ function TxngPortalTab() {
           </div>
         ))}
         <button
-          onClick={() => refetch()}
+          onClick={() => {
+            setSearchGtin("");
+            setSearchLot("");
+            setSearchBusiness("");
+            setSearchProduct("");
+          }}
           className="ml-auto rounded-xl border border-[#e4e8f0] p-2 text-slate-400 hover:border-[#2740BA] hover:text-[#2740BA]"
           title="Làm mới"
         >
@@ -1524,13 +1549,7 @@ function TxngPortalTab() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#f0f2f8]">
-            {isLoading ? (
-              <tr>
-                <td colSpan={8} className="px-4 py-10 text-center">
-                  <Loader2 className="mx-auto h-5 w-5 animate-spin text-[#2740BA]" />
-                </td>
-              </tr>
-            ) : lots.length === 0 ? (
+            {lots.length === 0 ? (
               <tr>
                 <td
                   colSpan={8}
@@ -1667,8 +1686,8 @@ function TxngPortalTab() {
           onClose={() => setSyncLot(null)}
           onSuccess={(lotId) => {
             setSessionSynced((prev) => new Set(prev).add(lotId));
+            setMockLots((prev) => prev.map((item) => item.id === lotId ? { ...item, syncStatus: "synced", portalUrl: `https://txng.gov.vn/lot/${lotId}` } : item));
             setSyncLot(null);
-            refetch();
           }}
         />
       )}
