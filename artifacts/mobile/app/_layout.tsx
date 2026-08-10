@@ -48,6 +48,7 @@ function RootLayoutNav() {
         <Stack.Screen name="cms" options={{ presentation: 'card', headerShown: false }} />
         <Stack.Screen name="support" options={{ presentation: 'card', headerShown: false }} />
         <Stack.Screen name="accounts" options={{ presentation: 'card', headerShown: false }} />
+        <Stack.Screen name="solution-providers" options={{ presentation: 'card', headerShown: false }} />
         <Stack.Screen name="sync" options={{ presentation: 'card', headerShown: false }} />
         <Stack.Screen name="settings" options={{ presentation: 'card', headerShown: false }} />
         <Stack.Screen name="system" options={{ presentation: 'card', headerShown: false }} />

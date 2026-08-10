@@ -1031,6 +1031,7 @@ function SolutionProviderTab() {
   const [sendingLot, setSendingLot] = useState<number | null>(null);
   const [failedLots, setFailedLots] = useState<Set<number>>(new Set());
   const [sendAttempts, setSendAttempts] = useState<Record<number, number>>({});
+  const [failureLot, setFailureLot] = useState<(typeof MOCK_SOLUTION_LOTS)[number] | null>(null);
   const lots = useMemo(() => MOCK_SOLUTION_LOTS.filter((lot) => {
     const matches = (value: string, query: string) =>
       !query || value.toLowerCase().includes(query.toLowerCase());
@@ -1048,6 +1049,7 @@ function SolutionProviderTab() {
     setSendAttempts((prev) => ({ ...prev, [lotId]: attempt }));
     if (attempt === 1) {
       setFailedLots((prev) => new Set(prev).add(lotId));
+      setFailureLot(MOCK_SOLUTION_LOTS.find((lot) => lot.id === lotId) ?? null);
       setSendingLot(null);
       return;
     }
@@ -1109,6 +1111,46 @@ function SolutionProviderTab() {
           <RefreshCw className="h-3.5 w-3.5" />
         </button>
       </div>
+
+      {failureLot && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#16234f]/35 p-4 backdrop-blur-sm">
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="sync-failure-title"
+            className="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl"
+          >
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#fef0f0]">
+              <X className="h-7 w-7 text-[#c0392b]" />
+            </div>
+            <p id="sync-failure-title" className="mt-4 text-[18px] font-bold text-[#1d2944]">
+              Đồng bộ không thành công
+            </p>
+            <p className="mt-1 text-[12px] leading-5 text-slate-500">
+              Không thể đồng bộ <span className="font-semibold text-[#25304b]">{failureLot.productName}</span> sang đơn vị cung cấp giải pháp. Vui lòng thử lại.
+            </p>
+            <div className="mt-5 flex justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => setFailureLot(null)}
+                className="rounded-xl border border-[#e4e8f0] px-4 py-2.5 text-[12px] font-semibold text-slate-600"
+              >
+                Đóng
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setFailureLot(null);
+                  handleSend(failureLot.id);
+                }}
+                className="flex items-center gap-2 rounded-xl bg-[#2740BA] px-4 py-2.5 text-[12px] font-bold text-white hover:bg-[#1e33a0]"
+              >
+                <RefreshCw className="h-3.5 w-3.5" /> Đồng bộ lại
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Table */}
       <div className="overflow-hidden rounded-2xl border border-[#e4e8f0] bg-white shadow-sm">

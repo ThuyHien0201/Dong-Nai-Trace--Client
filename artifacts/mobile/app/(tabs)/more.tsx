@@ -24,6 +24,7 @@ const MENU_GROUPS = [
     title: 'Quản trị',
     items: [
       { icon: 'users', label: 'Tài khoản người dùng', sub: 'Quản lý tài khoản và phân quyền', color: '#2740BA', bg: '#edf0ff', route: '/accounts' },
+      { icon: 'briefcase', label: 'Đơn vị cung cấp giải pháp', sub: 'Thêm, sửa, xóa hồ sơ đơn vị kết nối', color: '#E8650A', bg: '#fff4ed', route: '/solution-providers' },
       { icon: 'cpu', label: 'Hệ thống', sub: 'Nhật ký, cấu hình và sao lưu', color: '#6b7694', bg: '#f2f3f7', route: '/system' },
       { icon: 'settings', label: 'Cài đặt cá nhân', sub: 'Hồ sơ và mật khẩu', color: '#1f7a45', bg: '#e8f5ed', route: '/settings' },
     ],

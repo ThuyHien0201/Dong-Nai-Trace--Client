@@ -588,6 +588,7 @@ export default function SyncScreen() {
   const [localLots, setLocalLots] = useState<Lot[]>(MOCK_LOTS);
   const [syncAllFailed, setSyncAllFailed] = useState(false);
   const [syncAllAttempts, setSyncAllAttempts] = useState(0);
+  const [solutionFailureLot, setSolutionFailureLot] = useState<Lot | null>(null);
   const sourceLots = localLots;
   const lots = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -614,6 +615,7 @@ export default function SyncScreen() {
     setTimeout(() => {
       if (!failedLots.has(id)) {
         setFailedLots((current) => new Set(current).add(id));
+        setSolutionFailureLot(localLots.find((lot) => lot.id === id) ?? null);
       } else {
         setFailedLots((current) => {
           const next = new Set(current);
@@ -754,6 +756,33 @@ export default function SyncScreen() {
           onSuccess={(id) => setSessionSynced((current) => new Set(current).add(id))}
         />
       )}
+      <Modal visible={!!solutionFailureLot} transparent animationType="fade" onRequestClose={() => setSolutionFailureLot(null)}>
+        <View style={s.overlay}>
+          <View style={s.failureCard}>
+            <View style={s.failureIcon}><Feather name="x" size={30} color="#c0392b" /></View>
+            <Text style={s.failureTitle}>Đồng bộ không thành công</Text>
+            <Text style={s.failureText}>
+              Không thể đồng bộ {solutionFailureLot?.productName ?? "hồ sơ"} sang đơn vị cung cấp giải pháp. Bạn có thể thử lại ngay.
+            </Text>
+            <View style={s.failureActions}>
+              <TouchableOpacity style={s.secondaryButton} onPress={() => setSolutionFailureLot(null)}>
+                <Text style={s.secondaryButtonText}>Đóng</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={s.primaryButton}
+                onPress={() => {
+                  const id = solutionFailureLot?.id;
+                  setSolutionFailureLot(null);
+                  if (id) sendLot(id);
+                }}
+              >
+                <Feather name="refresh-cw" size={14} color="#fff" />
+                <Text style={s.primaryButtonText}>Đồng bộ lại</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
       <Modal visible={syncAllFailed} transparent animationType="fade" onRequestClose={() => setSyncAllFailed(false)}>
         <View style={s.overlay}>
           <View style={s.failureCard}>
