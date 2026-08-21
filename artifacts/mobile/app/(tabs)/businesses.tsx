@@ -251,6 +251,7 @@ const sb = StyleSheet.create({
 function BizCard({
   biz,
   onPress,
+  onApprove,
   onEdit,
   onDelete,
   onLock,
@@ -258,6 +259,7 @@ function BizCard({
 }: {
   biz: Business;
   onPress: () => void;
+  onApprove: (biz: Business) => void;
   onEdit: (biz: Business) => void;
   onDelete: (biz: Business) => void;
   onLock: (biz: Business) => void;
@@ -300,6 +302,13 @@ function BizCard({
       )}
       <View style={s.actionRow}>
         <TouchableOpacity
+          accessibilityLabel="Duyệt doanh nghiệp"
+          hitSlop={8}
+          onPress={() => onApprove(biz)}
+        >
+          <Feather name="check-circle" size={16} color="#1f7a45" />
+        </TouchableOpacity>
+        <TouchableOpacity
           accessibilityLabel="Đặt lại mật khẩu"
           hitSlop={8}
           onPress={() => onResetPassword(biz)}
@@ -332,6 +341,127 @@ function BizCard({
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
+  );
+}
+
+function ApprovalModal({
+  business,
+  onClose,
+  onApprove,
+  onRequestDocuments,
+}: {
+  business: Business;
+  onClose: () => void;
+  onApprove: () => void;
+  onRequestDocuments: () => void;
+}) {
+  const [completedAction, setCompletedAction] = useState<'approved' | 'needs_more_documents' | null>(null);
+
+  const finish = (action: 'approved' | 'needs_more_documents') => {
+    if (action === 'approved') onApprove();
+    else onRequestDocuments();
+    setCompletedAction(action);
+  };
+
+  return (
+    <Modal visible transparent animationType="slide" onRequestClose={onClose}>
+      <View style={sd.modalOverlay}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+        <View style={sd.approvalModal}>
+          <View style={sd.sheetHandle} />
+          <View style={sd.approvalHeader}>
+            <View style={{ flex: 1, marginRight: 12 }}>
+              <Text style={sd.approvalEyebrow}>XÉT DUYỆT HỒ SƠ</Text>
+              <Text style={sd.approvalTitle} numberOfLines={2}>{business.name}</Text>
+            </View>
+            <TouchableOpacity onPress={onClose} hitSlop={10}>
+              <Feather name="x" size={20} color="#6b7694" />
+            </TouchableOpacity>
+          </View>
+
+          {completedAction ? (
+            <View style={sd.approvalDone}>
+              <View style={[sd.approvalDoneIcon, { backgroundColor: completedAction === 'approved' ? '#e8f5ed' : '#fff4ed' }]}>
+                <Feather
+                  name={completedAction === 'approved' ? 'check' : 'file-text'}
+                  size={28}
+                  color={completedAction === 'approved' ? '#1f7a45' : '#E8650A'}
+                />
+              </View>
+              <Text style={sd.approvalDoneTitle}>
+                {completedAction === 'approved' ? 'Đã xác nhận duyệt' : 'Đã yêu cầu bổ sung hồ sơ'}
+              </Text>
+              <Text style={sd.approvalDoneText}>
+                {completedAction === 'approved'
+                  ? `Hồ sơ của ${business.name} đã được duyệt.`
+                  : `Yêu cầu bổ sung hồ sơ đã được ghi nhận cho ${business.name}.`}
+              </Text>
+              <TouchableOpacity style={sd.approvalCloseButton} onPress={onClose}>
+                <Text style={sd.approvalCloseText}>Đóng</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <>
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={sd.approvalContent}>
+                <View style={sd.approvalCodeCard}>
+                  <View>
+                    <Text style={sd.approvalLabel}>Mã hồ sơ</Text>
+                    <Text style={sd.approvalCode}>{business.id} · {business.code}</Text>
+                  </View>
+                  <StatusBadge status={business.status} />
+                </View>
+                <View style={sd.approvalInfoCard}>
+                  {[
+                    ['Mã số thuế', business.taxId, 'file-text'],
+                    ['Người đại diện', business.representative, 'user'],
+                    ['Điện thoại', business.phone, 'phone'],
+                    ['Địa bàn', business.district, 'map-pin'],
+                    ['Ngành hàng', business.sector, 'layers'],
+                    ['Ngày đăng ký', business.joinDate, 'calendar'],
+                    ['Địa chỉ', business.address, 'map'],
+                    ['Email', business.email, 'mail'],
+                  ].map(([label, value, icon]) => (
+                    <View key={label} style={sd.approvalInfoRow}>
+                      <Feather name={icon as any} size={13} color="#6b7694" />
+                      <View style={{ flex: 1 }}>
+                        <Text style={sd.approvalLabel}>{label}</Text>
+                        <Text style={sd.approvalValue}>{value}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+                <Text style={sd.approvalSectionTitle}>Tài liệu đính kèm</Text>
+                {business.documents.length === 0 ? (
+                  <View style={sd.approvalEmptyDocs}>
+                    <Feather name="folder" size={22} color="#a8b2c8" />
+                    <Text style={sd.approvalEmptyText}>Chưa có hồ sơ nào được tải lên</Text>
+                  </View>
+                ) : business.documents.map((doc, index) => (
+                  <View key={`${doc.name}-${index}`} style={sd.approvalDocRow}>
+                    <View style={sd.approvalDocIcon}><Feather name="file-text" size={17} color="#2740BA" /></View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={sd.approvalDocName}>{doc.name}</Text>
+                      <Text style={sd.approvalDocDate}>Ngày tải: {doc.date}</Text>
+                    </View>
+                    <Feather name="eye" size={16} color="#a8b2c8" />
+                  </View>
+                ))}
+              </ScrollView>
+              <View style={sd.approvalActions}>
+                <TouchableOpacity style={sd.approvalRequestButton} onPress={() => finish('needs_more_documents')}>
+                  <Feather name="file-plus" size={16} color="#C45A0A" />
+                  <Text style={sd.approvalRequestText}>Yêu cầu bổ sung hồ sơ</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={sd.approvalConfirmButton} onPress={() => finish('approved')}>
+                  <Feather name="check" size={17} color="#fff" />
+                  <Text style={sd.approvalConfirmText}>Xác nhận</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -716,6 +846,7 @@ export default function BusinessesScreen() {
   const [selectedStatus, setSelectedStatus] = useState('Tất cả');
   
   const [selected, setSelected] = useState<Business | null>(null);
+  const [approvalBusiness, setApprovalBusiness] = useState<Business | null>(null);
   const handleEdit = (biz: Business) => {
     setSelected(biz);
   };
@@ -786,6 +917,13 @@ export default function BusinessesScreen() {
     setSelected(updated);
     Alert.alert('Đã lưu', 'Thông tin doanh nghiệp đã được cập nhật.');
   };
+  const handleApproval = (biz: Business, action: 'approved' | 'needs_more_documents') => {
+    if (action === 'approved') {
+      const updated = { ...biz, status: 'active' as Business['status'] };
+      setBusinesses(current => current.map(item => item.id === biz.id ? updated : item));
+    }
+    setApprovalBusiness(current => current?.id === biz.id ? { ...biz, status: action === 'approved' ? 'active' : biz.status } : current);
+  };
   const filtered = useMemo(() => {
     return businesses.filter(b => {
       const q = search.toLowerCase();
@@ -817,6 +955,14 @@ export default function BusinessesScreen() {
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
+      {approvalBusiness && (
+        <ApprovalModal
+          business={approvalBusiness}
+          onClose={() => setApprovalBusiness(null)}
+          onApprove={() => handleApproval(approvalBusiness, 'approved')}
+          onRequestDocuments={() => handleApproval(approvalBusiness, 'needs_more_documents')}
+        />
+      )}
       {/* Header */}
       <View style={s.header}>
         <View>
@@ -880,6 +1026,7 @@ export default function BusinessesScreen() {
           <BizCard
             biz={item}
             onPress={() => setSelected(item)}
+            onApprove={setApprovalBusiness}
             onEdit={handleEdit}
             onDelete={handleDelete}
             onLock={handleLock}
@@ -1074,6 +1221,35 @@ const sd = StyleSheet.create({
   resetConfirm: { flex: 1, paddingVertical: 12, borderRadius: 10, backgroundColor: '#E8650A', alignItems: 'center' },
   resetConfirmText: { fontSize: 13, color: '#fff', fontWeight: '700' },
   sheetHandle: { alignSelf: 'center', width: 38, height: 4, borderRadius: 4, backgroundColor: '#d9dce9', marginBottom: 14 },
+  approvalModal: { width: '100%', maxHeight: '92%', backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 18, paddingTop: 10, paddingBottom: 16 },
+  approvalHeader: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12 },
+  approvalEyebrow: { fontSize: 9, letterSpacing: 1.2, fontWeight: '700', color: '#E8650A' },
+  approvalTitle: { fontSize: 17, lineHeight: 22, fontWeight: '700', color: '#1d2944', marginTop: 4 },
+  approvalContent: { paddingBottom: 12 },
+  approvalCodeCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: '#e4e8f0', backgroundColor: '#f9fafb', marginBottom: 10 },
+  approvalLabel: { fontSize: 10, color: '#6b7694', marginBottom: 3 },
+  approvalCode: { fontSize: 11, fontWeight: '700', color: '#2740BA' },
+  approvalInfoCard: { borderRadius: 12, borderWidth: 1, borderColor: '#e4e8f0', paddingHorizontal: 12, marginBottom: 16 },
+  approvalInfoRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 9, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#f0f2f8' },
+  approvalValue: { fontSize: 12, lineHeight: 17, color: '#1d2944', fontWeight: '500' },
+  approvalSectionTitle: { fontSize: 13, fontWeight: '700', color: '#1d2944', marginBottom: 8 },
+  approvalDocRow: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 11, borderRadius: 11, borderWidth: 1, borderColor: '#e4e8f0', backgroundColor: '#f9fafb', marginBottom: 8 },
+  approvalDocIcon: { width: 34, height: 34, borderRadius: 9, alignItems: 'center', justifyContent: 'center', backgroundColor: '#edf0ff' },
+  approvalDocName: { fontSize: 11, fontWeight: '600', color: '#1d2944' },
+  approvalDocDate: { fontSize: 10, color: '#6b7694', marginTop: 2 },
+  approvalEmptyDocs: { alignItems: 'center', paddingVertical: 22, borderRadius: 11, borderWidth: 1, borderColor: '#e4e8f0', borderStyle: 'dashed' },
+  approvalEmptyText: { fontSize: 11, color: '#a8b2c8', marginTop: 6 },
+  approvalActions: { gap: 8, paddingTop: 4 },
+  approvalRequestButton: { minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 11, borderWidth: 1, borderColor: '#f4c49f', backgroundColor: '#fff', paddingHorizontal: 10 },
+  approvalRequestText: { fontSize: 12, fontWeight: '700', color: '#C45A0A' },
+  approvalConfirmButton: { minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 11, backgroundColor: '#1f7a45' },
+  approvalConfirmText: { fontSize: 12, fontWeight: '700', color: '#fff' },
+  approvalDone: { alignItems: 'center', paddingVertical: 28, paddingHorizontal: 12 },
+  approvalDoneIcon: { width: 58, height: 58, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
+  approvalDoneTitle: { fontSize: 16, fontWeight: '700', color: '#1d2944', textAlign: 'center' },
+  approvalDoneText: { fontSize: 12, lineHeight: 18, color: '#6b7694', textAlign: 'center', marginTop: 7 },
+  approvalCloseButton: { alignSelf: 'stretch', minHeight: 44, borderRadius: 11, backgroundColor: '#2740BA', alignItems: 'center', justifyContent: 'center', marginTop: 20 },
+  approvalCloseText: { fontSize: 12, fontWeight: '700', color: '#fff' },
   editModal: { width: '100%', maxHeight: '90%', backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 18, paddingTop: 10, paddingBottom: 24 },
   editHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 },
   editTitle: { fontSize: 18, fontWeight: '700', color: '#1d2944' },

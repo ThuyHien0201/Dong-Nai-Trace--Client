@@ -35,6 +35,7 @@ import {
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 type Status = "Hoạt động"| "Đã khóa";
+type ApprovalStatus = "pending" | "approved" | "needs_more_documents";
 type SortDir = "asc" | "desc" | null;
 type SortKey = keyof Business | null;
 
@@ -280,6 +281,122 @@ function ResetPasswordModal({ business, onClose }: { business: Business; onClose
   );
 }
 
+function ApprovalModal({
+  business,
+  approvalStatus,
+  onClose,
+  onApprove,
+  onRequestDocuments,
+}: {
+  business: Business;
+  approvalStatus: ApprovalStatus;
+  onClose: () => void;
+  onApprove: () => void;
+  onRequestDocuments: () => void;
+}) {
+  const [completedAction, setCompletedAction] = useState<"approved" | "needs_more_documents" | null>(null);
+
+  function finish(action: "approved" | "needs_more_documents") {
+    if (action === "approved") onApprove();
+    else onRequestDocuments();
+    setCompletedAction(action);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4 backdrop-blur-sm">
+      <div className="my-4 flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex items-center justify-between border-b border-[#e4e8f0] px-5 py-4 sm:px-6">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[.18em] text-[#E8650A]">Xét duyệt hồ sơ</p>
+            <h3 className="mt-1 text-[16px] font-bold text-[#1d2944]">{business.name}</h3>
+          </div>
+          <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-[#f1f3fa]" aria-label="Đóng">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {completedAction ? (
+          <div className="px-6 py-10 text-center">
+            <div className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl ${completedAction === "approved" ? "bg-[#e8f5ed]" : "bg-[#fff4ed]"}`}>
+              {completedAction === "approved" ? <Check className="h-7 w-7 text-[#1f7a45]" strokeWidth={2.5} /> : <FileText className="h-7 w-7 text-[#E8650A]" />}
+            </div>
+            <p className="text-[15px] font-bold text-[#1d2944]">
+              {completedAction === "approved" ? "Đã xác nhận duyệt" : "Đã yêu cầu bổ sung hồ sơ"}
+            </p>
+            <p className="mx-auto mt-2 max-w-md text-[12px] leading-5 text-slate-500">
+              {completedAction === "approved"
+                ? `Hồ sơ của ${business.name} đã được duyệt trên danh sách doanh nghiệp.`
+                : `Yêu cầu bổ sung hồ sơ đã được ghi nhận cho ${business.name}.`}
+            </p>
+            <button onClick={onClose} className="mt-6 w-full rounded-xl bg-[#2740BA] py-3 text-[13px] font-bold text-white hover:bg-[#1e33a0]">
+              Đóng
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="flex-1 space-y-4 overflow-y-auto p-5 sm:p-6">
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#e4e8f0] bg-[#f9fafb] p-3.5">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Mã hồ sơ</p>
+                  <p className="mt-1 font-mono text-[12px] font-bold text-[#2740BA]">{business.id}</p>
+                </div>
+                <StatusBadge status={business.status} />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 rounded-xl border border-[#e4e8f0] p-4 text-[12px] sm:grid-cols-3">
+                {[
+                  ["Mã số thuế", business.taxCode],
+                  ["Người đại diện", business.representative],
+                  ["Số điện thoại", business.phone],
+                  ["Địa bàn", business.region],
+                  ["Ngành hàng", business.sector],
+                  ["Ngày đăng ký", business.registeredAt],
+                ].map(([label, value]) => (
+                  <div key={label}>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
+                    <p className="mt-1 font-medium text-[#25304b]">{value}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div>
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-[13px] font-bold text-[#1d2944]">Tài liệu đính kèm</p>
+                  <span className="text-[11px] text-slate-400">4 file</span>
+                </div>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {["Giấy đăng ký kinh doanh", "CMND/CCCD người đại diện", "Giấy chứng nhận ATTP", "Hồ sơ năng lực sản xuất"].map((document) => (
+                    <div key={document} className="flex items-center gap-2.5 rounded-xl border border-[#e4e8f0] bg-[#f9fafb] p-3">
+                      <FileText className="h-4 w-4 shrink-0 text-[#2740BA]" />
+                      <span className="truncate text-[11px] font-medium text-[#25304b]">{document}</span>
+                      <Eye className="ml-auto h-3.5 w-3.5 shrink-0 text-slate-300" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col-reverse gap-2 border-t border-[#e4e8f0] bg-[#f9fafb] p-4 sm:flex-row sm:justify-end sm:px-6">
+              <button
+                onClick={() => finish("needs_more_documents")}
+                className="flex items-center justify-center gap-2 rounded-xl border border-[#f4c49f] bg-white px-4 py-3 text-[12px] font-bold text-[#C45A0A] hover:bg-[#fff4ed]"
+              >
+                <FileText className="h-4 w-4" /> Yêu cầu bổ sung hồ sơ
+              </button>
+              <button
+                onClick={() => finish("approved")}
+                className="flex items-center justify-center gap-2 rounded-xl bg-[#1f7a45] px-5 py-3 text-[12px] font-bold text-white hover:bg-[#176238]"
+              >
+                <Check className="h-4 w-4" /> Xác nhận
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Business Detail screen ─────────────────────────────────────────────────────
 function BusinessDetail({
   business,
@@ -292,6 +409,7 @@ function BusinessDetail({
 }) {
   const [qrOpen, setQrOpen] = useState(false);
   const [resetPwdOpen, setResetPwdOpen] = useState(false);
+  const [approvalOpen, setApprovalOpen] = useState(false);
 
   
 
@@ -306,6 +424,15 @@ function BusinessDetail({
       )}
       {resetPwdOpen && (
         <ResetPasswordModal business={business} onClose={() => setResetPwdOpen(false)} />
+      )}
+      {approvalOpen && (
+        <ApprovalModal
+          business={business}
+          approvalStatus="pending"
+          onClose={() => setApprovalOpen(false)}
+          onApprove={() => onUpdate(business.id, { status: "Hoạt động" })}
+          onRequestDocuments={() => undefined}
+        />
       )}
 
       <DashboardShell title="Chi tiết doanh nghiệp" subtitle={business.name}>
@@ -453,6 +580,12 @@ function BusinessDetail({
 
               {/* Edit / Delete actions */}
               <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setApprovalOpen(true)}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-[#1f7a45] py-3 text-[12px] font-bold text-white transition hover:bg-[#176238]"
+                >
+                  <Check className="h-3.5 w-3.5" /> Duyệt
+                </button>
                 <button className="flex items-center justify-center gap-2 rounded-xl border border-[#e4e8f0] bg-white py-3 text-[12px] font-semibold text-slate-600 transition hover:border-[#2740BA] hover:text-[#2740BA]">
                   <Pencil className="h-3.5 w-3.5" /> Chỉnh sửa
                 </button>
@@ -496,6 +629,8 @@ export default function Businesses() {
   const [viewing, setViewing] = useState<Business | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [resetPwdBusiness, setResetPwdBusiness] = useState<Business | null>(null);
+  const [approvalBusiness, setApprovalBusiness] = useState<Business | null>(null);
+  const [approvalStatuses, setApprovalStatuses] = useState<Record<string, ApprovalStatus>>({});
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const viewingBusiness = viewing ? (businesses.find((b) => b.id === viewing.id) ?? viewing) : null;
@@ -537,6 +672,11 @@ export default function Businesses() {
 
   function handleUpdate(id: string, updates: Partial<Business>) {
     setBusinesses((prev) => prev.map((b) => b.id === id ? { ...b, ...updates } : b));
+  }
+
+  function handleApproval(id: string, status: ApprovalStatus) {
+    setApprovalStatuses((prev) => ({ ...prev, [id]: status }));
+    if (status === "approved") handleUpdate(id, { status: "Hoạt động" });
   }
 
   function handleDelete(id: string) {
@@ -587,6 +727,15 @@ export default function Businesses() {
 
   return (
     <DashboardShell title="Quản lý doanh nghiệp" subtitle="Danh sách doanh nghiệp">
+      {approvalBusiness && (
+        <ApprovalModal
+          business={approvalBusiness}
+          approvalStatus={approvalStatuses[approvalBusiness.id] ?? "pending"}
+          onClose={() => setApprovalBusiness(null)}
+          onApprove={() => handleApproval(approvalBusiness.id, "approved")}
+          onRequestDocuments={() => handleApproval(approvalBusiness.id, "needs_more_documents")}
+        />
+      )}
       {resetPwdBusiness && (
         <ResetPasswordModal business={resetPwdBusiness} onClose={() => setResetPwdBusiness(null)} />
       )}
@@ -749,6 +898,13 @@ export default function Businesses() {
                   </div>
                 )}
                 <div className="mt-auto flex items-center gap-1 border-t border-[#f0f2f8] pt-3">
+                   <button
+                     onClick={() => setApprovalBusiness(b)}
+                     className="flex items-center gap-1 rounded-lg bg-[#e8f5ed] px-2 py-1.5 text-[10px] font-bold text-[#1f7a45] transition-colors hover:bg-[#d5eddd]"
+                     title="Duyệt doanh nghiệp"
+                   >
+                     <Check className="h-3.5 w-3.5" /> Duyệt
+                   </button>
                   <button
                     onClick={() => setViewing(b)}
                     className="ml-auto rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#edf0ff] hover:text-[#2740BA]"
@@ -876,6 +1032,13 @@ export default function Businesses() {
                         title="Xem chi tiết"
                       >
                         <Eye className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => setApprovalBusiness(b)}
+                        className="flex items-center gap-1 rounded-lg bg-[#e8f5ed] px-2 py-1.5 text-[10px] font-bold text-[#1f7a45] transition-colors hover:bg-[#d5eddd]"
+                        title="Duyệt doanh nghiệp"
+                      >
+                        <Check className="h-3.5 w-3.5" /> Duyệt
                       </button>
                       <button
                         className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#fff4ed] hover:text-[#E8650A]"
