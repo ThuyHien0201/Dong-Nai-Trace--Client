@@ -12,7 +12,8 @@ import { Feather } from '@expo/vector-icons';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 
 /* ─── Mock Data ────────────────────────────────────────────── */
-const STATUSES = ['Tất cả', 'Hoạt động', "Đã Khóa"];
+type ReviewStatus = 'approved' | 'pending' | 'needs_more_documents' | 'supplemented' | 'locked';
+const STATUSES = ['Tất cả', 'Đã duyệt', 'Chờ duyệt', 'Yêu cầu bổ sung', 'Đã bổ sung', 'Đã khóa'];
 
 interface Business {
   id: string;
@@ -26,7 +27,7 @@ interface Business {
   phone: string;
   email: string;
   representative: string;
-  status: 'active'  | 'locked';
+  status: ReviewStatus | 'active';
   productCount: number;
   joinDate: string;
   certifications: string[];
@@ -226,7 +227,17 @@ const BUSINESSES: Business[] = [
   }
 ];
 
+const reviewStatuses: ReviewStatus[] = ['pending', 'approved', 'needs_more_documents', 'supplemented'];
+const businessesWithReviewStatuses = BUSINESSES.map((business, index) => ({
+  ...business,
+  status: business.status === 'locked' ? 'locked' as ReviewStatus : reviewStatuses[index % reviewStatuses.length],
+}));
+
 const STATUS_META = {
+  approved: { label: 'Đã duyệt', color: '#1f7a45', bg: '#e8f5ed' },
+  pending: { label: 'Chờ duyệt', color: '#a66b00', bg: '#fff8e8' },
+  needs_more_documents: { label: 'Yêu cầu bổ sung', color: '#C45A0A', bg: '#fff4ed' },
+  supplemented: { label: 'Đã bổ sung', color: '#2740BA', bg: '#edf0ff' },
   active: { label: 'Hoạt động', color: '#1f7a45', bg: '#e8f5ed' },
   
   locked: { label: 'Đã khóa', color: '#c0392b', bg: '#fef0f0' },
@@ -267,6 +278,7 @@ function BizCard({
 }) {
   
   const m = STATUS_META[biz.status];
+  const canApprove = biz.status === 'pending' || biz.status === 'supplemented';
   return (
     <TouchableOpacity style={s.bizCard} onPress={onPress} activeOpacity={0.85}>
       <View style={s.bizCardHeader}>
@@ -301,13 +313,15 @@ function BizCard({
         </View>
       )}
       <View style={s.actionRow}>
-        <TouchableOpacity
-          accessibilityLabel="Duyệt doanh nghiệp"
-          hitSlop={8}
-          onPress={() => onApprove(biz)}
-        >
-          <Feather name="check-circle" size={16} color="#1f7a45" />
-        </TouchableOpacity>
+        {canApprove && (
+          <TouchableOpacity
+            accessibilityLabel="Duyệt doanh nghiệp"
+            hitSlop={8}
+            onPress={() => onApprove(biz)}
+          >
+            <Feather name="check-circle" size={16} color="#1f7a45" />
+          </TouchableOpacity>
+        )}
         <TouchableOpacity
           accessibilityLabel="Đặt lại mật khẩu"
           hitSlop={8}
@@ -840,7 +854,7 @@ function BusinessEditModal({
 
 /* ─── Main Screen ───────────────────────────────────────────── */
 export default function BusinessesScreen() {
-  const [businesses, setBusinesses] = useState<Business[]>(BUSINESSES);
+  const [businesses, setBusinesses] = useState<Business[]>(businessesWithReviewStatuses);
   const [search, setSearch] = useState('');
   const [selectedSector, setSelectedSector] = useState('Tất cả');
   const [selectedStatus, setSelectedStatus] = useState('Tất cả');
@@ -884,7 +898,7 @@ export default function BusinessesScreen() {
           text: willLock ? 'Khóa' : 'Mở khóa',
           style: willLock ? 'destructive' : 'default',
           onPress: () => {
-            const updated = { ...biz, status: willLock ? 'locked' : 'active' as Business['status'] };
+            const updated = { ...biz, status: willLock ? 'locked' : 'approved' as Business['status'] };
             setBusinesses(current => current.map(item => item.id === biz.id ? updated : item));
             setSelected(current => current?.id === biz.id ? updated : current);
             Alert.alert('Đã cập nhật', willLock ? 'Doanh nghiệp đã được khóa.' : 'Doanh nghiệp đã được mở khóa.');
@@ -918,11 +932,9 @@ export default function BusinessesScreen() {
     Alert.alert('Đã lưu', 'Thông tin doanh nghiệp đã được cập nhật.');
   };
   const handleApproval = (biz: Business, action: 'approved' | 'needs_more_documents') => {
-    if (action === 'approved') {
-      const updated = { ...biz, status: 'active' as Business['status'] };
-      setBusinesses(current => current.map(item => item.id === biz.id ? updated : item));
-    }
-    setApprovalBusiness(current => current?.id === biz.id ? { ...biz, status: action === 'approved' ? 'active' : biz.status } : current);
+    const updated = { ...biz, status: action as Business['status'] };
+    setBusinesses(current => current.map(item => item.id === biz.id ? updated : item));
+    setApprovalBusiness(current => current?.id === biz.id ? updated : current);
   };
   const filtered = useMemo(() => {
     return businesses.filter(b => {
@@ -930,7 +942,13 @@ export default function BusinessesScreen() {
       if (q && !b.name.toLowerCase().includes(q) && !b.code.toLowerCase().includes(q) && !b.representative.toLowerCase().includes(q)) return false;
       if (selectedSector !== 'Tất cả' && b.sector !== selectedSector) return false;
       if (selectedStatus !== 'Tất cả') {
-        const map: Record<string, Business['status']> = { 'Hoạt động': 'active', 'đã khóa': 'locked' };
+        const map: Record<string, Business['status']> = {
+          'Đã duyệt': 'approved',
+          'Chờ duyệt': 'pending',
+          'Yêu cầu bổ sung': 'needs_more_documents',
+          'Đã bổ sung': 'supplemented',
+          'Đã khóa': 'locked',
+        };
         if (b.status !== map[selectedStatus]) return false;
       }
       return true;

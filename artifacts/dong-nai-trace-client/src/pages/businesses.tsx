@@ -34,8 +34,8 @@ import {
 } from "lucide-react";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
-type Status = "Hoạt động"| "Đã khóa";
-type ApprovalStatus = "pending" | "approved" | "needs_more_documents";
+type Status = "Hoạt động" | "Đã duyệt" | "Chờ duyệt" | "Yêu cầu bổ sung" | "Đã bổ sung" | "Đã khóa";
+type ApprovalStatus = "Đã duyệt" | "Chờ duyệt" | "Yêu cầu bổ sung" | "Đã bổ sung";
 type SortDir = "asc" | "desc" | null;
 type SortKey = keyof Business | null;
 
@@ -72,15 +72,25 @@ const initialBusinesses: Business[] = [
   { id: "DN-015", name: "Công ty TNHH OCOP Nhơn Trạch", taxCode: "3604445678", region: "Nhơn Trạch", sector: "OCOP", status: "Hoạt động", registeredAt: "21/12/2024", representative: "Bùi Văn Oanh", phone: "0945 678 901", businessCode: null, imageUrl: "https://images.unsplash.com/photo-1471193945509-9ad0617afabf?w=400&h=220&fit=crop" },
 ];
 
+const reviewStatuses: Status[] = ["Chờ duyệt", "Đã duyệt", "Yêu cầu bổ sung", "Đã bổ sung"];
+const businessesWithReviewStatuses = initialBusinesses.map((business, index) => ({
+  ...business,
+  status: business.status === "Đã khóa" ? "Đã khóa" as Status : reviewStatuses[index % reviewStatuses.length],
+}));
+
 // ─── Constants ─────────────────────────────────────────────────────────────────
 const STATUS_ALL = "Tất cả";
-const statuses: Status[] = ["Hoạt động", "Đã khóa"];
+const statuses: Status[] = ["Đã duyệt", "Chờ duyệt", "Yêu cầu bổ sung", "Đã bổ sung", "Đã khóa"];
 const regions = ["Tất cả địa bàn", "Biên Hòa", "Long Khánh", "Xuân Lộc", "Nhơn Trạch", "Long Thành", "Trảng Bom", "Định Quán", "Tân Phú", "Vĩnh Cửu", "Cao Lãnh"];
 const sectors = ["Tất cả ngành", "Nông sản", "Thực phẩm CB", "Thủy sản", "OCOP", "Dược liệu", "Chăn nuôi"];
 const PAGE_SIZE = 8;
 
 const statusConfig: Record<Status, { cls: string; icon: typeof Check }> = {
   "Hoạt động": { cls: "bg-[#e8f5ed] text-[#1f7a45] border border-[#b8e2c8]", icon: Check },
+  "Đã duyệt": { cls: "bg-[#e8f5ed] text-[#1f7a45] border border-[#b8e2c8]", icon: Check },
+  "Chờ duyệt": { cls: "bg-[#fff8e8] text-[#a66b00] border border-[#f1d38c]", icon: Clock },
+  "Yêu cầu bổ sung": { cls: "bg-[#fff4ed] text-[#C45A0A] border border-[#f4c49f]", icon: FileText },
+  "Đã bổ sung": { cls: "bg-[#edf0ff] text-[#2740BA] border border-[#cbd5ff]", icon: FileText },
   "Đã khóa": { cls: "bg-[#f2f3f7] text-[#6b7694] border border-[#d9dce9]", icon: Lock },
 };
 
@@ -294,10 +304,10 @@ function ApprovalModal({
   onApprove: () => void;
   onRequestDocuments: () => void;
 }) {
-  const [completedAction, setCompletedAction] = useState<"approved" | "needs_more_documents" | null>(null);
+  const [completedAction, setCompletedAction] = useState<"Đã duyệt" | "Yêu cầu bổ sung" | null>(null);
 
-  function finish(action: "approved" | "needs_more_documents") {
-    if (action === "approved") onApprove();
+  function finish(action: "Đã duyệt" | "Yêu cầu bổ sung") {
+    if (action === "Đã duyệt") onApprove();
     else onRequestDocuments();
     setCompletedAction(action);
   }
@@ -317,14 +327,14 @@ function ApprovalModal({
 
         {completedAction ? (
           <div className="px-6 py-10 text-center">
-            <div className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl ${completedAction === "approved" ? "bg-[#e8f5ed]" : "bg-[#fff4ed]"}`}>
-              {completedAction === "approved" ? <Check className="h-7 w-7 text-[#1f7a45]" strokeWidth={2.5} /> : <FileText className="h-7 w-7 text-[#E8650A]" />}
+            <div className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl ${completedAction === "Đã duyệt" ? "bg-[#e8f5ed]" : "bg-[#fff4ed]"}`}>
+              {completedAction === "Đã duyệt" ? <Check className="h-7 w-7 text-[#1f7a45]" strokeWidth={2.5} /> : <FileText className="h-7 w-7 text-[#E8650A]" />}
             </div>
             <p className="text-[15px] font-bold text-[#1d2944]">
-              {completedAction === "approved" ? "Đã xác nhận duyệt" : "Đã yêu cầu bổ sung hồ sơ"}
+              {completedAction === "Đã duyệt" ? "Đã xác nhận duyệt" : "Đã yêu cầu bổ sung hồ sơ"}
             </p>
             <p className="mx-auto mt-2 max-w-md text-[12px] leading-5 text-slate-500">
-              {completedAction === "approved"
+              {completedAction === "Đã duyệt"
                 ? `Hồ sơ của ${business.name} đã được duyệt trên danh sách doanh nghiệp.`
                 : `Yêu cầu bổ sung hồ sơ đã được ghi nhận cho ${business.name}.`}
             </p>
@@ -378,13 +388,13 @@ function ApprovalModal({
 
             <div className="flex flex-col-reverse gap-2 border-t border-[#e4e8f0] bg-[#f9fafb] p-4 sm:flex-row sm:justify-end sm:px-6">
               <button
-                onClick={() => finish("needs_more_documents")}
+                onClick={() => finish("Yêu cầu bổ sung")}
                 className="flex items-center justify-center gap-2 rounded-xl border border-[#f4c49f] bg-white px-4 py-3 text-[12px] font-bold text-[#C45A0A] hover:bg-[#fff4ed]"
               >
                 <FileText className="h-4 w-4" /> Yêu cầu bổ sung hồ sơ
               </button>
               <button
-                onClick={() => finish("approved")}
+                onClick={() => finish("Đã duyệt")}
                 className="flex items-center justify-center gap-2 rounded-xl bg-[#1f7a45] px-5 py-3 text-[12px] font-bold text-white hover:bg-[#176238]"
               >
                 <Check className="h-4 w-4" /> Xác nhận
@@ -428,10 +438,10 @@ function BusinessDetail({
       {approvalOpen && (
         <ApprovalModal
           business={business}
-          approvalStatus="pending"
+          approvalStatus={business.status === "Đã bổ sung" ? "Đã bổ sung" : "Chờ duyệt"}
           onClose={() => setApprovalOpen(false)}
-          onApprove={() => onUpdate(business.id, { status: "Hoạt động" })}
-          onRequestDocuments={() => undefined}
+          onApprove={() => onUpdate(business.id, { status: "Đã duyệt" })}
+          onRequestDocuments={() => onUpdate(business.id, { status: "Yêu cầu bổ sung" })}
         />
       )}
 
@@ -496,7 +506,7 @@ function BusinessDetail({
               </div>
 
               {/* Issued code (if approved) */}
-              {business.status === "Hoạt động" && business.businessCode && (
+              {business.status === "Đã duyệt" && business.businessCode && (
                 <div className="mt-5 rounded-xl border border-[#b8e2c8] bg-[#e8f5ed] p-3.5">
                   <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#1f7a45]">Mã định danh tổ chức</p>
                   <div className="flex items-center gap-2">
@@ -557,7 +567,7 @@ function BusinessDetail({
               </div>
 
               {/* QR code button (approved only) */}
-              {business.status === "Hoạt động" && business.businessCode && (
+              {business.status === "Đã duyệt" && business.businessCode && (
                 <button
                   onClick={() => setQrOpen(true)}
                   className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-[#dce3ff] bg-[#f0f2ff] py-3 text-[12px] font-semibold text-[#2740BA] transition hover:bg-[#e4e8ff]"
@@ -580,17 +590,19 @@ function BusinessDetail({
 
               {/* Edit / Delete actions */}
               <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => setApprovalOpen(true)}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-[#1f7a45] py-3 text-[12px] font-bold text-white transition hover:bg-[#176238]"
-                >
-                  <Check className="h-3.5 w-3.5" /> Duyệt
-                </button>
+                {(business.status === "Chờ duyệt" || business.status === "Đã bổ sung") && (
+                  <button
+                    onClick={() => setApprovalOpen(true)}
+                    className="flex items-center justify-center gap-2 rounded-xl bg-[#1f7a45] py-3 text-[12px] font-bold text-white transition hover:bg-[#176238]"
+                  >
+                    <Check className="h-3.5 w-3.5" /> Duyệt
+                  </button>
+                )}
                 <button className="flex items-center justify-center gap-2 rounded-xl border border-[#e4e8f0] bg-white py-3 text-[12px] font-semibold text-slate-600 transition hover:border-[#2740BA] hover:text-[#2740BA]">
                   <Pencil className="h-3.5 w-3.5" /> Chỉnh sửa
                 </button>
                 <button
-                  onClick={() => onUpdate(business.id, { status: business.status === "Đã khóa" ? "Hoạt động" : "Đã khóa" })}
+                  onClick={() => onUpdate(business.id, { status: business.status === "Đã khóa" ? "Đã duyệt" : "Đã khóa" })}
                   className="flex items-center justify-center gap-2 rounded-xl border border-[#e4e8f0] bg-white py-3 text-[12px] font-semibold text-slate-600 transition hover:border-[#E8650A] hover:text-[#E8650A]"
                 >
                   {business.status === "Đã khóa" ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
@@ -617,7 +629,7 @@ function BusinessDetail({
 
 // ─── Business list ──────────────────────────────────────────────────────────────
 export default function Businesses() {
-  const [businesses, setBusinesses] = useState<Business[]>(initialBusinesses);
+  const [businesses, setBusinesses] = useState<Business[]>(businessesWithReviewStatuses);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState(STATUS_ALL);
   const [regionFilter, setRegionFilter] = useState("Tất cả địa bàn");
@@ -676,7 +688,7 @@ export default function Businesses() {
 
   function handleApproval(id: string, status: ApprovalStatus) {
     setApprovalStatuses((prev) => ({ ...prev, [id]: status }));
-    if (status === "approved") handleUpdate(id, { status: "Hoạt động" });
+    if (status === "Đã duyệt" || status === "Đã bổ sung") handleUpdate(id, { status });
   }
 
   function handleDelete(id: string) {
@@ -730,10 +742,10 @@ export default function Businesses() {
       {approvalBusiness && (
         <ApprovalModal
           business={approvalBusiness}
-          approvalStatus={approvalStatuses[approvalBusiness.id] ?? "pending"}
+          approvalStatus={approvalStatuses[approvalBusiness.id] ?? (approvalBusiness.status === "Đã bổ sung" ? "Đã bổ sung" : "Chờ duyệt")}
           onClose={() => setApprovalBusiness(null)}
-          onApprove={() => handleApproval(approvalBusiness.id, "approved")}
-          onRequestDocuments={() => handleApproval(approvalBusiness.id, "needs_more_documents")}
+          onApprove={() => handleApproval(approvalBusiness.id, "Đã duyệt")}
+          onRequestDocuments={() => handleApproval(approvalBusiness.id, "Yêu cầu bổ sung")}
         />
       )}
       {resetPwdBusiness && (
@@ -898,13 +910,15 @@ export default function Businesses() {
                   </div>
                 )}
                 <div className="mt-auto flex items-center gap-1 border-t border-[#f0f2f8] pt-3">
-                   <button
-                     onClick={() => setApprovalBusiness(b)}
-                     className="flex items-center gap-1 rounded-lg bg-[#e8f5ed] px-2 py-1.5 text-[10px] font-bold text-[#1f7a45] transition-colors hover:bg-[#d5eddd]"
-                     title="Duyệt doanh nghiệp"
-                   >
-                     <Check className="h-3.5 w-3.5" /> Duyệt
-                   </button>
+                   {(b.status === "Chờ duyệt" || b.status === "Đã bổ sung") && (
+                     <button
+                       onClick={() => setApprovalBusiness(b)}
+                       className="flex items-center gap-1 rounded-lg bg-[#e8f5ed] px-2 py-1.5 text-[10px] font-bold text-[#1f7a45] transition-colors hover:bg-[#d5eddd]"
+                       title="Duyệt doanh nghiệp"
+                     >
+                       <Check className="h-3.5 w-3.5" /> Duyệt
+                     </button>
+                   )}
                   <button
                     onClick={() => setViewing(b)}
                     className="ml-auto rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#edf0ff] hover:text-[#2740BA]"
@@ -1033,13 +1047,15 @@ export default function Businesses() {
                       >
                         <Eye className="h-3.5 w-3.5" />
                       </button>
-                      <button
-                        onClick={() => setApprovalBusiness(b)}
-                        className="flex items-center gap-1 rounded-lg bg-[#e8f5ed] px-2 py-1.5 text-[10px] font-bold text-[#1f7a45] transition-colors hover:bg-[#d5eddd]"
-                        title="Duyệt doanh nghiệp"
-                      >
-                        <Check className="h-3.5 w-3.5" /> Duyệt
-                      </button>
+                      {(b.status === "Chờ duyệt" || b.status === "Đã bổ sung") && (
+                        <button
+                          onClick={() => setApprovalBusiness(b)}
+                          className="flex items-center gap-1 rounded-lg bg-[#e8f5ed] px-2 py-1.5 text-[10px] font-bold text-[#1f7a45] transition-colors hover:bg-[#d5eddd]"
+                          title="Duyệt doanh nghiệp"
+                        >
+                          <Check className="h-3.5 w-3.5" /> Duyệt
+                        </button>
+                      )}
                       <button
                         className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#fff4ed] hover:text-[#E8650A]"
                         title="Chỉnh sửa"
@@ -1054,7 +1070,7 @@ export default function Businesses() {
                         <KeyRound className="h-3.5 w-3.5" />
                       </button>
                       <button
-                        onClick={() => handleUpdate(b.id, { status: b.status === "Đã khóa" ? "Hoạt động" : "Đã khóa" })}
+                        onClick={() => handleUpdate(b.id, { status: b.status === "Đã khóa" ? "Đã duyệt" : "Đã khóa" })}
                         className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-[#f0f2f8] hover:text-slate-600"
                         title={b.status === "Đã khóa" ? "Mở khóa" : "Khóa"}
                       >
