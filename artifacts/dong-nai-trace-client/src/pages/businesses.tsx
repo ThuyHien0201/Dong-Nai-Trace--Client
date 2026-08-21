@@ -31,6 +31,7 @@ import {
   KeyRound,
   RefreshCw,
   Copy,
+  UploadCloud,
 } from "lucide-react";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -353,26 +354,69 @@ function ApprovalModal({
                 <StatusBadge status={business.status} />
               </div>
 
-              <div className="grid grid-cols-2 gap-3 rounded-xl border border-[#e4e8f0] p-4 text-[12px] sm:grid-cols-3">
-                {[
-                  ["Mã số thuế", business.taxCode],
-                  ["Người đại diện", business.representative],
-                  ["Số điện thoại", business.phone],
-                  ["Địa bàn", business.region],
-                  ["Ngành hàng", business.sector],
-                  ["Ngày đăng ký", business.registeredAt],
-                ].map(([label, value]) => (
-                  <div key={label}>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
-                    <p className="mt-1 font-medium text-[#25304b]">{value}</p>
-                  </div>
-                ))}
+              <div>
+                <p className="mb-3 text-[13px] font-bold text-[#1d2944]">Thông tin doanh nghiệp</p>
+                <div className="grid grid-cols-1 gap-x-3 gap-y-3 rounded-xl border border-[#e4e8f0] p-4 text-[12px] sm:grid-cols-2">
+                  {[
+                    ["Tên doanh nghiệp / tổ chức", business.name],
+                    ["Mã số thuế", business.taxCode],
+                    ["Loại hình", "Doanh nghiệp"],
+                    ["Ngành nghề", business.sector],
+                    ["Địa chỉ", `${business.region}, Đồng Nai`],
+                    ["Huyện / Thị xã", business.region],
+                    ["Số điện thoại", business.phone],
+                    ["Email", "lienhe@dntrace.vn"],
+                    ["GCP", "—"],
+                  ].map(([label, value]) => (
+                    <div key={label}>
+                      <p className="mb-1 text-[10px] font-semibold text-slate-500">{label}</p>
+                      <div className="min-h-9 rounded-lg border border-[#dfe3ec] bg-white px-3 py-2 font-medium text-[#25304b]">{value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="mb-3 text-[13px] font-bold text-[#1d2944]">Thông tin người đại diện</p>
+                <div className="grid grid-cols-1 gap-x-3 gap-y-3 rounded-xl border border-[#e4e8f0] p-4 text-[12px] sm:grid-cols-2">
+                  {[
+                    ["Họ và tên người đại diện", business.representative],
+                    ["Số điện thoại liên hệ", business.phone],
+                    ["Email đăng nhập", "lienhe@dntrace.vn"],
+                    ["CCCD / CMND", "Chưa cập nhật"],
+                  ].map(([label, value]) => (
+                    <div key={label}>
+                      <p className="mb-1 text-[10px] font-semibold text-slate-500">{label}</p>
+                      <div className="min-h-9 rounded-lg border border-[#dfe3ec] bg-white px-3 py-2 font-medium text-[#25304b]">{value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="mb-3 text-[13px] font-bold text-[#1d2944]">Hồ sơ và hình ảnh</p>
+                <div className="space-y-2">
+                  {[
+                    ["Giấy phép kinh doanh (bản scan)", "Kéo thả hoặc bấm để tải lên (PDF, JPG, PNG)"],
+                    ["Giấy chứng nhận (nếu có)", "OCOP · Tải giấy chứng nhận (PDF, JPG, PNG)"],
+                    ["Hình ảnh doanh nghiệp", "Tải lên hình ảnh trụ sở, nhà xưởng hoặc vùng sản xuất (JPG, PNG)"],
+                    ["Giấy ủy quyền (nếu có)", "Tải lên giấy ủy quyền (PDF, JPG)"],
+                  ].map(([label, hint]) => (
+                    <div key={label}>
+                      <p className="mb-1 text-[10px] font-semibold text-slate-500">{label}</p>
+                      <div className="flex min-h-16 items-center justify-center gap-2 rounded-xl border border-dashed border-[#cfd5e1] bg-[#f9fafb] px-3 py-3 text-center text-[11px] text-slate-400">
+                        <UploadCloud className="h-5 w-5 shrink-0 text-slate-300" />
+                        <span>{hint}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div>
                 <div className="mb-3 flex items-center justify-between">
-                  <p className="text-[13px] font-bold text-[#1d2944]">Tài liệu đính kèm</p>
-                  <span className="text-[11px] text-slate-400">4 file</span>
+                  <p className="text-[13px] font-bold text-[#1d2944]">Tài liệu đã tải lên</p>
+                  <span className="text-[11px] text-slate-400">{business.businessCode ? "4 file" : "Chưa đủ hồ sơ"}</span>
                 </div>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {["Giấy đăng ký kinh doanh", "CMND/CCCD người đại diện", "Giấy chứng nhận ATTP", "Hồ sơ năng lực sản xuất"].map((document) => (

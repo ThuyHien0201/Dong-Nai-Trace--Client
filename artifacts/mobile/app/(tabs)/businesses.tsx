@@ -424,27 +424,55 @@ function ApprovalModal({
                   </View>
                   <StatusBadge status={business.status} />
                 </View>
+                <Text style={sd.approvalSectionTitle}>Thông tin doanh nghiệp</Text>
                 <View style={sd.approvalInfoCard}>
                   {[
-                    ['Mã số thuế', business.taxId, 'file-text'],
-                    ['Người đại diện', business.representative, 'user'],
-                    ['Điện thoại', business.phone, 'phone'],
-                    ['Địa bàn', business.district, 'map-pin'],
-                    ['Ngành hàng', business.sector, 'layers'],
-                    ['Ngày đăng ký', business.joinDate, 'calendar'],
-                    ['Địa chỉ', business.address, 'map'],
-                    ['Email', business.email, 'mail'],
-                  ].map(([label, value, icon]) => (
-                    <View key={label} style={sd.approvalInfoRow}>
-                      <Feather name={icon as any} size={13} color="#6b7694" />
-                      <View style={{ flex: 1 }}>
-                        <Text style={sd.approvalLabel}>{label}</Text>
-                        <Text style={sd.approvalValue}>{value}</Text>
-                      </View>
+                    ['Tên doanh nghiệp / tổ chức', business.name],
+                    ['Mã số thuế', business.taxId],
+                    ['Loại hình', business.businessType],
+                    ['Ngành nghề', business.sector],
+                    ['Địa chỉ', business.address],
+                    ['Huyện / Thị xã', business.district],
+                    ['Số điện thoại', business.phone],
+                    ['Email', business.email],
+                    ['GCP', '—'],
+                  ].map(([label, value]) => (
+                    <View key={label} style={sd.approvalField}>
+                      <Text style={sd.approvalLabel}>{label}</Text>
+                      <Text style={sd.approvalValue}>{value}</Text>
                     </View>
                   ))}
                 </View>
-                <Text style={sd.approvalSectionTitle}>Tài liệu đính kèm</Text>
+                <Text style={sd.approvalSectionTitle}>Thông tin người đại diện</Text>
+                <View style={sd.approvalInfoCard}>
+                  {[
+                    ['Họ và tên người đại diện', business.representative],
+                    ['Số điện thoại liên hệ', business.phone],
+                    ['Email đăng nhập', business.email],
+                    ['CCCD / CMND', 'Chưa cập nhật'],
+                  ].map(([label, value]) => (
+                    <View key={label} style={sd.approvalField}>
+                      <Text style={sd.approvalLabel}>{label}</Text>
+                      <Text style={sd.approvalValue}>{value}</Text>
+                    </View>
+                  ))}
+                </View>
+                <Text style={sd.approvalSectionTitle}>Hồ sơ và hình ảnh</Text>
+                {[
+                  ['Giấy phép kinh doanh (bản scan)', 'Kéo thả hoặc bấm để tải lên (PDF, JPG, PNG)'],
+                  ['Giấy chứng nhận (nếu có)', 'OCOP · Tải giấy chứng nhận (PDF, JPG, PNG)'],
+                  ['Hình ảnh doanh nghiệp', 'Tải lên hình ảnh trụ sở, nhà xưởng hoặc vùng sản xuất (JPG, PNG)'],
+                  ['Giấy ủy quyền (nếu có)', 'Tải lên giấy ủy quyền (PDF, JPG)'],
+                ].map(([label, hint]) => (
+                  <View key={label} style={sd.approvalUploadGroup}>
+                    <Text style={sd.approvalLabel}>{label}</Text>
+                    <View style={sd.approvalUploadBox}>
+                      <Feather name="upload-cloud" size={22} color="#a8b2c8" />
+                      <Text style={sd.approvalUploadText}>{hint}</Text>
+                    </View>
+                  </View>
+                ))}
+                <Text style={sd.approvalSectionTitle}>Tài liệu đã tải lên</Text>
                 {business.documents.length === 0 ? (
                   <View style={sd.approvalEmptyDocs}>
                     <Feather name="folder" size={22} color="#a8b2c8" />
@@ -1249,8 +1277,12 @@ const sd = StyleSheet.create({
   approvalCode: { fontSize: 11, fontWeight: '700', color: '#2740BA' },
   approvalInfoCard: { borderRadius: 12, borderWidth: 1, borderColor: '#e4e8f0', paddingHorizontal: 12, marginBottom: 16 },
   approvalInfoRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 9, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#f0f2f8' },
+  approvalField: { width: '50%', paddingVertical: 8, paddingRight: 8, borderBottomWidth: 1, borderBottomColor: '#f0f2f8' },
   approvalValue: { fontSize: 12, lineHeight: 17, color: '#1d2944', fontWeight: '500' },
   approvalSectionTitle: { fontSize: 13, fontWeight: '700', color: '#1d2944', marginBottom: 8 },
+  approvalUploadGroup: { marginBottom: 10 },
+  approvalUploadBox: { minHeight: 64, borderRadius: 11, borderWidth: 1, borderStyle: 'dashed', borderColor: '#cfd5e1', backgroundColor: '#f9fafb', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12, paddingVertical: 12, gap: 5 },
+  approvalUploadText: { fontSize: 10, color: '#8d97aa', textAlign: 'center' },
   approvalDocRow: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 11, borderRadius: 11, borderWidth: 1, borderColor: '#e4e8f0', backgroundColor: '#f9fafb', marginBottom: 8 },
   approvalDocIcon: { width: 34, height: 34, borderRadius: 9, alignItems: 'center', justifyContent: 'center', backgroundColor: '#edf0ff' },
   approvalDocName: { fontSize: 11, fontWeight: '600', color: '#1d2944' },
