@@ -1042,10 +1042,20 @@ function SolutionProviderTab() {
     (typeof MOCK_SOLUTION_LOTS)[number] | null
   >(null);
   const [selectedProviderId, setSelectedProviderId] = useState<number | "">("");
+  const [providerSearch, setProviderSearch] = useState("");
   const [failure, setFailure] = useState<{
     lot: (typeof MOCK_SOLUTION_LOTS)[number];
     provider: SolutionProvider;
   } | null>(null);
+  const visibleProviders = useMemo(() => {
+    const query = providerSearch.trim().toLowerCase();
+    if (!query) return INITIAL_SOLUTION_PROVIDERS;
+    return INITIAL_SOLUTION_PROVIDERS.filter((provider) =>
+      `${provider.name} ${provider.organization} ${provider.taxCode}`
+        .toLowerCase()
+        .includes(query),
+    );
+  }, [providerSearch]);
   const lots = useMemo(() => MOCK_SOLUTION_LOTS.filter((lot) => {
     const matches = (value: string, query: string) =>
       !query || value.toLowerCase().includes(query.toLowerCase());
@@ -1055,6 +1065,18 @@ function SolutionProviderTab() {
       matches(lot.productName, searchProduct);
   }), [searchGtin, searchLot, searchBusiness, searchProduct]);
   const total = lots.length;
+
+  function openProviderSelection(lot: (typeof MOCK_SOLUTION_LOTS)[number]) {
+    setProviderSelectionLot(lot);
+    setProviderSearch("");
+    setSelectedProviderId(INITIAL_SOLUTION_PROVIDERS[0]?.id ?? "");
+  }
+
+  function closeProviderSelection() {
+    setProviderSelectionLot(null);
+    setSelectedProviderId("");
+    setProviderSearch("");
+  }
 
   async function handleSend(lotId: number, provider: SolutionProvider) {
     setSendingLot(lotId);
@@ -1175,77 +1197,99 @@ function SolutionProviderTab() {
       )}
 
       {providerSelectionLot && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#16234f]/40 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#16234f]/35 p-4 backdrop-blur-[5px]">
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="provider-selection-title"
-            className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl"
+            className="w-full max-w-[348px] rounded-xl bg-white p-4 shadow-[0_18px_50px_rgba(20,32,74,.2)]"
           >
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-[.16em] text-[#E8650A]">
-                  Đồng bộ hồ sơ
-                </p>
                 <h3
                   id="provider-selection-title"
-                  className="mt-1 text-[18px] font-bold text-[#1d2944]"
+                  className="text-[12px] font-bold leading-4 text-[#20283d]"
                 >
                   Chọn đơn vị cung cấp giải pháp
                 </h3>
-                <p className="mt-1 text-[12px] text-slate-500">
-                  Chọn đơn vị sẽ tiếp nhận hồ sơ{" "}
-                  <span className="font-semibold text-[#25304b]">
-                    {providerSelectionLot.productName}
-                  </span>
-                  .
+                <p className="mt-0.5 text-[9px] text-slate-400">
+                  {providerSelectionLot.productName} ·{" "}
+                  {providerSelectionLot.lotCode}
                 </p>
               </div>
               <button
                 type="button"
-                onClick={() => {
-                  setProviderSelectionLot(null);
-                  setSelectedProviderId("");
-                }}
+                onClick={closeProviderSelection}
                 aria-label="Đóng"
-                className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3 w-3" />
               </button>
             </div>
 
-            <label
-              htmlFor="sync-solution-provider"
-              className="mt-6 block text-[11px] font-semibold text-slate-600"
-            >
-              Đơn vị nhận hồ sơ
-            </label>
-            <select
-              id="sync-solution-provider"
-              value={selectedProviderId}
-              onChange={(event) =>
-                setSelectedProviderId(
-                  event.target.value ? Number(event.target.value) : "",
-                )
-              }
-              className="mt-2 h-11 w-full rounded-xl border border-[#e4e8f0] bg-[#f9fafb] px-3 text-[12px] text-[#25304b] outline-none focus:border-[#2740BA] focus:bg-white focus:ring-2 focus:ring-[#2740BA]/15"
-            >
-              <option value="">Chọn đơn vị cung cấp giải pháp</option>
-              {INITIAL_SOLUTION_PROVIDERS.map((provider) => (
-                <option key={provider.id} value={provider.id}>
-                  {provider.name} — MST {provider.taxCode}
-                </option>
-              ))}
-            </select>
+            <div className="relative mt-3">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-slate-400" />
+              <input
+                type="search"
+                aria-label="Tìm đơn vị cung cấp giải pháp"
+                autoFocus
+                value={providerSearch}
+                onChange={(event) => setProviderSearch(event.target.value)}
+                placeholder="Tìm đơn vị cung cấp giải pháp..."
+                className="h-8 w-full rounded-lg border border-[#c8d0e3] bg-white pl-7 pr-2 text-[9px] text-[#25304b] outline-none placeholder:text-slate-400 focus:border-[#526bc2] focus:ring-2 focus:ring-[#2740BA]/10"
+              />
+            </div>
 
-            <div className="mt-6 flex justify-end gap-2">
+            <div
+              aria-label="Danh sách đơn vị cung cấp giải pháp"
+              className="mt-2 h-[148px] space-y-1.5 overflow-y-auto pr-1"
+            >
+              {visibleProviders.map((provider) => {
+                const selected = provider.id === selectedProviderId;
+                return (
+                  <button
+                    key={provider.id}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => setSelectedProviderId(provider.id)}
+                    className={`flex min-h-[40px] w-full items-center justify-between gap-2 rounded-lg border px-2 py-1.5 text-left transition-colors ${
+                      selected
+                        ? "border-[#9ba9e2] bg-[#f0f2ff]"
+                        : "border-[#e8eaf0] bg-white hover:border-[#c9d0e3] hover:bg-[#fafbff]"
+                    }`}
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-[9px] font-semibold leading-3 text-[#263047]">
+                        {provider.name}
+                      </span>
+                      <span className="mt-0.5 block truncate text-[8px] leading-3 text-slate-400">
+                        {provider.organization} · MST {provider.taxCode}
+                      </span>
+                    </span>
+                    <span
+                      className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border ${
+                        selected
+                          ? "border-[#566dc0] text-[#566dc0]"
+                          : "border-[#d7dbe4] text-transparent"
+                      }`}
+                    >
+                      {selected && <CheckCircle2 className="h-3.5 w-3.5" />}
+                    </span>
+                  </button>
+                );
+              })}
+              {visibleProviders.length === 0 && (
+                <p className="rounded-lg border border-dashed border-[#e4e8f0] px-3 py-4 text-center text-[9px] text-slate-400">
+                  Không tìm thấy đơn vị phù hợp.
+                </p>
+              )}
+            </div>
+
+            <div className="mt-3 flex justify-end gap-2">
               <button
                 type="button"
-                onClick={() => {
-                  setProviderSelectionLot(null);
-                  setSelectedProviderId("");
-                }}
-                className="rounded-xl border border-[#e4e8f0] px-4 py-2.5 text-[12px] font-semibold text-slate-600 hover:bg-slate-50"
+                onClick={closeProviderSelection}
+                className="rounded-lg border border-[#e4e8f0] px-3 py-1.5 text-[9px] font-semibold text-slate-600 hover:bg-slate-50"
               >
                 Hủy
               </button>
@@ -1262,9 +1306,9 @@ function SolutionProviderTab() {
                   setSelectedProviderId("");
                   void handleSend(lot.id, provider);
                 }}
-                className="flex items-center gap-2 rounded-xl bg-[#2740BA] px-4 py-2.5 text-[12px] font-bold text-white hover:bg-[#1e33a0] disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center gap-1.5 rounded-lg bg-[#2740BA] px-3 py-1.5 text-[9px] font-bold text-white hover:bg-[#1e33a0] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <Send className="h-3.5 w-3.5" />
+                <Send className="h-3 w-3" />
                 Xác nhận đồng bộ
               </button>
             </div>
@@ -1371,10 +1415,7 @@ function SolutionProviderTab() {
                     <td className="px-4 py-3.5">
                       {!isSent || isFailed ? (
                         <button
-                          onClick={() => {
-                            setProviderSelectionLot(lot);
-                            setSelectedProviderId("");
-                          }}
+                          onClick={() => openProviderSelection(lot)}
                           disabled={isSending}
                           className="flex items-center gap-1.5 rounded-lg border border-[#2740BA] px-3 py-1.5 text-[11px] font-semibold text-[#2740BA] hover:bg-[#edf0ff] disabled:opacity-60"
                         >
@@ -1391,10 +1432,7 @@ function SolutionProviderTab() {
                         </button>
                       ) : (
                         <button
-                          onClick={() => {
-                            setProviderSelectionLot(lot);
-                            setSelectedProviderId("");
-                          }}
+                          onClick={() => openProviderSelection(lot)}
                           className="flex items-center gap-1.5 rounded-lg border border-[#e4e8f0] px-3 py-1.5 text-[11px] font-semibold text-slate-400 hover:border-[#2740BA] hover:text-[#2740BA]"
                         >
                           <RefreshCw className="h-3 w-3" /> Đồng bộ lại
