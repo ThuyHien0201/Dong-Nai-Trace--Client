@@ -15,6 +15,10 @@ import {
   QrCode,
   CalendarDays,
 } from "lucide-react";
+import {
+  INITIAL_SOLUTION_PROVIDERS,
+  type SolutionProvider,
+} from "@/data/solution-providers";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -1028,10 +1032,20 @@ function SolutionProviderTab() {
   const [searchProduct, setSearchProduct] = useState("");
   // Track which lots have been "sent" to solution provider (mock)
   const [sentLots, setSentLots] = useState<Set<number>>(new Set());
+  const [sentProviderNames, setSentProviderNames] = useState<
+    Record<number, string>
+  >({});
   const [sendingLot, setSendingLot] = useState<number | null>(null);
   const [failedLots, setFailedLots] = useState<Set<number>>(new Set());
   const [sendAttempts, setSendAttempts] = useState<Record<number, number>>({});
-  const [failureLot, setFailureLot] = useState<(typeof MOCK_SOLUTION_LOTS)[number] | null>(null);
+  const [providerSelectionLot, setProviderSelectionLot] = useState<
+    (typeof MOCK_SOLUTION_LOTS)[number] | null
+  >(null);
+  const [selectedProviderId, setSelectedProviderId] = useState<number | "">("");
+  const [failure, setFailure] = useState<{
+    lot: (typeof MOCK_SOLUTION_LOTS)[number];
+    provider: SolutionProvider;
+  } | null>(null);
   const lots = useMemo(() => MOCK_SOLUTION_LOTS.filter((lot) => {
     const matches = (value: string, query: string) =>
       !query || value.toLowerCase().includes(query.toLowerCase());
@@ -1042,14 +1056,15 @@ function SolutionProviderTab() {
   }), [searchGtin, searchLot, searchBusiness, searchProduct]);
   const total = lots.length;
 
-  async function handleSend(lotId: number) {
+  async function handleSend(lotId: number, provider: SolutionProvider) {
     setSendingLot(lotId);
     await new Promise((r) => setTimeout(r, 900));
     const attempt = (sendAttempts[lotId] ?? 0) + 1;
     setSendAttempts((prev) => ({ ...prev, [lotId]: attempt }));
     if (attempt === 1) {
       setFailedLots((prev) => new Set(prev).add(lotId));
-      setFailureLot(MOCK_SOLUTION_LOTS.find((lot) => lot.id === lotId) ?? null);
+      const lot = MOCK_SOLUTION_LOTS.find((item) => item.id === lotId);
+      setFailure(lot ? { lot, provider } : null);
       setSendingLot(null);
       return;
     }
@@ -1059,6 +1074,7 @@ function SolutionProviderTab() {
       return next;
     });
     setSentLots((prev) => new Set(prev).add(lotId));
+    setSentProviderNames((prev) => ({ ...prev, [lotId]: provider.name }));
     setSendingLot(null);
   }
 
@@ -1112,7 +1128,7 @@ function SolutionProviderTab() {
         </button>
       </div>
 
-      {failureLot && (
+      {failure && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#16234f]/35 p-4 backdrop-blur-sm">
           <div
             role="alertdialog"
@@ -1127,12 +1143,17 @@ function SolutionProviderTab() {
               Đồng bộ không thành công
             </p>
             <p className="mt-1 text-[12px] leading-5 text-slate-500">
-              Không thể đồng bộ <span className="font-semibold text-[#25304b]">{failureLot.productName}</span> sang đơn vị cung cấp giải pháp. Vui lòng thử lại.
+              Không thể đồng bộ{" "}
+              <span className="font-semibold text-[#25304b]">
+                {failure.lot.productName}
+              </span>{" "}
+              sang <span className="font-semibold">{failure.provider.name}</span>.
+              Vui lòng thử lại.
             </p>
             <div className="mt-5 flex justify-center gap-2">
               <button
                 type="button"
-                onClick={() => setFailureLot(null)}
+                onClick={() => setFailure(null)}
                 className="rounded-xl border border-[#e4e8f0] px-4 py-2.5 text-[12px] font-semibold text-slate-600"
               >
                 Đóng
@@ -1140,12 +1161,111 @@ function SolutionProviderTab() {
               <button
                 type="button"
                 onClick={() => {
-                  setFailureLot(null);
-                  handleSend(failureLot.id);
+                  const retry = failure;
+                  setFailure(null);
+                  void handleSend(retry.lot.id, retry.provider);
                 }}
                 className="flex items-center gap-2 rounded-xl bg-[#2740BA] px-4 py-2.5 text-[12px] font-bold text-white hover:bg-[#1e33a0]"
               >
                 <RefreshCw className="h-3.5 w-3.5" /> Đồng bộ lại
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {providerSelectionLot && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#16234f]/40 p-4 backdrop-blur-sm">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="provider-selection-title"
+            className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[.16em] text-[#E8650A]">
+                  Đồng bộ hồ sơ
+                </p>
+                <h3
+                  id="provider-selection-title"
+                  className="mt-1 text-[18px] font-bold text-[#1d2944]"
+                >
+                  Chọn đơn vị cung cấp giải pháp
+                </h3>
+                <p className="mt-1 text-[12px] text-slate-500">
+                  Chọn đơn vị sẽ tiếp nhận hồ sơ{" "}
+                  <span className="font-semibold text-[#25304b]">
+                    {providerSelectionLot.productName}
+                  </span>
+                  .
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setProviderSelectionLot(null);
+                  setSelectedProviderId("");
+                }}
+                aria-label="Đóng"
+                className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <label
+              htmlFor="sync-solution-provider"
+              className="mt-6 block text-[11px] font-semibold text-slate-600"
+            >
+              Đơn vị nhận hồ sơ
+            </label>
+            <select
+              id="sync-solution-provider"
+              value={selectedProviderId}
+              onChange={(event) =>
+                setSelectedProviderId(
+                  event.target.value ? Number(event.target.value) : "",
+                )
+              }
+              className="mt-2 h-11 w-full rounded-xl border border-[#e4e8f0] bg-[#f9fafb] px-3 text-[12px] text-[#25304b] outline-none focus:border-[#2740BA] focus:bg-white focus:ring-2 focus:ring-[#2740BA]/15"
+            >
+              <option value="">Chọn đơn vị cung cấp giải pháp</option>
+              {INITIAL_SOLUTION_PROVIDERS.map((provider) => (
+                <option key={provider.id} value={provider.id}>
+                  {provider.name} — MST {provider.taxCode}
+                </option>
+              ))}
+            </select>
+
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setProviderSelectionLot(null);
+                  setSelectedProviderId("");
+                }}
+                className="rounded-xl border border-[#e4e8f0] px-4 py-2.5 text-[12px] font-semibold text-slate-600 hover:bg-slate-50"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                disabled={!selectedProviderId || sendingLot !== null}
+                onClick={() => {
+                  const provider = INITIAL_SOLUTION_PROVIDERS.find(
+                    (item) => item.id === selectedProviderId,
+                  );
+                  if (!provider || !providerSelectionLot) return;
+                  const lot = providerSelectionLot;
+                  setProviderSelectionLot(null);
+                  setSelectedProviderId("");
+                  void handleSend(lot.id, provider);
+                }}
+                className="flex items-center gap-2 rounded-xl bg-[#2740BA] px-4 py-2.5 text-[12px] font-bold text-white hover:bg-[#1e33a0] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Send className="h-3.5 w-3.5" />
+                Xác nhận đồng bộ
               </button>
             </div>
           </div>
@@ -1229,9 +1349,19 @@ function SolutionProviderTab() {
                           <X className="h-3 w-3" /> Đồng bộ lỗi
                         </span>
                       ) : isSent ? (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-[#b8e2c8] bg-[#e8f5ed] px-2.5 py-0.5 text-[10px] font-bold text-[#1f7a45]">
-                          <CheckCircle2 className="h-3 w-3" /> Đã gửi
-                        </span>
+                        <div>
+                          <span className="inline-flex items-center gap-1 rounded-full border border-[#b8e2c8] bg-[#e8f5ed] px-2.5 py-0.5 text-[10px] font-bold text-[#1f7a45]">
+                            <CheckCircle2 className="h-3 w-3" /> Đã gửi
+                          </span>
+                          {sentProviderNames[lot.id] && (
+                            <p
+                              className="mt-1 max-w-[150px] truncate text-[10px] text-slate-400"
+                              title={sentProviderNames[lot.id]}
+                            >
+                              {sentProviderNames[lot.id]}
+                            </p>
+                          )}
+                        </div>
                       ) : (
                         <span className="inline-flex items-center gap-1 rounded-full border border-[#d9dce9] bg-[#f2f3f7] px-2.5 py-0.5 text-[10px] font-bold text-slate-500">
                           <Clock className="h-3 w-3" /> Chưa gửi
@@ -1241,7 +1371,10 @@ function SolutionProviderTab() {
                     <td className="px-4 py-3.5">
                       {!isSent || isFailed ? (
                         <button
-                          onClick={() => handleSend(lot.id)}
+                          onClick={() => {
+                            setProviderSelectionLot(lot);
+                            setSelectedProviderId("");
+                          }}
                           disabled={isSending}
                           className="flex items-center gap-1.5 rounded-lg border border-[#2740BA] px-3 py-1.5 text-[11px] font-semibold text-[#2740BA] hover:bg-[#edf0ff] disabled:opacity-60"
                         >
@@ -1258,7 +1391,10 @@ function SolutionProviderTab() {
                         </button>
                       ) : (
                         <button
-                          onClick={() => handleSend(lot.id)}
+                          onClick={() => {
+                            setProviderSelectionLot(lot);
+                            setSelectedProviderId("");
+                          }}
                           className="flex items-center gap-1.5 rounded-lg border border-[#e4e8f0] px-3 py-1.5 text-[11px] font-semibold text-slate-400 hover:border-[#2740BA] hover:text-[#2740BA]"
                         >
                           <RefreshCw className="h-3 w-3" /> Đồng bộ lại
