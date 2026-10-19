@@ -15,17 +15,18 @@ A product traceability platform for Đồng Nai province, Vietnam. Enables gover
 
 ## Running
 
-Both services start automatically via managed workflows:
+The web client is the only service started for this Replit setup:
 
-- **Frontend** — `artifacts/dong-nai-trace-client: web` (port `$PORT`, default 21771)
-- **API server** — `artifacts/api-server: API Server` (port 8080)
+- **Frontend** — `artifacts/dong-nai-trace-client: web` (port supplied through `$PORT`, default 21771)
 
-The API server requires `DATABASE_URL` (provisioned automatically by Replit PostgreSQL).
+The API server, mobile app, and component preview server are separate workflows and are not started. The current web client renders without the API server; server-backed functionality will require starting the API separately.
 
-To install/update dependencies:
+To install dependencies from the lockfile:
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
 ```
+
+To start only the web client, restart the managed workflow `artifacts/dong-nai-trace-client: web`.
 
 To run DB migrations:
 ```bash
